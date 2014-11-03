@@ -1,0 +1,66 @@
+#!/bin/bash
+###############################################################################
+#         Name: battery_charge
+#        Usage: ./battery_charge
+#  Description: This script prints out the battery charge on a Linux (Ubuntu
+#               14.04 Trusty and CentOS7/RHEL7) or OSX Mountain Lion laptop
+#
+# Last Updated: Fri 24 Oct 2014 11:32:13 AM CDT
+#
+#       Author: Jose Elera (https://github.com/jelera)
+#      Credits: http://www.commandlinefu.com/commands/view/10477/get-osx-battery-percentage
+#               http://askubuntu.com/a/490713/31823
+#               http://stackoverflow.com/a/17072017/428786
+#
+#      License: MIT
+#               Copyright (c) 2014 Jose Elera Campana
+#               Permission is hereby granted, free of charge, to any person
+#               obtaining a copy of this software and associated documentation
+#               files (the "Software"), to deal in the Software without
+#               restriction, including without limitation the rights to use,
+#               copy, modify, merge, publish, distribute, sublicense, and/or
+#               sell copies of the Software, and to permit persons to whom the
+#               Software is furnished to do so, subject to the following
+#               conditions:
+#
+#               The above copyright notice and this permission notice shall be
+#               included in all copies or substantial portions of the Software.
+#
+#               THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+#               EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+#               OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+#               NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+#               HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+#               WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#               FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+#               OTHER DEALINGS IN THE SOFTWARE.
+###############################################################################
+
+# Tested on OSX Mountain Lion, Ubuntu 14.04 Trusty and CentOS/RHEL 7
+# For OSX and Linux Support
+OS="`uname`"
+case $OS in
+  'Linux')
+	battery_charge=`upower -i $(upower -e | grep BAT) | grep --color=never -E percentage|xargs|cut -d' ' -f2|sed s/%// `
+    ;;
+  'darwin')
+	battery_charge=`pmset -g batt | egrep "([0-9]+\%)" -o | sed s/%//`
+    ;;
+  *) ;;
+esac
+
+# If battery_charge is a float, convert to a Integer
+battery_charge=${battery_charge%.*}
+
+# Just a simple comparison to echo the main string
+if [ "$battery_charge" -gt 75 ]; then
+	echo "♥︎♥︎♥︎ ${battery_charge}%"
+elif [ "$battery_charge" -gt 50 ]; then
+	echo "♡♥︎♥︎ ${battery_charge}%"
+elif [ "$battery_charge" -ge 25 ]; then
+	echo "♡♡♥︎ ${battery_charge}%"
+elif [ "$battery_charge" -ge 5 ]; then
+	echo "♡♡♡ ${battery_charge}%"
+else
+	echo "✗ ${battery_charge}%"
+fi

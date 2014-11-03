@@ -1,0 +1,88 @@
+#!/bin/bash
+###############################################################################
+#         Name: wallpaper_changer_for_gnome3
+#        Usage: ./wallpaper_changer_for_gnome3
+#
+#  Description: It changes the desktop wallpaper every set interval minutes in
+#               GNOME 3 and Unity
+#
+# Last Updated: Fri 24 Oct 2014 12:46:49 AM CDT
+#
+#   Maintainer: Jose Elera (https://github.com/jelera)
+#      Credits: http://somethingididnotknow.wordpress.com/2014/04/12/another-wallpaper-changer-for-gnome-and-unity/
+#      License: GNU GPLv3
+#               Copyright (c) 2014 Michele Bonazza michele@michelebonazza.com
+#               This program is free software: you can redistribute it and/or
+#               modify it under the terms of the GNU General Public License as
+#               published by the Free Software Foundation, either version 3 of
+#               the License, or (at your option) any later version.
+#
+#               This program is distributed in the hope that it will be useful,
+#               but WITHOUT ANY WARRANTY; without even the implied warranty of
+#               MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#               GNU General Public License for more details.
+#
+#               You should have received a copy of the GNU General Public
+#               License along with this program.  If not, see
+#               <http://www.gnu.org/licenses/>.
+###############################################################################
+
+
+#----------------------------------------------------------------------------//
+# => SETTINGS
+#----------------------------------------------------------------------------//
+WALLPAPERS_FOLDER=$HOME/Pictures/Wallpapers
+REFRESH_INTERVAL=$((5 * 60)) # change every 5 minutes
+MODE="zoom" # one between none, centered, wallpaper, scaled, stretched, zoom, spanned
+
+
+#----------------------------------------------------------------------------//
+# => HELPER FUNCTIONS
+#----------------------------------------------------------------------------//
+function change_wallpaper() {
+	# Changes the desktop background, and moves it to the "shown" folder so
+	# that it's not shown again before all wallpapers in the folder have been
+	# used.  arg1 the file name of the file to be set as new background; must
+	# be in the current folder
+	mv $1 shown
+	gsettings set org.gnome.desktop.background picture-uri file://$WALLPAPERS_FOLDER/shown/$1
+	gsettings set org.gnome.desktop.background picture-options $MODE
+}
+
+function get_next_wallpaper() {
+	# Echoes the next wallpaper to be set, picked at random among images in the
+	# configured folder
+	find . -maxdepth 1 -type f -name "*.png" -o -name "*.jpg" -o -name "*.gif" -o -name "*.jpeg"| shuf -n 1
+}
+
+#----------------------------------------------------------------------------//
+# => MAIN PROGRAM
+#----------------------------------------------------------------------------//
+mkdir -p $WALLPAPERS_FOLDER/shown
+cd $WALLPAPERS_FOLDER
+
+while true; do
+	NEXT_WP=$(get_next_wallpaper)
+
+	# have we used all wallpapers?
+	if [[ "$NEXT_WP" == "" ]]; then
+		# yes, chdir to shown, and move them all back to the parent folder
+		cd shown
+		# move them to parent folder
+		find . -maxdepth 1 -type f -name "*.png" -o -name "*.jpg" -o -name "*.gif" -o -name "*.jpeg" | xargs mv -t ..
+		cd ..
+
+		# check again
+		NEXT_WP=$(get_next_wallpaper)
+
+		if [[ "$NEXT_WP" == "" ]]; then
+			echo "no wallpapers found in $WALLPAPERS_FOLDER, will check again in $REFRESH_INTERVAL seconds..."
+			sleep $REFRESH_INTERVAL
+			continue
+		fi
+	fi
+
+	echo "changing background to $NEXT_WP"
+	change_wallpaper $NEXT_WP
+	sleep $REFRESH_INTERVAL
+done

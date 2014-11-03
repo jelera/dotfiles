@@ -1,0 +1,408 @@
+#!/bin/bash
+###############################################################################
+#         Name: linux_centos-rhel7
+#        Usage: ./linux_centos-rhel7
+#
+#  Description: This is a helper script that automates the installation of
+#               software for Development, SysAdmin, etc.
+#
+# Last Updated: Sun 26 Oct 2014 11:42:02 PM CDT
+#
+#    Tested on: CentOS 7, Red Hat Enterprise Linux 7
+#
+#   Maintainer: Jose Elera (https://github.com/jelera)
+#     Based on: https://github.com/thoughtbot/laptop
+#      License: MIT
+#               Copyright (c) 2014 Jose Elera Campana
+#               Permission is hereby granted, free of charge, to any person
+#               obtaining a copy of this software and associated documentation
+#               files (the "Software"), to deal in the Software without
+#               restriction, including without limitation the rights to use,
+#               copy, modify, merge, publish, distribute, sublicense, and/or
+#               sell copies of the Software, and to permit persons to whom the
+#               Software is furnished to do so, subject to the following
+#               conditions:
+#
+#               The above copyright notice and this permission notice shall be
+#               included in all copies or substantial portions of the Software.
+#
+#               THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+#               EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+#               OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+#               NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+#               HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+#               WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#               FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+#               OTHER DEALINGS IN THE SOFTWARE.
+###############################################################################
+
+#----------------------------------------------------------------------------//
+# => HELPER FUNCTIONS
+#----------------------------------------------------------------------------//
+function color_echo(){
+	# Usage  : color_echo "string" color
+	# Credit : http://stackoverflow.com/a/23006365/428786
+	local exp=$1;
+	local color=$2;
+	if ! [[ $color =~ '^[0-9]$' ]] ; then
+		case $(echo $color | tr '[:upper:]' '[:lower:]') in
+			black) color=0 ;;
+			red) color=1 ;;
+			green) color=2 ;;
+			yellow) color=3 ;;
+			blue) color=4 ;;
+			magenta) color=5 ;;
+			cyan) color=6 ;;
+			white|*) color=7 ;; # white or invalid color
+		esac
+	fi
+	tput setaf $color;
+	printf "\n$exp\n"
+	tput sgr0;
+}
+
+append_to_zshrc() {
+	local text="$1" zshrc
+	local skip_new_line="$2"
+
+	if [[ -w "$HOME/.zshrc.local" ]]; then
+		zshrc="$HOME/.zshrc.local"
+	else
+		zshrc="$HOME/.zshrc"
+	fi
+
+	if ! grep -Fqs "$text" "$zshrc"; then
+		if (( skip_new_line )); then
+			printf "%s\n" "$text" >> "$zshrc"
+		else
+			printf "\n%s\n" "$text" >> "$zshrc"
+		fi
+	fi
+}
+
+silver_searcher_from_source() {
+	git clone git://github.com/ggreer/the_silver_searcher.git /tmp/the_silver_searcher
+	yum -y install pcre-devel xz-devel pkgconfig automake gcc zlib-devel
+	sh /tmp/the_silver_searcher/build.sh
+	cd /tmp/the_silver_searcher
+	sh build.sh
+	make install
+	cd
+	rm -rf /tmp/the_silver_searcher
+}
+
+matplotlib_from_source() {
+	cd /tmp
+	git clone git@github.com:matplotlib/matplotlib.git
+	cd matplotlib/
+	/usr/local/bin/python3.4 setup.py build
+	/usr/local/bin/python3.4 setup.py install
+}
+
+vim74_from_source() {
+	yum install -y ruby ruby-devel lua lua-devel \
+		ctags mercurial python python-devel \
+		tcl-devel \
+		perl perl-devel perl-ExtUtils-ParseXS \
+		perl-ExtUtils-CBuilder \
+		perl-ExtUtils-Embed
+		make ncurses ncurses-devel
+
+	# Remove any installed vim packages, this will also remove sudo
+	yum remove $(rpm -qa | grep ^vim)
+
+	cd /tmp
+	hg clone https://code.google.com/p/vim/
+	cd vim
+	./configure --with-features=huge \
+		--enable-multibyte \
+		--enable-rubyinterp \
+		--enable-pythoninterp \
+		--with-python-config-dir=/usr/lib/python2.7-config \
+		--enable-luainterp \
+		--enable-python3interp \
+		--enable-perlinterp \
+		--enable-xim \
+		--with-x \
+		--enable-gui=gtk2 --enable-cscope --prefix=/usr
+	make && make install
+	rm -rf /tmp/vim*
+	yum install sudo
+	exit
+}
+
+python2_from_source() {
+	yum groupinstall -y "Development tools"
+	yum install -y zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-devel
+	echo '/usr/local/lib' >> /etc/ld.so.conf
+
+	cd /tmp
+	wget http://python.org/ftp/python/2.7.8/Python-2.7.8.tgz
+	tar xvf Python-2.7.8.tgz
+	cd Python-2.7.8
+	./configure --prefix=/usr/local --enable-unicode=ucs4 --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib"
+
+	make && make altinstall
+	cd
+	rm -rf /tmp/Python-2.7.8
+}
+
+python3_from_source() {
+	yum install -y zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-devel
+	echo '/usr/local/lib' >> /etc/ld.so.conf
+	cd /tmp
+	wget http://python.org/ftp/python/3.4.1/Python-3.4.1.tar.xz
+	tar xvf Python-3.4.1.tar.xz
+	cd Python-3.4.1
+	./configure --prefix=/usr/local --enable-shared LDFLAGS="-Wl,-rpath /usr/local/lib"
+	make && make altinstall
+	cd
+	rm -rf /tmp/Python-3.4.1
+}
+
+install_pip_from_source() {
+	cd /tmp
+	wget https://bitbucket.org/pypa/setuptools/raw/bootstrap/ez_setup.py
+	# Then install it for Python 2.7 and/or Python 3.3:
+	/usr/local/bin/python3.4 ez_setup.py
+	/usr/local/bin/python2.7 ez_setup.py
+
+	# Now install pip using the newly installed setuptools:
+	/usr/local/bin/easy_install-2.7 pip
+	/usr/local/bin/easy_install-3.4 pip
+}
+
+#----------------------------------------------------------------------------//
+# => SET TRAP
+#----------------------------------------------------------------------------//
+trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
+set -e
+
+# Require root privileges
+if [[ $EUID -ne 0 ]]; then
+	color_echo "This script must be run as root." red
+	exit 1
+fi
+
+# #----------------------------------------------------------------------------//
+# # => CHECK $HOME/.bin and .zshrc
+# #----------------------------------------------------------------------------//
+# if [[ ! -d "$HOME/.bin/" ]]; then
+# 	mkdir "$HOME/.bin"
+# fi
+
+# if [ ! -f "$HOME/.zshrc" ]; then
+# 	touch "$HOME/.zshrc"
+# fi
+
+# append_to_zshrc 'export PATH="$HOME/.bin:$PATH"'
+
+
+# #----------------------------------------------------------------------------//
+# # => CHECK LINUX DISTRO
+# #----------------------------------------------------------------------------//
+# if ! grep -qiE 'centos|fedora|rhel' /etc/os-release; then
+# 	color_echo "Sorry! we don't currently support that distro." red
+# 	exit 1
+# fi
+
+
+# #----------------------------------------------------------------------------//
+# # => UPDATE THE SYSTEM
+# #----------------------------------------------------------------------------//
+# color_echo "Updating system packages ..." cyan
+#    yum update
+
+
+# #----------------------------------------------------------------------------//
+# # => INSTALL SOFTWARE FROM REPOS
+# #----------------------------------------------------------------------------//
+# color_echo "Installing Development Tools from groupinstall ..." cyan
+#    yum -y groupinstall "Development Tools"
+
+# color_echo "Installing base Ruby 2.x build dependencies ..." cyan
+#    yum-builddep -y ruby
+
+# color_echo "Installing Ruby, Perl and Lua" cyan
+#    yum -y install ruby ruby-devel lua lua-devel perl perl-devel
+
+# color_echo "Installing Python, Development libraries ..." cyan
+#    yum install -y python python-devel
+
+# color_echo "Installing git, for source control management ..." cyan
+#    yum install -y git-all
+
+# color_echo "Installing libraries for common dependencies ..." cyan
+#    yum install -y gcc ncurses-devel gcc-c++ patch readline readline-devel zlib zlib-devel libyaml-devel libffi-devel openssl-devel make bzip2 autoconf automake libtool bison libxslt libxslt-devel libksba libksba-devel qtwebkit-devel readline-devel qt3-devel PyQt4 PyQt4-devel PyQt4-webkit PyQt4-webkit-devel
+
+# color_echo "Installing sqlite3, embeddable SQL database engine" cyan
+#   yum install -y sqlite-devel sqlite
+
+# color_echo "Installing Postgres, a great open source relational database ..." cyan
+#    yum install -y postgresql postgresql-devel postgresql-server
+
+# color_echo "Installing Redis, an advanced key-value database ..." cyan
+#    yum install -y redis
+
+# color_echo "Installing ctags, to index files for vim tab completion of methods, classes, variables ..." cyan
+#    yum install -y ctags
+
+# color_echo "installing tmux, a terminal multiplexer" cyan
+#    yum install -y tmux
+
+# color_echo "Installing ImageMagick, to crop and resize images ..." cyan
+#    yum install -y ImageMagick
+
+# color_echo "Installing curl ..." cyan
+#    yum install -y curl
+
+# color_echo "Installing zsh ..." cyan
+#    yum install -y zsh
+
+# color_echo "Installing node.js and npm ..." cyan
+#    yum install -y nodejs npm
+
+# color_echo "Installing jsctags, ctags for JavaScript  with Tern.js" cyan
+# #   npm install -g git://github.com/ramitos/jsctags.git
+
+# color_echo "Installing jshint, an opinionated lint program for JS" cyan
+# #   npm install -g jshint
+
+# color_echo "Installing Python and Python 3 and pip to /usr/local/bin ..." cyan
+#   python2_from_source
+#   python3_from_source
+#   install_pip_from_source
+
+# color_echo "Installing Jedi, for enhanced Python autocompletion in Vim" cyan
+#    pip install jedi
+
+
+# #----------------------------------------------------------------------------//
+# # => INSTALL VIM
+# #----------------------------------------------------------------------------//
+# color_echo "Installing Vim 7.4 with Lua support from source ..." cyan
+#   vim74_from_source
+
+
+# #----------------------------------------------------------------------------//
+# # => INSTALL AG, THE SILVER SEARCHER
+# #----------------------------------------------------------------------------//
+# if ! command -v ag > /dev/null; then
+# 	color_echo "Installing The Silver Searcher, grep for programmers ..." cyan
+
+# 	if yum info the_silver_searcher &> /dev/null; then
+# 		yum -y install the_silver_searcher
+# 	else
+# 		silver_searcher_from_source
+# 	fi
+# fi
+
+
+# #----------------------------------------------------------------------------//
+# # => CHANGING THE SHELL TO ZSH
+# #----------------------------------------------------------------------------//
+# color_echo "Changing your shell to zsh ..." blue
+#   chsh -s /bin/zsh
+
+
+# #----------------------------------------------------------------------------//
+# # => INSTALL RBENV, RUBY AND GEMS MANAGEMENT
+# #----------------------------------------------------------------------------//
+# if [[ ! -d "$HOME/.rbenv" ]]; then
+#   color_echo "Installing rbenv, to change Ruby versions ..." cyan
+#     git clone https://github.com/sstephenson/rbenv.git ~/.rbenv
+
+#     append_to_zshrc 'export PATH="$HOME/.rbenv/bin:$PATH"'
+#     append_to_zshrc 'eval "$(rbenv init - zsh --no-rehash)"' 1
+
+#     export PATH="$HOME/.rbenv/bin:$PATH"
+#     eval "$(rbenv init - zsh)"
+# fi
+
+# if [[ ! -d "$HOME/.rbenv/plugins/rbenv-gem-rehash" ]]; then
+#   color_echo "Installing rbenv-gem-rehash so the shell automatically picks up binaries after installing gems with binaries..." cyan
+#     git clone https://github.com/sstephenson/rbenv-gem-rehash.git \
+#       ~/.rbenv/plugins/rbenv-gem-rehash
+# fi
+
+# if [[ ! -d "$HOME/.rbenv/plugins/ruby-build" ]]; then
+#   color_echo "Installing ruby-build, to install Rubies ..." cyan
+#     git clone https://github.com/sstephenson/ruby-build.git \
+#       ~/.rbenv/plugins/ruby-build
+# fi
+
+
+# #----------------------------------------------------------------------------//
+# # => SETUP RUBY ENVIRONMENT
+# #----------------------------------------------------------------------------//
+# ruby_version="$(curl -sSL http://ruby.thoughtbot.com/latest)"
+
+# color_echo "Installing Ruby $ruby_version ..." cyan
+#   rbenv install -s "$ruby_version"
+
+# color_echo "Setting $ruby_version as global default Ruby ..." cyan
+#   rbenv global "$ruby_version"
+#   rbenv rehash
+
+# color_echo "Updating to latest Rubygems version ..." cyan
+#   gem update --system
+
+
+# #----------------------------------------------------------------------------//
+# # => BUNDLER FOR RUBY GEM INSTALLATION
+# #----------------------------------------------------------------------------//
+# color_echo "Installing Bundler to install project-specific Ruby gems ..." cyan
+#   gem install bundler --no-document --pre
+
+# color_echo "Configuring Bundler for faster, parallel gem installation ..." cyan
+#   number_of_cores=$(nproc)
+#   bundle config --global jobs $((number_of_cores - 1))
+
+# #----------------------------------------------------------------------------//
+# # => PYTHON 3.x
+# #----------------------------------------------------------------------------//
+color_echo "Installing Numpy dependencies ..." cyan
+   yum install -y lapack lapack-devel blas blas-devel
+
+
+#----[ IPYTHON ]--------------------------//
+color_echo "Fixing qmake for compiling ipython qt console ..." blue
+  if [ -f /usr/lib64/qt-3.3/bin/qmake ]; then
+      mv /usr/lib64/qt-3.3/bin/qmake  /usr/lib64/qt-3.3/bin/qmake-qt3
+  fi
+  if [ -f /usr/bin/qmake-qt4 ]; then
+      mv /usr/bin/qmake-qt4  /usr/bin/qmake
+  fi
+
+color_echo "Installing IPython requirements ..." cyan
+/usr/local/bin/pip3.4 install distribute --upgrade
+/usr/local/bin/pip2.7 install distribute --upgrade
+/usr/local/bin/pip3.4 install pygments pyzmq jinja2 tornado
+/usr/local/bin/pip2.7 install pygments pyzmq jinja2 tornado
+/usr/local/bin/pip3.4 install pyside
+/usr/local/bin/pip2.7 install pyside
+
+color_echo "Installing IPython Qt console" cyan
+  /usr/local/bin/pip3.4 install "ipython[qtconsole]"
+  /usr/local/bin/pip2.7 install "ipython[qtconsole]"
+
+color_echo "Installing IPython notebook" cyan
+  /usr/local/bin/pip3.4 install "ipython[notebook]"
+  /usr/local/bin/pip2.7 install "ipython[notebook]"
+
+#----[ NUMPY ]-----------------------------//
+color_echo "Installing Numpy ..." cyan
+   /usr/local/bin/pip2.7 install numpy
+   /usr/local/bin/pip3.4 install numpy
+
+#----[ SCIPY ]-----------------------------//
+color_echo "Installing SciPy in Python 3.4 ..." cyan
+   /usr/local/bin/pip2.7 install scipy
+   /usr/local/bin/pip3.4 install scipy
+
+#----[ MATPLOTLIB ]------------------------//
+color_echo "Installing MatplotLib dependencies ..." cyan
+   yum install -y freetype libpng libpng-devel
+
+color_echo "Installing matplotlib in Python 3.4 from source ..." cyan
+  matplotlib_from_source

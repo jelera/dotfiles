@@ -1,0 +1,88 @@
+#!/bin/bash
+#
+
+#----------------------------------------------------------------------------//
+# => HELPER FUNCTIONS
+#----------------------------------------------------------------------------//
+function color_echo(){
+	# Usage  : color_echo "string" color
+	# Credit : http://stackoverflow.com/a/23006365/428786
+	local exp=$1;
+	local color=$2;
+	if ! [[ $color =~ '^[0-9]$' ]] ; then
+		case $(echo $color | tr '[:upper:]' '[:lower:]') in
+			black) color=0 ;;
+			red) color=1 ;;
+			green) color=2 ;;
+			yellow) color=3 ;;
+			blue) color=4 ;;
+			magenta) color=5 ;;
+			cyan) color=6 ;;
+			white|*) color=7 ;; # white or invalid color
+		esac
+	fi
+	tput setaf $color;
+	printf "\n$exp\n"
+	tput sgr0;
+}
+
+
+#----------------------------------------------------------------------------//
+# => SET TRAP
+#----------------------------------------------------------------------------//
+# Exit install script if any command fails
+set -e
+
+# Require root privileges
+if [[ $EUID -ne 0 ]]; then
+    echo "This script must be run as root."
+    exit 1
+fi
+
+
+#----------------------------------------------------------------------------//
+# => ADDING NEW REPOSITORIES
+#----------------------------------------------------------------------------//
+apt-get update && apt-get upgrade -y
+
+
+#----------------------------------------------------------------------------//
+# => FONTS
+#----------------------------------------------------------------------------//
+color_echo "Installing restricted repositories ... " cyan
+  apt-get install -y xubuntu-restricted-extras
+
+
+#----------------------------------------------------------------------------//
+# => FONTS
+#----------------------------------------------------------------------------//
+color_echo "Installing extra fonts ... " cyan
+  apt-get install -y fonts-inconsolata
+
+
+#----------------------------------------------------------------------------//
+# => INSTALLING DESKTOP SOFTWARE....
+#----------------------------------------------------------------------------//
+color_echo "Installing Steam ..." cyan
+  apt-get install -y steam
+
+color_echo "Installing Skype ..." cyan
+  apt-get install -y skype
+
+color_echo "Installing MP3 support with gstreamer ..." cyan
+  apt-get install -y gstreamer gstreamer1 gstreamer-ffmpeg gstreamer-plugins-good gstreamer-plugins-ugly
+
+color_echo "Installing VLC ..." cyan
+  apt-get install -y vlc
+
+color_echo "Installing LibreOffice ..." cyan
+  apt-get install -y libreoffice
+
+color_echo "Installing Gimp  ..." cyan
+  apt-get install -y gimp
+
+color_echo "Installing Transmission  ..." cyan
+  apt-get install -y transmission
+
+color_echo "Installing Filezilla ..." cyan
+  apt-get install -y filezilla

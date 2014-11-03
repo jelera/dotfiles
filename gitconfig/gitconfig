@@ -1,0 +1,59 @@
+[color]
+	diff = auto
+	status = auto
+	branch = auto
+	interactive = auto
+	ui = auto
+	pager = true
+[color "branch"]
+	current = yellow reverse
+	local = yellow
+	remote = green
+[color "diff"]
+	meta = yellow bold
+	frag = magenta bold
+	old = red bold
+	new = green bold
+[color "status"]
+	added = yellow
+	changed = green
+	untracked = cyan
+
+[push]
+	default = current
+[core]
+	pager = less -FRSX
+	whitespace=fix,-indent-with-non-tab,trailing-space,cr-at-eol
+	quotepath = false
+	excludesfile = ~/.config/dotfiles/gitconfig/gitignore
+	editor = vim
+	autocrif = input
+
+[alias]
+	aa = add -all
+	ap = add --patch
+	b = branch
+	ba = branch -a
+	c = commit
+	ca = commit -a
+	ci = commit -v
+	cl = clone
+	co = checkout
+	l = pull
+	p = push
+	st = status
+	create-branch = !sh -c 'git push origin HEAD:refs/heads/$1 && git fetch origin && git branch --track $1 origin/$1 && cd . && git checkout $1' -
+	delete-branch = !sh -c 'git push origin :refs/heads/$1 && git remote prune origin && git branch -D $1' -
+	merge-branch = !git checkout master && git merge @{-1}
+	pr = !hub pull-request
+	up = !git fetch origin && git rebase origin/master
+	lol = log --pretty=oneline --abbrev-commit --graph --decorate
+
+[include]
+	path = ~/Dropbox/dotfiles/gitconfig/gitconfig.local
+[commit]
+	template = ~/.config/dotfiles/gitconfig/gitmessage
+[diff]
+	tool = vimdiff
+[merge]
+	ff = only

@@ -1,0 +1,109 @@
+###############################################################################
+#             /\/|  __
+#            |/\/  / /      _______| |__  _ __ ___
+#                 / /      |_  / __| '_ \| '__/ __|
+#                / /    _   / /\__ \ | | | | | (__
+#               /_/    (_) /___|___/_| |_|_|  \___|
+#
+# Last Updated: Mon 03 Nov 2014 12:55:48 PM CST
+#
+#   Maintainer: Jose Elera (https://github.com/jelera)
+#
+#      License: MIT
+#               Copyright (c) 2014 Jose Elera Campana
+#               Permission is hereby granted, free of charge, to any person
+#               obtaining a copy of this software and associated documentation
+#               files (the "Software"), to deal in the Software without
+#               restriction, including without limitation the rights to use,
+#               copy, modify, merge, publish, distribute, sublicense, and/or
+#               sell copies of the Software, and to permit persons to whom the
+#               Software is furnished to do so, subject to the following
+#               conditions:
+#
+#               The above copyright notice and this permission notice shall be
+#               included in all copies or substantial portions of the Software.
+#
+#               THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+#               EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+#               OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+#               NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+#               HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+#               WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#               FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+#               OTHER DEALINGS IN THE SOFTWARE.
+###############################################################################
+
+
+##---------------------------------------------------------------------------//
+##
+## => SOURCES
+##
+##---------------------------------------------------------------------------//
+source ~/.config/dotfiles/bash/alias
+source ~/.config/dotfiles/bash/shellscripts
+source ~/.config/dotfiles/bash/env
+
+
+##---------------------------------------------------------------------------//
+##
+## => OH-MY-ZSH CONFIG
+##
+##---------------------------------------------------------------------------//
+# Path to your oh-my-zsh configuration.
+ZSH=$HOME/.oh-my-zsh
+
+# Set name of the theme to load.
+# Look in ~/.oh-my-zsh/themes/
+# Optionally, if you set this to "random", it'll load a random theme each
+# time that oh-my-zsh is loaded.
+ZSH_THEME="candy"
+
+# Example aliases
+# alias zshconfig="mate ~/.zshrc"
+# alias ohmyzsh="mate ~/.oh-my-zsh"
+
+# Set to this to use case-sensitive completion
+# CASE_SENSITIVE="true"
+
+# Comment this out to disable bi-weekly auto-update checks
+# DISABLE_AUTO_UPDATE="true"
+
+# Uncomment to change how often before auto-updates occur? (in days)
+# export UPDATE_ZSH_DAYS=13
+
+# Uncomment following line if you want to disable colors in ls
+# DISABLE_LS_COLORS="true"
+
+# Uncomment following line if you want to disable autosetting terminal title.
+# DISABLE_AUTO_TITLE="true"
+
+# Uncomment following line if you want to disable command autocorrection
+# DISABLE_CORRECTION="true"
+
+# Uncomment following line if you want red dots to be displayed while waiting for completion
+# COMPLETION_WAITING_DOTS="true"
+
+# Uncomment following line if you want to disable marking untracked files under
+# VCS as dirty. This makes repository status check for large repositories much,
+# much faster.
+# DISABLE_UNTRACKED_FILES_DIRTY="true"
+
+# Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
+# Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
+# Example format: plugins=(rails git textmate ruby lighthouse)
+plugins=(git git-flow osx yum systemd brew vi-mode colored-man vagrant)
+
+source $ZSH/oh-my-zsh.sh
+
+# Generate an ESC when CTRL is pressed and released by itself
+# Run xcape once.
+# if [ -z $XCAPE ]; then
+#   export XCAPE=1
+#   xcape -e 'Control_L=Escape'
+# fi
+
+# export PATH="$HOME/.rbenv/bin:$PATH"
+# eval "$(rbenv init - zsh --no-rehash)"
+
+# export PATH="$HOME/.pyenv/bin:$PATH"
+# eval "$(pyenv init - zsh --no-rehash)"
