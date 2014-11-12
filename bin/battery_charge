@@ -5,7 +5,7 @@
 #  Description: This script prints out the battery charge on a Linux (Ubuntu
 #               14.04 Trusty and CentOS7/RHEL7) or OSX Mountain Lion laptop
 #
-# Last Updated: Fri 24 Oct 2014 11:32:13 AM CDT
+# Last Updated: Wed 12 Nov 2014 02:32:12 PM CST
 #
 #       Author: Jose Elera (https://github.com/jelera)
 #      Credits: http://www.commandlinefu.com/commands/view/10477/get-osx-battery-percentage
@@ -49,18 +49,33 @@ case $OS in
   *) ;;
 esac
 
-# If battery_charge is a float, convert to a Integer
+
+##---------------------------------------------------------------------------//
+## => SETTING THE CHARGE STATUS ICON
+##---------------------------------------------------------------------------//
+# battery_charge is a float, convert to a Integer
 battery_charge=${battery_charge%.*}
 
-# Just a simple comparison to echo the main string
 if [ "$battery_charge" -gt 75 ]; then
-	echo "♥︎♥︎♥︎ ${battery_charge}%"
+	charge_status_icon="♥︎♥︎♥︎"
 elif [ "$battery_charge" -gt 50 ]; then
-	echo "♡♥︎♥︎ ${battery_charge}%"
+	charge_status_icon="♡♥︎♥︎"
 elif [ "$battery_charge" -ge 25 ]; then
-	echo "♡♡♥︎ ${battery_charge}%"
+	charge_status_icon="♡♡♥︎"
 elif [ "$battery_charge" -ge 5 ]; then
-	echo "♡♡♡ ${battery_charge}%"
+	charge_status_icon="♡♡♡"
 else
-	echo "✗ ${battery_charge}%"
+	charge_status_icon="✗"
 fi
+
+#  This only works in Linux, since I don't have a mac to test on
+is_charging=`upower -i $(upower -e | grep BAT) | awk '/state/ {print $2}'`
+
+if [ "$is_charging" == "charging" ]; then
+	charge_status_icon="↯"
+fi
+
+##---------------------------------------------------------------------------//
+## => RETURNING STRING
+##---------------------------------------------------------------------------//
+echo "${charge_status_icon} ${battery_charge}%"
