@@ -4,7 +4,7 @@
 sysinfo() {
 	echo -ne "${bldred}Today is:\t${txtgrn}";date -R
 	echo
-	echo -e "${bldred}Hostname:\t${bldcyn}$HOSTNAME"
+	echo -ne "${bldred}Hostname:\t${bldcyn}";cat /etc/hostname
 	echo -ne "${bldred}OS:\t\t${txtcyn}"; awk '/PRETTY/ {split($0,a,"\""); print a[2]}' /etc/os-release
 	echo -e "${bldred}Kernel Info:\t${txtcyn}"`uname -smr`
 	echo
@@ -46,7 +46,8 @@ localnet ()
 # Looks for the ip of this computer
 myip ()
 {
-	lynx -dump -hiddenlinks=ignore -nolist http://checkip.dyndns.org:8245/ | grep "Current IP Address" | cut -d":" -f2 | cut -d" " -f2
+	# lynx -dump -hiddenlinks=ignore -nolist http://checkip.dyndns.org:8245/ | grep "Current IP Address" | cut -d":" -f2 | cut -d" " -f2
+	curl icanhazip.com
 }
 
 # Shows the uptime for this terminal
@@ -80,13 +81,10 @@ take ()
 	cd $1
 }
 
-
-#########################
-# FFMPEG
-#########################
 convert_video_to_mp4 () {
 	find . -name '*.mov' -print0 | xargs -0 -I xxx ffmpeg -i xxx -f mp4 -vcodec mpeg4 -qscale 0 xxx.mp4
 	find . -iname '*.mov.mp4' -print0 | xargs -0 rename 's/\.mov\.mp4$/\.mp4/i'
 	mkdir ./oldmovies/
 	find . -iname '*.mov' -print0 | xargs -0 -I fff mv fff ./oldmovies/
 }
+
