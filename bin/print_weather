@@ -6,7 +6,7 @@
 #  Description: Prints to STDOUT, the current weather and conditions
 #               with unicode symbols, it uses Yahoo as source
 #
-# Last Updated: Fri 24 Oct 2014 12:44:07 AM CDT
+# Last Updated: Thu 06 Nov 2014 03:05:55 PM CST
 #
 #       Author: Jose Elera (https://github.com/jelera)
 #      License: MIT
@@ -62,7 +62,7 @@ case "$weather_condition" in
 	"snow" | "mixed snow and sleet" | "snow flurries" | "light snow showers" | "blowing snow" | "sleet" | "hail" | "heavy snow" | "scattered snow showers" | "snow showers" | "light snow" | "snow/windy" | "snow grains" | "snow/fog")
 		condition_symbol="☃"
 		;;
-	"cloudy" | "mostly cloudy" | "partly cloudy" | "partly cloudy/windy")
+	"cloudy" | "mostly cloudy" | "partly cloudy" | "partly cloudy/windy" | "cloudy/windy")
 		condition_symbol="☁"
 		;;
 	"tornado" | "tropical storm" | "hurricane" | "severe thunderstorms" | "thunderstorms" | "isolated thunderstorms" | "scattered thunderstorms")
