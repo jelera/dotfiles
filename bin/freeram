@@ -1,0 +1,14 @@
+#! /bin/sh
+##-----------------------------------------------------------------------------
+##
+##         Name : freeram.sh
+##     Synopsis : This script prints out the Free RAM on the system
+##       Author : Jose Elera <jelera@gmail.com>
+## Last Updated : Wed 12 Nov 2014 02:02:48 PM CST
+##
+## Copyright © 2014 Jose Elera
+## Distributed under terms of the MIT license.
+##
+##-----------------------------------------------------------------------------
+
+free -h | awk 'NR==3 {print $3}'
