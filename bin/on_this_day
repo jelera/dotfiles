@@ -1,0 +1,2 @@
+#!/bin/bash
+lynx -dump -nolist http://en.wikipedia.org/wiki/Main_Page | awk '/Recent deaths/,/More anniversaries/' | awk '{ if (NR > 4 && NR != 7) print}' | head -n -2 | sed 's/^\s.//'

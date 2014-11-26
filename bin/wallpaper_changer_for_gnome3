@@ -6,7 +6,7 @@
 #  Description: It changes the desktop wallpaper every set interval minutes in
 #               GNOME 3 and Unity
 #
-# Last Updated: Fri 24 Oct 2014 12:46:49 AM CDT
+# Last Updated: Mon 24 Nov 2014 02:41:18 PM CST
 #
 #   Maintainer: Jose Elera (https://github.com/jelera)
 #      Credits: http://somethingididnotknow.wordpress.com/2014/04/12/another-wallpaper-changer-for-gnome-and-unity/
@@ -28,17 +28,21 @@
 ###############################################################################
 
 
-#----------------------------------------------------------------------------//
-# => SETTINGS
-#----------------------------------------------------------------------------//
+##---------------------------------------------------------------------------//
+##
+## => SETTINGS
+##
+##---------------------------------------------------------------------------//
 WALLPAPERS_FOLDER=$HOME/Pictures/Wallpapers
-REFRESH_INTERVAL=$((5 * 60)) # change every 5 minutes
+REFRESH_INTERVAL=$((3 * 60)) # change every 3 minutes
 MODE="zoom" # one between none, centered, wallpaper, scaled, stretched, zoom, spanned
 
 
-#----------------------------------------------------------------------------//
-# => HELPER FUNCTIONS
-#----------------------------------------------------------------------------//
+##---------------------------------------------------------------------------//
+##
+## => HELPER FUNCTIONS
+##
+##---------------------------------------------------------------------------//
 function change_wallpaper() {
 	# Changes the desktop background, and moves it to the "shown" folder so
 	# that it's not shown again before all wallpapers in the folder have been
@@ -55,9 +59,11 @@ function get_next_wallpaper() {
 	find . -maxdepth 1 -type f -name "*.png" -o -name "*.jpg" -o -name "*.gif" -o -name "*.jpeg"| shuf -n 1
 }
 
-#----------------------------------------------------------------------------//
-# => MAIN PROGRAM
-#----------------------------------------------------------------------------//
+##---------------------------------------------------------------------------//
+##
+## => MAIN PROGRAM
+##
+##---------------------------------------------------------------------------//
 mkdir -p $WALLPAPERS_FOLDER/shown
 cd $WALLPAPERS_FOLDER
 

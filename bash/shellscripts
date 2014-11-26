@@ -2,13 +2,18 @@
 
 # It pretty prints a basic system info
 sysinfo() {
-	echo -ne "${bldred}Today is:\t${txtgrn}";date -R
+	printf "${bldred}%13s: ${txtgrn}%s\n" "Today is" "$(date -R)"
 	echo
-	echo -ne "${bldred}Hostname:\t${bldcyn}";cat /etc/hostname
-	echo -ne "${bldred}OS:\t\t${txtcyn}"; awk '/PRETTY/ {split($0,a,"\""); print a[2]}' /etc/os-release
-	echo -e "${bldred}Kernel Info:\t${txtcyn}"`uname -smr`
+	printf "${bldred}%13s: ${bldcyn}%s\n" "Hostname" "$(cat /etc/hostname)"
+	printf "${bldred}%13s: ${txtcyn}%s\n" "OS" "$(awk ' /PRETTY/ { split($0,a,"\""); print a[2] } ' /etc/os-release)"
+	printf "${bldred}%13s: ${txtcyn}%s\n" "Kernel Info" "$(uname -smr)"
 	echo
-	echo -e "${bldred}Uptime:\t\t${txtcyn}`uptime | awk /'up/ {print $3,$4,$5,$6,$7,$8,$9,$10}'`${txtrst}"
+	printf "${bldred}%13s: ${txtcyn}%s\n" "Uptime" "$(uptime | awk ' { print $3, $4, $5 }' | sed 's/,/  /g')"
+	printf "${bldred}%13s: ${txtcyn}%s\n" "Load Average" "$(uptime | awk ' {print $8, $9, $10}' | sed 's/,/%  /g')%"
+	echo
+	printf "${bldred}%13s: ${txtcyn}%s\n" "CPU" "$(awk '/model name/ { print $4, $5, $6, $7, $8, $9; exit;}' /proc/cpuinfo)"
+	printf "${bldred}%13s: ${txtcyn}%s\n" "RAM" "$(free -h | awk '/Mem/ { printf "%5s /%5s", $3, $2 }')"
+	printf "${bldred}%13s: ${txtcyn}%s${txtrst}\n" "Storage" "$(df -h --total | awk '/total/ { printf "%5s /%5s" ,$3 ,$2} ' )"
 }
 
 # It extracts from a bunch of compression and archiving formats

@@ -5,7 +5,7 @@
 #                / /    _   / /\__ \ | | | | | (__
 #               /_/    (_) /___|___/_| |_|_|  \___|
 #
-# Last Updated: Mon 03 Nov 2014 12:55:48 PM CST
+# Last Updated: Mon 24 Nov 2014 02:14:16 PM CST
 #
 #   Maintainer: Jose Elera (https://github.com/jelera)
 #
@@ -107,3 +107,6 @@ source $ZSH/oh-my-zsh.sh
 
 # export PATH="$HOME/.pyenv/bin:$PATH"
 # eval "$(pyenv init - zsh --no-rehash)"
+
+echo
+$HOME/.bin/on_this_day | head -n 1 | sed 's/^\s//'
