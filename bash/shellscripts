@@ -2,15 +2,41 @@
 
 # It pretty prints a basic system info
 sysinfo() {
+	# => Distro Detection
+	if grep -qiE 'centos|fedora|rhel' /etc/os-release ; then
+		distro="redhat"
+	elif grep -qiE 'precise|trusty|qiana' /etc/os-release ; then
+		distro="ubuntu"
+	elif grep -qiE 'wheezy|jessie' /etc/os-release ; then
+		distro="debian"
+	elif grep -qiE 'arch' /etc/os-release ; then
+		distro="archlinux"
+	fi
+
+	# => Get number of installed packages
+	if [[ $distro == "ubuntu" || $distro == "debian" ]]; then
+		pckgs=$(ls -1 /var/log/packages | wc -l)
+	elif [[ $distro == "archlinux" ]]; then
+		pckgs=$(pacman -Qq | wc -l)
+	elif [[ $distro == "redhat" ]]; then
+		pckgs=$(rpm -qa | wc -l)
+	fi
+
+	user_fullname=$(getent passwd $USER | awk -F: '{ print $5}')
+
+	printf "${txtylw}%13s, ${bldylw}%s" "Welcome" "$user_fullname"
+	echo
 	printf "${bldred}%13s: ${txtgrn}%s\n" "Today is" "$(date -R)"
 	echo
 	printf "${bldred}%13s: ${bldcyn}%s\n" "Hostname" "$(cat /etc/hostname)"
 	printf "${bldred}%13s: ${txtcyn}%s\n" "OS" "$(awk ' /PRETTY/ { split($0,a,"\""); print a[2] } ' /etc/os-release)"
 	printf "${bldred}%13s: ${txtcyn}%s\n" "Kernel Info" "$(uname -smr)"
+	printf "${bldred}%13s: ${txtcyn}%s\n" "Packages" "${pckgs}"
 	echo
-	printf "${bldred}%13s: ${txtcyn}%s\n" "Uptime" "$(uptime | awk ' { print $3, $4, $5 }' | sed 's/,/  /g')"
-	printf "${bldred}%13s: ${txtcyn}%s\n" "Load Average" "$(uptime | awk ' {print $8, $9, $10}' | sed 's/,/%  /g')%"
+	printf "${bldred}%13s: ${txtcyn}%s\n" "Uptime" "$(uptime -p | sed 's/up //')"
+	printf "${bldred}%13s: ${txtcyn}%s\n" "Load Average" "$(uptime | awk 'BEGIN {FS=":";} {print $5}')"
 	echo
+	printf "${bldred}%13s: ${txtcyn}%s\n" "Model" "$(cat /sys/class/dmi/id/product_version)"
 	printf "${bldred}%13s: ${txtcyn}%s\n" "CPU" "$(awk '/model name/ { print $4, $5, $6, $7, $8, $9; exit;}' /proc/cpuinfo)"
 	printf "${bldred}%13s: ${txtcyn}%s\n" "RAM" "$(free -h | awk '/Mem/ { printf "%5s /%5s", $3, $2 }')"
 	printf "${bldred}%13s: ${txtcyn}%s${txtrst}\n" "Storage" "$(df -h --total | awk '/total/ { printf "%5s /%5s" ,$3 ,$2} ' )"
