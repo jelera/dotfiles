@@ -15,7 +15,7 @@ sysinfo() {
 
 	# => Get number of installed packages
 	if [[ $distro == "ubuntu" || $distro == "debian" ]]; then
-		pckgs=$(ls -1 /var/log/packages | wc -l)
+		pckgs=$(dpkg --get-selections | wc -l)
 	elif [[ $distro == "archlinux" ]]; then
 		pckgs=$(pacman -Qq | wc -l)
 	elif [[ $distro == "redhat" ]]; then
@@ -34,7 +34,7 @@ sysinfo() {
 	printf "${bldred}%13s: ${txtcyn}%s\n" "Packages" "${pckgs}"
 	echo
 	printf "${bldred}%13s: ${txtcyn}%s\n" "Uptime" "$(uptime -p | sed 's/up //')"
-	printf "${bldred}%13s: ${txtcyn}%s\n" "Load Average" "$(uptime | awk 'BEGIN {FS=":";} {print $5}')"
+	printf "${bldred}%13s: ${txtcyn}%s\n" "Load Average" "$(uptime | awk 'BEGIN {FS=":";} {print $4}')"
 	echo
 	printf "${bldred}%13s: ${txtcyn}%s\n" "Model" "$(cat /sys/class/dmi/id/product_version)"
 	printf "${bldred}%13s: ${txtcyn}%s\n" "CPU" "$(awk '/model name/ { print $4, $5, $6, $7, $8, $9; exit;}' /proc/cpuinfo)"
