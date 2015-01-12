@@ -47,10 +47,10 @@ apt-get update && apt-get upgrade -y
 
 
 #----------------------------------------------------------------------------//
-# => FONTS
+# => RESTRICTED EXTRAS
 #----------------------------------------------------------------------------//
-color_echo "Installing restricted repositories ... " cyan
-  apt-get install -y xubuntu-restricted-extras
+color_echo "Installing restricted extras ... " cyan
+  apt-get install -y ubuntu-restricted-extras
 
 
 #----------------------------------------------------------------------------//
@@ -69,8 +69,8 @@ color_echo "Installing Steam ..." cyan
 color_echo "Installing Skype ..." cyan
   apt-get install -y skype
 
-color_echo "Installing MP3 support with gstreamer ..." cyan
-  apt-get install -y gstreamer gstreamer1 gstreamer-ffmpeg gstreamer-plugins-good gstreamer-plugins-ugly
+# color_echo "Installing MP3 support with gstreamer ..." cyan
+#   apt-get install -y gstreamer gstreamer1 gstreamer-ffmpeg gstreamer-plugins-good gstreamer-plugins-ugly
 
 color_echo "Installing VLC ..." cyan
   apt-get install -y vlc
@@ -86,3 +86,20 @@ color_echo "Installing Transmission  ..." cyan
 
 color_echo "Installing Filezilla ..." cyan
   apt-get install -y filezilla
+
+color_echo "Installing gparted ..." cyan
+  apt-get install -y gparted
+
+color_echo "Installing Inkscape ..." cyan
+  apt-get install -y inkscape
+
+color_echo "Installing gcolor2  ..." cyan
+  apt-get install -y gcolor2
+
+color_echo "Installing meld  ..." cyan
+  apt-get install -y meld
+
+color_echo "Installing Hexchat   ..." cyan
+  apt-get install -y hexchat
+
+
