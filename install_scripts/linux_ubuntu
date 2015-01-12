@@ -6,7 +6,7 @@
 #  Description: This is a helper script that automates the installation of
 #                software for Development, SysAdmin, etc.
 #
-# Last Updated: Mon 27 Oct 2014 12:33:43 AM CDT
+# Last Updated: Sun 11 Jan 2015 09:46:46 PM CST
 #
 #    Tested on: Ubuntu 14.04 LTS Trusty Tahr
 #
@@ -62,35 +62,6 @@ function color_echo(){
 	tput sgr0;
 }
 
-silver_searcher_from_source() {
-	git clone git://github.com/ggreer/the_silver_searcher.git /tmp/the_silver_searcher
-	sudo yum -y install pcre-devel xz-devel pkgconfig automake gcc zlib-devel
-	sh /tmp/the_silver_searcher/build.sh
-	cd /tmp/the_silver_searcher
-	sh build.sh
-	sudo make install
-	cd
-	rm -rf /tmp/the_silver_searcher
-}
-
-# vim74_from_source() {
-# 	cd /tmp
-# 	wget ftp://ftp.vim.org/pub/vim/unix/vim-7.4.tar.bz2
-# 	tar -xjf vim-7.4.tar.bz2
-# 	cd vim74
-# 	./configure --with-features=huge \
-# 	--enable-rubyinterp \
-# 	--enable-pythoninterp \
-# 	--with-python-config-dir=/usr/lib/python2.7-config \
-# 	--enable-python3interp \
-# 	--enable-perlinterp \
-# 	--enable-cscope --prefix=/usr \
-# 	--enable-luainterp \
-# 	--enable-gui=gtk
-# 	make && sudo make install
-# 	cd
-# 	rm -rf /tmp/vim74
-# }
 
 append_to_zshrc() {
 	local text="$1" zshrc
@@ -146,7 +117,7 @@ fi
 # => UPDATE THE SYSTEM
 #----------------------------------------------------------------------------//
 color_echo "Updating system packages ..." cyan
-  sudo apt-get update && sudo apt-get upgrade
+  sudo apt-get update && sudo apt-get upgrade -y
 
 
 #----------------------------------------------------------------------------//
@@ -155,27 +126,20 @@ color_echo "Updating system packages ..." cyan
 color_echo "Installing Build Essentials ..." cyan
   sudo apt-get install -y build-essential
 
-color_echo "Installing base Ruby 2.x build dependencies ..." cyan
-  sudo apt-get build-dep -y ruby
-
-color_echo "Installing base Python 2.x build dependencies ..." cyan
-  sudo apt-get build-dep -y python
-
-color_echo "Installing base Python 3.x build dependencies ..." cyan
-  sudo apt-get build-dep -y python3
+color_echo "Installing Build Dependencies for Ruby, Python, Lua and Perl..." cyan
+  sudo apt-get build-dep -y ruby-defaults python-defaults perl lua5.2
 
 color_echo "Installing Ruby, Python, Python3, Perl and Lua" cyan
-  sudo apt-get install -y ruby ruby-dev ruby2.0 ruby2.0-dev python python-pip python-dev python3 python3-pip python3-dev lua lua-dev perl perl-dev
+  sudo apt-get install -y ruby ruby-all-dev python-all python-pip python-all-dev python3-all python3-pip python3-all-dev lua5.2 perl
 
 color_echo "Installing git, for source control management ..." cyan
   sudo apt-get install -y git-all
 
 color_echo "Installing libraries for common dependencies ..." cyan
   sudo apt-get install -y libxslt1-dev libcurl4-openssl-dev libksba8 libksba-dev libqtwebkit-dev libreadline-dev
-  # TODO: sudo yum install -y gcc ncurses-devel gcc-c++ patch readline readline-devel zlib zlib-devel libyaml-devel libffi-devel openssl-devel make bzip2 autoconf automake libtool bison libxslt libxslt-devel libksba libksba-devel qtwebkit-devel readline-devel qt3-devel PyQt4 PyQt4-devel PyQt4-webkit PyQt4-webkit-devel
 
 color_echo "Installing sqlite3, embeddable SQL database engine" cyan
- sudo apt-get install -y sqlite3-dev sqlite3
+ sudo apt-get install -y sqlite3 libsqlite3-dev
 
 color_echo "Installing Postgres, a great open source relational database ..." cyan
   sudo apt-get install -y postgresql postgresql-server-dev-all
@@ -216,27 +180,24 @@ color_echo "Installing jshint, an opinionated lint program for JS" cyan
 color_echo "Installing Jedi, for enhanced Python autocompletion in Vim" cyan
   sudo pip install jedi
 
+color_echo "Installing Ag, the silver searcher, grep for programmers" cyan
+  sudo apt-get install -y silversearcher-ag
 
 #----------------------------------------------------------------------------//
-# => INSTALL AG, THE SILVER SEARCHER
+# => INSTALL IPYTHON NOTEBOOK (SYSTEM-WIDE)
 #----------------------------------------------------------------------------//
-if ! command -v ag > /dev/null; then
-	color_echo "Installing The Silver Searcher, grep for programmers ..." cyan
+color_echo "Installing IPython 2/3 notebook" cyan
+  sudo apt-get install -y ipython ipython3 ipython-notebook ipython3-notebook
 
-	if yum info the_silver_searcher &> /dev/null; then
-		sudo yum -y install the_silver_searcher
-	else
-		silver_searcher_from_source
-	fi
-fi
+color_echo "Installing IPython 2/3 Qt console" cyan
+  sudo apt-get install -y ipython-qtconsole ipython3-qtconsole
 
 
 #----------------------------------------------------------------------------//
-# => CHANGING THE SHELL TO ZSH
+# => INSTALL SCIPY STACK
 #----------------------------------------------------------------------------//
-color_echo "Changing your shell to zsh ..." blue
-  chsh -s $(which zsh)
-
+color_echo "Installing SciPy Stack ..." cyan
+  sudo apt-get install -y python-numpy python-scipy python-matplotlib python-pandas python-sympy python-nose
 
 #----------------------------------------------------------------------------//
 # => INSTALL RBENV, RUBY AND GEMS MANAGEMENT
@@ -292,21 +253,6 @@ color_echo "Configuring Bundler for faster, parallel gem installation ..." cyan
   bundle config --global jobs $((number_of_cores - 1))
 
 
-#----------------------------------------------------------------------------//
-# => INSTALL IPYTHON NOTEBOOK (SYSTEM-WIDE)
-#----------------------------------------------------------------------------//
-color_echo "Installing IPython 2/3 notebook" cyan
-  sudo apt-get install -y ipython ipython3 ipython-notebook ipython3-notebook
-
-color_echo "Installing IPython 2/3 Qt console" cyan
-  sudo apt-get install -y ipython-qt ipython3-qt
-
-
-#----------------------------------------------------------------------------//
-# => INSTALL SCIPY STACK
-#----------------------------------------------------------------------------//
-color_echo "Installing SciPy Stack ..." cyan
-  sudo apt-get install python-numpy python-scipy python-matplotlib python-pandas python-sympy python-nose
 
 
 #----------------------------------------------------------------------------//
@@ -316,3 +262,10 @@ if [[ ! -d "$HOME/.pyenv" ]]; then
   color_echo "Installing pyenv, to change Python versions ..." cyan
     curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
 fi
+
+
+#----------------------------------------------------------------------------//
+# => CHANGING THE SHELL TO ZSH
+#----------------------------------------------------------------------------//
+color_echo "Changing your shell to zsh ..." blue
+  chsh -s /bin/zsh
