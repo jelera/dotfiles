@@ -272,14 +272,23 @@ color_echo "Installing DosBox,an Emulator of IBM PC compatible computer running 
 #===============================================//
 # => Utilities
 #===============================================//
-color_echo "Installing Unzip ... " cyan
-  apt-get install -y unzip
+color_echo "Installing Rar, Unzip and other Archiving utilities ... " cyan
+  apt-get install -y unzip unace p7zip-rar sharutils rar arj lunzip lzip
 
 color_echo "Installing Curl ... " cyan
   apt-get install -y curl
 
 color_echo "Installing Guake, the Dropdown Terminal ... " cyan
   apt-get install -y guake
+
+color_echo "Installing Hardinfo, a system information tool ... " cyan
+  apt-get install -y hardinfo
+
+color_echo "Installing Glipper, a Gnome/Mate Clipboard Manager ... " cyan
+  apt-get install -y glipper
+
+color_echo "Installing Gufw, a GUI for UFW firewall ... " cyan
+  apt-get install -y gufw
 
 color_echo "Installing LuckyBackup, a Rsync frontend ... " cyan
   apt-get install -y guake
