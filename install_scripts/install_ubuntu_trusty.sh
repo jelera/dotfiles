@@ -6,7 +6,7 @@
 #  Description: This is a helper script that automates the installation of
 #                software for Development, SysAdmin, etc.
 #
-# Last Updated: Wed 20 Jan 2016 02:36:46 AM CST
+# Last Updated: Wed 20 Jan 2016 04:15:08 PM CST
 #
 #    Tested on: Ubuntu 14.04 LTS Trusty Tahr
 #
@@ -297,6 +297,23 @@ color_echo "Installing LuckyBackup, a Rsync frontend ... " cyan
 # => PPA's, DEB's and Source Compilation
 #===============================================//
 #-----------------------------//
+# => Google Chrome
+#-----------------------------//
+color_echo "Installing Google Chrome, A fast Web Browser... " cyan
+  cd /tmp
+  wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+  dpkg -i google-chrome-stable_current_amd64.deb
+  cd $HOME
+
+#-----------------------------//
+# => Uget
+#-----------------------------//
+color_echo "Installing uGet, a Download Manager ... " cyan
+  add-apt-repository -y ppa:plushuang-tw/uget-stable
+  apt-get update
+  apt-get install -y uget
+
+#-----------------------------//
 # => Pithos
 #-----------------------------//
 color_echo "Installing Pithos, a Pandora.com client ... " cyan
@@ -393,6 +410,8 @@ color_echo "Installing Meld Diff Viewer ... " cyan
 color_echo "Installing Giggle Git Viewer ... " cyan
   apt-get install -y giggle
 
+color_echo "Installing Git-Flow, a great workflow for git ... " cyan
+  apt-get install -y git-flow
 
 color_echo "Installing Ag The Silver Searcher as a Grep replacement ... " cyan
   apt-get install -y silversearcher-ag
