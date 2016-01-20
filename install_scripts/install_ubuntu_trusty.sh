@@ -146,22 +146,22 @@ figlet_echo "░░░░░░░░░░░░░░░░░░░░░░�
 # => GetDeb and PlayDeb Repos
 #-----------------------------//
 color_echo "Adding GetDeb.net Repo" cyan
-  if grep -qiE 'trusty' /etc/os-release; then
-  	if ! grep -qiE 'Linux Mint' /etc/issue; then
+if grep -qiE 'trusty' /etc/os-release; then
+	if ! grep -qiE 'Linux Mint' /etc/issue; then
 		apt-add-repository "deb http://archive.getdeb.net/ubuntu trusty-getdeb apps"
 		wget -q -O- http://archive.getdeb.net/getdeb-archive.key | sudo apt-key add -
 		apt-get update
 	else
 		color_echo "Linux Mint already includes GetDeb Repo" yellow
 	fi
-  fi
+fi
 
 color_echo "Adding PlayDeb.net Repo" cyan
-  if grep -qiE 'trusty' /etc/os-release; then
-  	apt-add-repository "deb http://archive.getdeb.net/ubuntu trusty-getdeb games"
-  	wget -q -O- http://archive.getdeb.net/getdeb-archive.key | sudo apt-key add -
-  	apt-get update
-  fi
+if grep -qiE 'trusty' /etc/os-release; then
+	apt-add-repository "deb http://archive.getdeb.net/ubuntu trusty-getdeb games"
+	wget -q -O- http://archive.getdeb.net/getdeb-archive.key | sudo apt-key add -
+	apt-get update
+fi
 
 
 
