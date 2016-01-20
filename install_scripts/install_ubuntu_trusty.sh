@@ -45,45 +45,45 @@
 function color_echo(){
 # Usage  : color_echo "string" color
 # Credit : http://stackoverflow.com/a/23006365/428786
-    local exp=$1;
-    local color=$2;
-    if ! [[ $color =~ '^[0-9]$' ]] ; then
-	case $(echo $color | tr '[:upper:]' '[:lower:]') in
-	    black) color=0 ;;
-	    red) color=1 ;;
-	    green) color=2 ;;
-	    yellow) color=3 ;;
-	    blue) color=4 ;;
-	    magenta) color=5 ;;
-	    cyan) color=6 ;;
-	    white|*) color=7 ;; # white or invalid color
-	esac
-    fi
+	local exp=$1;
+	local color=$2;
+	if ! [[ $color =~ '^[0-9]$' ]] ; then
+		case $(echo $color | tr '[:upper:]' '[:lower:]') in
+			black) color=0 ;;
+			red) color=1 ;;
+			green) color=2 ;;
+			yellow) color=3 ;;
+			blue) color=4 ;;
+			magenta) color=5 ;;
+			cyan) color=6 ;;
+			white|*) color=7 ;; # white or invalid color
+		esac
+	fi
 
-    tput setaf $color;
-    printf "\n$exp\n"
-    tput sgr0;
+	tput setaf $color;
+	printf "\n$exp\n"
+	tput sgr0;
 }
 
 function figlet_echo(){
-    local exp=$1;
-    local color=$2;
-    if ! [[ $color =~ '^[0-9]$' ]] ; then
-	case $(echo $color | tr '[:upper:]' '[:lower:]') in
-	    black) color=0 ;;
-	    red) color=1 ;;
-	    green) color=2 ;;
-	    yellow) color=3 ;;
-	    blue) color=4 ;;
-	    magenta) color=5 ;;
-	    cyan) color=6 ;;
-	    white|*) color=7 ;; # white or invalid color
-	esac
-    fi
+	local exp=$1;
+	local color=$2;
+	if ! [[ $color =~ '^[0-9]$' ]] ; then
+		case $(echo $color | tr '[:upper:]' '[:lower:]') in
+			black) color=0 ;;
+			red) color=1 ;;
+			green) color=2 ;;
+			yellow) color=3 ;;
+			blue) color=4 ;;
+			magenta) color=5 ;;
+			cyan) color=6 ;;
+			white|*) color=7 ;; # white or invalid color
+		esac
+	fi
 
-    tput setaf $color;
-    printf "\n$exp"
-    tput sgr0;
+	tput setaf $color;
+	printf "\n$exp"
+	tput sgr0;
 }
 
 
