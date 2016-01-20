@@ -212,6 +212,15 @@ color_echo "Installing Hexchat IRC Client ... " cyan
   apt-get install -y hexchat
 
 #===============================================//
+# => Web Browsers
+#===============================================//
+color_echo "Installing Chromium, an Open Source version of Google Chrome ... " cyan
+  apt-get install -y chromium-browser
+
+color_echo "Installing Pepper Flash Plugin for Chromium ... " cyan
+  apt-get install -y pepperflashplugin-nonfree
+
+#===============================================//
 # => Multimedia
 #===============================================//
 color_echo "Installing VLC Media Player ... " cyan
