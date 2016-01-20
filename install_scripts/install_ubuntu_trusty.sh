@@ -476,12 +476,12 @@ color_echo "Installing Git Source Code Management ... " cyan
 # => VirtualBox
 #-----------------------------//
 color_echo "Installing VirtualBox 5 ... " cyan
-  if grep -qiE 'trusty' /etc/os-release; then
-  	apt-add-repository "deb http://download.virtualbox.org/virtualbox/debian trusty contrib"
+if grep -qiE 'trusty' /etc/os-release; then
+	apt-add-repository "deb http://download.virtualbox.org/virtualbox/debian trusty contrib"
 	wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -
-  	apt-get update
-  	apt-get install -y virtualbox-5.0
-  fi
+	apt-get update
+	apt-get install -y virtualbox-5.0
+fi
 
 #-----------------------------//
 # => Vagrant
