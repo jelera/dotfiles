@@ -108,5 +108,5 @@ source $ZSH/oh-my-zsh.sh
 # export PATH="$HOME/.pyenv/bin:$PATH"
 # eval "$(pyenv init - zsh --no-rehash)"
 
-echo
-$HOME/.bin/on_this_day | head -n 1 | sed 's/^\s//'
+# echo
+# $HOME/.bin/on_this_day | head -n 1 | sed 's/^\s//'
