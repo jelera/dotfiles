@@ -549,6 +549,7 @@ color_echo "Installing Yeoman and generator for webapps ... " cyan
 
 color_echo "Cleaning up!..." cyan
   apt-get purge banshee
+  apt-get autoremove
   rm -rf /tmp/* 2> /dev/null
 echo
 echo
