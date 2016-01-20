@@ -6,7 +6,7 @@
 #  Description: This is a helper script that automates the installation of
 #                software for Development, SysAdmin, etc.
 #
-# Last Updated: Wed 20 Jan 2016 04:45:40 PM CST
+# Last Updated: Wed 20 Jan 2016 05:13:20 PM CST
 #
 #    Tested on: Ubuntu 14.04 LTS Trusty Tahr
 #
@@ -278,6 +278,9 @@ color_echo "Installing Rar, Unzip and other Archiving utilities ... " cyan
 color_echo "Installing Curl ... " cyan
   apt-get install -y curl
 
+color_echo "Installing Par, a text formatter filter... " cyan
+  apt-get install -y par
+
 color_echo "Installing Guake, the Dropdown Terminal ... " cyan
   apt-get install -y guake
 
@@ -303,6 +306,15 @@ color_echo "Installing Google Chrome, A fast Web Browser... " cyan
   cd /tmp
   wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
   dpkg -i google-chrome-stable_current_amd64.deb
+  cd $HOME
+
+#-----------------------------//
+# => Pandoc
+#-----------------------------//
+color_echo "Installing Pandoc, a swiss armyknife for Documents... " cyan
+  cd /tmp
+  wget https://github.com/jgm/pandoc/releases/download/1.16.0.2/pandoc-1.16.0.2-1-amd64.deb
+  dpkg -i pandoc-1.16.0.2-1-amd64.deb
   cd $HOME
 
 #-----------------------------//
@@ -512,6 +524,13 @@ color_echo "Installing Git-Cola Git Viewer ... " cyan
 #===============================================//
 color_echo "Upgrading npm with npm" cyan
   npm install -g npm
+
+color_echo "Installing Commonmark, an strict implementation of Markdown" cyan
+  npm install -g commonmark
+  ln -s /usr/bin/commonmark /usr/bin/markdown
+
+  color_echo "Installing Markdown to PDF" cyan
+  npm install -g markdown-pdf
 
 color_echo "Installing JSHint, Unopinionated JavaScript Linter ... " cyan
   npm install -g jshint
