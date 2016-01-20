@@ -6,7 +6,7 @@
 #  Description: This is a helper script that automates the installation of
 #                software for Development, SysAdmin, etc.
 #
-# Last Updated: Wed 20 Jan 2016 04:15:08 PM CST
+# Last Updated: Wed 20 Jan 2016 04:45:40 PM CST
 #
 #    Tested on: Ubuntu 14.04 LTS Trusty Tahr
 #
@@ -412,6 +412,9 @@ color_echo "Installing Giggle Git Viewer ... " cyan
 
 color_echo "Installing Git-Flow, a great workflow for git ... " cyan
   apt-get install -y git-flow
+
+color_echo "Installing Git-extras, more porcelain for git ... " cyan
+  apt-get install -y git-extras
 
 color_echo "Installing Ag The Silver Searcher as a Grep replacement ... " cyan
   apt-get install -y silversearcher-ag
