@@ -93,9 +93,9 @@ function figlet_echo(){
 # => SETUP
 #
 #############################################################################//
- 
+
 #-----------------------------//
-# => Exit install script if 
+# => Exit install script if
 #    any command fails
 #-----------------------------//
 set -e
