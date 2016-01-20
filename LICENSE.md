@@ -1,6 +1,6 @@
 The MIT License (MIT)
 
-Copyright (c) 2013 Jose Elera Campana
+Copyright (c) 2016 Jose Elera Campana
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
