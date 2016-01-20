@@ -5,7 +5,7 @@
 #                / /    _   / /\__ \ | | | | | (__
 #               /_/    (_) /___|___/_| |_|_|  \___|
 #
-# Last Updated: Mon 24 Nov 2014 02:14:16 PM CST
+# Last Updated: Wed 20 Jan 2016 04:52:10 PM CST
 #
 #   Maintainer: Jose Elera (https://github.com/jelera)
 #
@@ -91,7 +91,7 @@ ZSH_THEME="candy"
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(git git-flow osx yum systemd brew vi-mode colored-man vagrant)
+plugins=(git git-flow systemd vi-mode colored-man vagrant tmux ubuntu wp-cli git-extras gulp grunt pyenv rbenv rsync bower git-prompt)
 
 source $ZSH/oh-my-zsh.sh
 
