@@ -571,7 +571,7 @@ color_echo "Installing Yeoman and generator for webapps ... " cyan
   npm install -g generator-gulp-webapp
 
 color_echo "Installing Write-good, Linter for English proves for devs... " cyan
-npnpm install -g write-good
+  npm install -g write-good
 
 
 #############################################################################//
