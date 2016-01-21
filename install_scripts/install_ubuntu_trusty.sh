@@ -294,7 +294,7 @@ color_echo "Installing Gufw, a GUI for UFW firewall ... " cyan
   apt-get install -y gufw
 
 color_echo "Installing LuckyBackup, a Rsync frontend ... " cyan
-  apt-get install -y guake
+  apt-get install -y luckybackup
 
 #===============================================//
 # => PPA's, DEB's and Source Compilation
