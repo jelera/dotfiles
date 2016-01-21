@@ -1,4 +1,40 @@
 #!/bin/bash
+###############################################################################
+#         Name: install_rbenv_pyenv
+#        Usage: ./install_rbenv_pyenv
+#
+#  Description: This is a helper script that automates the installation of
+#                software for Development, SysAdmin, etc.
+#
+# Last Updated: Thu 21 Jan 2016 02:31:24 PM CST
+#
+#    Tested on: Ubuntu 14.04 LTS Trusty Tahr
+#
+#   Maintainer: Jose Elera (https://github.com/jelera)
+#     Based on: https://github.com/thoughtbot/laptop
+#      License: MIT
+#               Copyright (c) 2016 Jose Elera Campana
+#               Permission is hereby granted, free of charge, to any person
+#               obtaining a copy of this software and associated documentation
+#               files (the "Software"), to deal in the Software without
+#               restriction, including without limitation the rights to use,
+#               copy, modify, merge, publish, distribute, sublicense, and/or
+#               sell copies of the Software, and to permit persons to whom the
+#               Software is furnished to do so, subject to the following
+#               conditions:
+#
+#               The above copyright notice and this permission notice shall be
+#               included in all copies or substantial portions of the Software.
+#
+#               THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+#               EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+#               OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+#               NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+#               HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+#               WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#               FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+#               OTHER DEALINGS IN THE SOFTWARE.
+###############################################################################
 #############################################################################//
 #
 # => HELPER FUNCTIONS
@@ -8,48 +44,56 @@
 function color_echo(){
 # Usage  : color_echo "string" color
 # Credit : http://stackoverflow.com/a/23006365/428786
-    local exp=$1;
-    local color=$2;
-    if ! [[ $color =~ '^[0-9]$' ]] ; then
-	case $(echo $color | tr '[:upper:]' '[:lower:]') in
-	    black) color=0 ;;
-	    red) color=1 ;;
-	    green) color=2 ;;
-	    yellow) color=3 ;;
-	    blue) color=4 ;;
-	    magenta) color=5 ;;
-	    cyan) color=6 ;;
-	    white|*) color=7 ;; # white or invalid color
-	esac
-    fi
+	local exp=$1;
+	local color=$2;
+	if ! [[ $color =~ ^[0-9]$ ]] ; then
+		case $(echo "$color" | tr '[:upper:]' '[:lower:]') in
+			black) color=0 ;;
+			red) color=1 ;;
+			green) color=2 ;;
+			yellow) color=3 ;;
+			blue) color=4 ;;
+			magenta) color=5 ;;
+			cyan) color=6 ;;
+			white|*) color=7 ;; # white or invalid color
+		esac
+	fi
 
-    tput setaf $color;
-    printf "\n$exp\n"
-    tput sgr0;
+	tput setaf $color;
+	printf "\n%s\n" "$exp"
+	tput sgr0;
 }
 
 function figlet_echo(){
     local exp=$1;
     local color=$2;
-    if ! [[ $color =~ '^[0-9]$' ]] ; then
-	case $(echo $color | tr '[:upper:]' '[:lower:]') in
-	    black) color=0 ;;
-	    red) color=1 ;;
-	    green) color=2 ;;
-	    yellow) color=3 ;;
-	    blue) color=4 ;;
-	    magenta) color=5 ;;
-	    cyan) color=6 ;;
-	    white|*) color=7 ;; # white or invalid color
+    if ! [[ $color =~ ^[0-9]$ ]] ; then
+	case $(echo "$color" | tr '[:upper:]' '[:lower:]') in
+		black) color=0 ;;
+		red) color=1 ;;
+		green) color=2 ;;
+		yellow) color=3 ;;
+		blue) color=4 ;;
+		magenta) color=5 ;;
+		cyan) color=6 ;;
+		white|*) color=7 ;; # white or invalid color
 	esac
     fi
 
     tput setaf $color;
-    printf "\n$exp"
+	printf "\n%s\n" "$exp"
     tput sgr0;
 }
 
-
+#-----------------------------//
+# => Check Permission
+#-----------------------------//
+if ! [[ $EUID -ne 0 ]]; then
+	color_echo "------------------------------------" red
+	color_echo "|  DO NOT RUN THIS SCRIPT AS SUDO  |" red
+	color_echo "------------------------------------" red
+	exit 1
+fi
 
 #===============================================//
 # => RBENV (RUBY) & PYENV (PYTHON)
@@ -59,29 +103,29 @@ function figlet_echo(){
 # => rbenv
 #-----------------------------//
 color_echo "Installing rbenv, Ruby Version Manager ... " cyan
-  #NOTE: On Ubuntu Desktop, replace all ocurrences .bash_profile
-  # in this code block with .bashrc
+#NOTE: On Ubuntu Desktop, replace all ocurrences .bash_profile
+# in this code block with .bashrc
 
-  cd $HOME
-  git clone git://github.com/sstephenson/rbenv.git .rbenv
+cd "$HOME"
+git clone git://github.com/sstephenson/rbenv.git .rbenv
 
-  echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> $HOME/.bashrc
-  echo 'eval "$(rbenv init -)"' >> $HOME/.bashrc
+# echo 'export PATH=""$HOME"/.rbenv/bin:$PATH"' >> "$HOME"/.bashrc
+# echo 'eval "$(rbenv init -)"' >> "$HOME"/.bashrc
 
-  echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> $HOME/.zshrc
-  echo 'eval "$(rbenv init -)"' >> $HOME/.zshrc
+# echo 'export PATH=""$HOME"/.rbenv/bin:$PATH"' >> "$HOME"/.zshrc
+# echo 'eval "$(rbenv init -)"' >> "$HOME"/.zshrc
 
-  git clone git://github.com/sstephenson/ruby-build.git $HOME/.rbenv/plugins/ruby-build
-  echo 'export PATH="$HOME/.rbenv/plugins/ruby-build/bin:$PATH"' >> $HOME/.bashrc
-  echo 'export PATH="$HOME/.rbenv/plugins/ruby-build/bin:$PATH"' >> $HOME/.zshrc
+git clone git://github.com/sstephenson/ruby-build.git "$HOME"/.rbenv/plugins/ruby-build
+# echo 'export PATH=""$HOME"/.rbenv/plugins/ruby-build/bin:$PATH"' >> "$HOME"/.bashrc
+# echo 'export PATH=""$HOME"/.rbenv/plugins/ruby-build/bin:$PATH"' >> "$HOME"/.zshrc
 
-  if [ -n "${BASH_VERSION}" ]; then
-  	source $HOME/.bashrc
-  elif [ -n "${ZSH_VERSION}" ]; then
-  	source $HOME/.zshrc
-  fi
+if [ -n "${BASH_VERSION}" ]; then
+	source "$HOME"/.bashrc
+elif [ -n "${ZSH_VERSION}" ]; then
+	source "$HOME"/.zshrc
+fi
 
-  cd -
+cd -
 
 color_echo "Installing Ruby, the latest version... " cyan
   rbenv install -v 2.3.0
@@ -95,21 +139,23 @@ color_echo "Installing Ruby on Rails ... " cyan
 # => pyenv
 #-----------------------------//
 color_echo "Installing pyenv, Python Version Manager ... " cyan
-  git clone https://github.com/yyuu/pyenv.git $HOME/.pyenv
+git clone https://github.com/yyuu/pyenv.git "$HOME"/.pyenv
 
-  echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $HOME/.bashrc
-  echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME/.bashrc
-  echo 'eval "$(pyenv init -)"' >> $HOME/.bashrc
+# These lines are already added in bashrc and zshrc
 
-  echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $HOME/.zshrc
-  echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME/.zshrc
-  echo 'eval "$(pyenv init -)"' >> $HOME/.zshrc
+# echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $HOME/.bashrc
+# echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME/.bashrc
+# echo 'eval "$(pyenv init -)"' >> $HOME/.bashrc
 
-  if [ -n "${BASH_VERSION}" ]; then
-  	source $HOME/.bashrc
-  elif [ -n "${ZSH_VERSION}" ]; then
-  	source $HOME/.zshrc
-  fi
+# echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $HOME/.zshrc
+# echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME/.zshrc
+# echo 'eval "$(pyenv init -)"' >> $HOME/.zshrc
+
+if [ -n "${BASH_VERSION}" ]; then
+	source "$HOME"/.bashrc
+elif [ -n "${ZSH_VERSION}" ]; then
+	source "$HOME"/.zshrc
+fi
 
 
 color_echo "Installing Python, the latest version... " cyan
