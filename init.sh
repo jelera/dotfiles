@@ -251,6 +251,11 @@ sudo cp $HOME/.config/dotfiles/bin/xcape /usr/local/bin/
 sudo cp $HOME/.config/dotfiles/bin/vcprompt /usr/local/bin/
 sleep 1
 
+color_echo "Install the rest using this line" green
+color_echo " Run this line as a regular user" green
+echo
+color_echo "cd ~/.config/dotfiles/install_scripts; ./install_ubuntu_trusty.sh; ./install_patched_fonts.sh; ./install_rbenv_pyenv; ./install_atom_packages.sh; cd $HOME" yellow
+echo
 echo
 figlet_echo "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░"
 figlet_echo "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░"
