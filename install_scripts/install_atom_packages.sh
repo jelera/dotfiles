@@ -2,10 +2,8 @@
 ##-----------------------------------------------------------------------------
 ##
 ##         Name : install_atom_packages.sh
-##     Synopsis :
 ##       Author : Jose Elera <jelera@gmail.com>
-##       Source :
-## Last Updated : Wed 20 Jan 2016 06:46:11 PM CST
+## Last Updated : Thu 21 Jan 2016 02:45:09 PM CST
 ##
 ## Copyright © 2016 Jose Elera
 ## Distributed under terms of the MIT license.
@@ -22,8 +20,8 @@ function color_echo(){
 # Credit : http://stackoverflow.com/a/23006365/428786
 	local exp=$1;
 	local color=$2;
-	if ! [[ $color =~ '^[0-9]$' ]] ; then
-		case $(echo $color | tr '[:upper:]' '[:lower:]') in
+	if ! [[ $color =~ ^[0-9]$ ]] ; then
+		case $(echo "$color" | tr '[:upper:]' '[:lower:]') in
 			black) color=0 ;;
 			red) color=1 ;;
 			green) color=2 ;;
@@ -36,30 +34,24 @@ function color_echo(){
 	fi
 
 	tput setaf $color;
-	printf "\n$exp\n"
+	printf "\n%s\n" "$exp"
 	tput sgr0;
 }
 
-function figlet_echo(){
-	local exp=$1;
-	local color=$2;
-	if ! [[ $color =~ '^[0-9]$' ]] ; then
-		case $(echo $color | tr '[:upper:]' '[:lower:]') in
-			black) color=0 ;;
-			red) color=1 ;;
-			green) color=2 ;;
-			yellow) color=3 ;;
-			blue) color=4 ;;
-			magenta) color=5 ;;
-			cyan) color=6 ;;
-			white|*) color=7 ;; # white or invalid color
-		esac
-	fi
+#-----------------------------------//
+# => Check if apm/atom is installed
+#-----------------------------------//
+if ! [[ -x apm ]]; then
+	color_echo "------------------------------------------------------" red
+	color_echo "|  You must install atom before running this script  |" red
+	color_echo "------------------------------------------------------" red
+	exit 1
+fi
 
-	tput setaf $color;
-	printf "\n$exp"
-	tput sgr0;
-}
+
+#-----------------------------//
+# => Install Plugins
+#-----------------------------//
 color_echo "project-manager, for easy access and switching between projects in Atom" cyan
   apm install project-manager
 
@@ -140,7 +132,7 @@ color_echo "Linter, a base linter provider for Atom, and Linters" cyan
   # PHP
   apm install linter-php
   # Puppet
-  apm install linter-puppet-lint
+  # apm install linter-puppet-lint
   # Python
   apm install linter-flake8
   # Ruby
