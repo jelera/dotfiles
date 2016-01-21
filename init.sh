@@ -6,7 +6,7 @@
 #  Description: Simple script to autocreate the symlinks for my dotfiles and
 #               copy some helper programs to /usr/local/bin
 #
-# Last Updated: Wed 20 Jan 2016 03:38:29 PM CST
+# Last Updated: Wed 20 Jan 2016 06:54:14 PM CST
 #
 #    Tested on: Ubuntu 14.04 LTS Trusty Tahr
 #               CentOS 7 / Red Hat Enterprise Linux 7
