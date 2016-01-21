@@ -6,7 +6,7 @@
 #  Description: This is a helper script that automates the installation of
 #                software for Development, SysAdmin, etc.
 #
-# Last Updated: Wed 20 Jan 2016 05:13:20 PM CST
+# Last Updated: Wed 20 Jan 2016 06:02:10 PM CST
 #
 #    Tested on: Ubuntu 14.04 LTS Trusty Tahr
 #
@@ -350,7 +350,7 @@ color_echo "Installing X-tile Tiling Manager ... " cyan
   cd /tmp
   wget http://www.giuspen.com/software/x-tile_2.5.1-1_all.deb
   dpkg -i x-tile_2.5.1-1_all.deb
-  cd -
+  cd $HOME
 
 #-----------------------------//
 # => Albert Launcher
@@ -505,7 +505,7 @@ color_echo "Installing Vagrant 1.8 ... " cyan
   cd /tmp
   wget https://releases.hashicorp.com/vagrant/1.8.1/vagrant_1.8.1_x86_64.deb
   dpkg -i vagrant_1.8.1_x86_64.deb
-  cd -
+  cd $HOME
 
 #-----------------------------//
 # => Git-cola
@@ -517,6 +517,15 @@ color_echo "Installing Git-Cola Git Viewer ... " cyan
   tar xfz git-cola.tar.gz
   cd git-cola-2.5
   python setup.py install
+  cd $HOME
+
+#-----------------------------//
+# => Atom Text Editor
+#-----------------------------//
+color_echo "Installing Atom text editor ... " cyan
+  cd /tmp
+  wget https://atom.io/download/deb -O atom.deb
+  dpkg -i atom.deb
   cd $HOME
 
 #===============================================//
