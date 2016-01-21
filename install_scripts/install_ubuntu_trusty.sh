@@ -6,7 +6,7 @@
 #  Description: This is a helper script that automates the installation of
 #                software for Development, SysAdmin, etc.
 #
-# Last Updated: Wed 20 Jan 2016 06:02:10 PM CST
+# Last Updated: Wed 20 Jan 2016 06:27:59 PM CST
 #
 #    Tested on: Ubuntu 14.04 LTS Trusty Tahr
 #
@@ -570,6 +570,8 @@ color_echo "Installing Yeoman and generator for webapps ... " cyan
   npm install -g generator-web
   npm install -g generator-gulp-webapp
 
+color_echo "Installing Write-good, Linter for English proves for devs... " cyan
+npnpm install -g write-good
 
 
 #############################################################################//
