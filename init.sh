@@ -254,7 +254,7 @@ sleep 1
 color_echo "Install the rest using this line" green
 color_echo " Run this line as a regular user" green
 echo
-color_echo "cd ~/.config/dotfiles/install_scripts; ./install_ubuntu_trusty.sh; ./install_patched_fonts.sh; ./install_rbenv_pyenv; ./install_atom_packages.sh; cd $HOME" yellow
+color_echo "cd ~/.config/dotfiles/install_scripts; sudo ./install_ubuntu_trusty.sh; ./install_patched_fonts.sh; ./install_rbenv_pyenv; ./install_atom_packages.sh; cd $HOME" yellow
 echo
 echo
 figlet_echo "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░"
