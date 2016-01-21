@@ -6,7 +6,7 @@
 #  Description: Simple script to autocreate the symlinks for my dotfiles and
 #               copy some helper programs to /usr/local/bin
 #
-# Last Updated: Wed 20 Jan 2016 06:54:14 PM CST
+# Last Updated: Thu 21 Jan 2016 02:18:10 PM CST
 #
 #    Tested on: Ubuntu 14.04 LTS Trusty Tahr
 #               CentOS 7 / Red Hat Enterprise Linux 7
@@ -49,8 +49,8 @@ function color_echo(){
 # Credit : http://stackoverflow.com/a/23006365/428786
 	local exp=$1;
 	local color=$2;
-	if ! [[ $color =~ '^[0-9]$' ]] ; then
-	case $(echo $color | tr '[:upper:]' '[:lower:]') in
+	if ! [[ $color =~ ^[0-9]$ ]] ; then
+	case $(echo "$color" | tr '[:upper:]' '[:lower:]') in
 		black) color=0 ;;
 		red) color=1 ;;
 		green) color=2 ;;
@@ -63,15 +63,15 @@ function color_echo(){
 	fi
 
 	tput setaf $color;
-	printf "\n$exp\n"
+	printf "\n%s\n" "$exp"
 	tput sgr0;
 }
 
 function figlet_echo(){
 	local exp=$1;
 	local color=$2;
-	if ! [[ $color =~ '^[0-9]$' ]] ; then
-		case $(echo $color | tr '[:upper:]' '[:lower:]') in
+	if ! [[ $color =~ ^[0-9]$ ]] ; then
+		case $(echo "$color" | tr '[:upper:]' '[:lower:]') in
 			black) color=0 ;;
 			red) color=1 ;;
 			green) color=2 ;;
@@ -84,7 +84,7 @@ function figlet_echo(){
 	fi
 
 	tput setaf $color;
-	printf "\n$exp"
+	printf "\n%s" "$exp"
 	tput sgr0;
 }
 
@@ -176,16 +176,16 @@ sleep 1
 ##---------------------------------------------------------------------------//
 echo
 color_echo "Creating the Symlinks ..." cyan
-ln -s $HOME/.config/dotfiles/bin                  $HOME/.bin
-ln -s $HOME/.config/dotfiles/bash/bashrc          $HOME/.bashrc
-ln -s $HOME/.config/dotfiles/bash/bash_profile    $HOME/.profile
+ln -s "$HOME"/.config/dotfiles/bin                  "$HOME"/.bin
+ln -s "$HOME"/.config/dotfiles/bash/bashrc          "$HOME"/.bashrc
+ln -s "$HOME"/.config/dotfiles/bash/bash_profile    "$HOME"/.profile
 
-ln -s $HOME/.config/dotfiles/gitconfig/gitconfig  $HOME/.gitconfig
-ln -s $HOME/.config/dotfiles/gitconfig/gitignore  $HOME/.gitignore_global
+ln -s "$HOME"/.config/dotfiles/gitconfig/gitconfig  "$HOME"/.gitconfig
+ln -s "$HOME"/.config/dotfiles/gitconfig/gitignore  "$HOME"/.gitignore_global
 
-ln -s $HOME/.config/dotfiles/tmux/tmux.conf       $HOME/.tmux.conf
+ln -s "$HOME"/.config/dotfiles/tmux/tmux.conf       "$HOME"/.tmux.conf
 
-ln -s $HOME/.config/dotfiles/zsh/zshrc            $HOME/.zshrc
+ln -s "$HOME"/.config/dotfiles/zsh/zshrc            "$HOME"/.zshrc
 sleep 1
 
 
@@ -212,7 +212,7 @@ fi
 color_echo "Cloning my dotvim repo ..." cyan
 # Cloning my dotvim repo and create the symlinks
 git clone git@github.com:jelera/vimconfig.git ~/.config/dotfiles/vim
-ln -s $HOME/.config/dotfiles/vim     $HOME/.vim
+ln -s "$HOME"/.config/dotfiles/vim     "$HOME"/.vim
 
 # Making the directories for backup, swap and undo
 echo
@@ -242,13 +242,13 @@ color_echo "Copying helper programs to /usr/local/bin/  ..." cyan
 
 # This script is needed for advanced tmux vim integration
 # Tested with Ubuntu Linux 14.04 LTS / CentOS 7 / RHEL 7
-sudo cp $HOME/.config/dotfiles/bin/tmux-vim-select-pane /usr/local/bin/
+sudo cp "$HOME"/.config/dotfiles/bin/tmux-vim-select-pane /usr/local/bin/
 
 # xcape adds extra remap to single keypress
-sudo cp $HOME/.config/dotfiles/bin/xcape /usr/local/bin/
+sudo cp "$HOME"/.config/dotfiles/bin/xcape /usr/local/bin/
 
 # vcprompt displays the current working VCS branch (git/hg)
-sudo cp $HOME/.config/dotfiles/bin/vcprompt /usr/local/bin/
+sudo cp "$HOME"/.config/dotfiles/bin/vcprompt /usr/local/bin/
 sleep 1
 
 color_echo "Install the rest using this line" green
