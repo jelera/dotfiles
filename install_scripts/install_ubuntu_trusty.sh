@@ -6,7 +6,7 @@
 #  Description: This is a helper script that automates the installation of
 #                software for Development, SysAdmin, etc.
 #
-# Last Updated: Wed 20 Jan 2016 06:27:59 PM CST
+# Last Updated: Thu 21 Jan 2016 02:35:55 PM CST
 #
 #    Tested on: Ubuntu 14.04 LTS Trusty Tahr
 #
@@ -47,8 +47,8 @@ function color_echo(){
 # Credit : http://stackoverflow.com/a/23006365/428786
 	local exp=$1;
 	local color=$2;
-	if ! [[ $color =~ '^[0-9]$' ]] ; then
-		case $(echo $color | tr '[:upper:]' '[:lower:]') in
+	if ! [[ $color =~ ^[0-9]$ ]] ; then
+		case $(echo "$color" | tr '[:upper:]' '[:lower:]') in
 			black) color=0 ;;
 			red) color=1 ;;
 			green) color=2 ;;
@@ -61,15 +61,15 @@ function color_echo(){
 	fi
 
 	tput setaf $color;
-	printf "\n$exp\n"
+	printf "\n%s\n" "$exp"
 	tput sgr0;
 }
 
 function figlet_echo(){
 	local exp=$1;
 	local color=$2;
-	if ! [[ $color =~ '^[0-9]$' ]] ; then
-		case $(echo $color | tr '[:upper:]' '[:lower:]') in
+	if ! [[ $color =~ ^[0-9]$ ]] ; then
+		case $(echo "$color" | tr '[:upper:]' '[:lower:]') in
 			black) color=0 ;;
 			red) color=1 ;;
 			green) color=2 ;;
@@ -82,7 +82,7 @@ function figlet_echo(){
 	fi
 
 	tput setaf $color;
-	printf "\n$exp"
+	printf "\n%s" "$exp"
 	tput sgr0;
 }
 
@@ -306,7 +306,7 @@ color_echo "Installing Google Chrome, A fast Web Browser... " cyan
   cd /tmp
   wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
   dpkg -i google-chrome-stable_current_amd64.deb
-  cd $HOME
+  cd "$HOME"
 
 #-----------------------------//
 # => Pandoc
@@ -315,7 +315,7 @@ color_echo "Installing Pandoc, a swiss armyknife for Documents... " cyan
   cd /tmp
   wget https://github.com/jgm/pandoc/releases/download/1.16.0.2/pandoc-1.16.0.2-1-amd64.deb
   dpkg -i pandoc-1.16.0.2-1-amd64.deb
-  cd $HOME
+  cd "$HOME"
 
 #-----------------------------//
 # => Uget
@@ -341,7 +341,7 @@ color_echo "Pencil, a wireframe and UI designer" cyan
   wget https://github.com/prikhi/pencil/releases/download/v2.0.15/pencil-2.0.15-ubuntu-all.deb
   dpkg -i pencil-2.0.15-ubuntu-all.deb
   sed -i -e 's/MaxVersion\=42/MaxVersion\=44/g' /usr/share/pencil/application.ini
-  cd $HOME
+  cd "$HOME"
 
 #-----------------------------//
 # => X-Tile
@@ -350,7 +350,7 @@ color_echo "Installing X-tile Tiling Manager ... " cyan
   cd /tmp
   wget http://www.giuspen.com/software/x-tile_2.5.1-1_all.deb
   dpkg -i x-tile_2.5.1-1_all.deb
-  cd $HOME
+  cd "$HOME"
 
 #-----------------------------//
 # => Albert Launcher
@@ -477,7 +477,7 @@ color_echo "Installing Universal Ctags, a more updated alternative to Exuberant 
   ./configure --prefix=/usr/local
   make
   make install
-  cd $HOME
+  cd "$HOME"
 
 #-----------------------------//
 # => Git SCM
@@ -505,7 +505,7 @@ color_echo "Installing Vagrant 1.8 ... " cyan
   cd /tmp
   wget https://releases.hashicorp.com/vagrant/1.8.1/vagrant_1.8.1_x86_64.deb
   dpkg -i vagrant_1.8.1_x86_64.deb
-  cd $HOME
+  cd "$HOME"
 
 #-----------------------------//
 # => Git-cola
@@ -517,7 +517,7 @@ color_echo "Installing Git-Cola Git Viewer ... " cyan
   tar xfz git-cola.tar.gz
   cd git-cola-2.5
   python setup.py install
-  cd $HOME
+  cd "$HOME"
 
 #-----------------------------//
 # => Atom Text Editor
@@ -526,7 +526,7 @@ color_echo "Installing Atom text editor ... " cyan
   cd /tmp
   wget https://atom.io/download/deb -O atom.deb
   dpkg -i atom.deb
-  cd $HOME
+  cd "$HOME"
 
 #===============================================//
 # => NPM Packages
@@ -581,7 +581,7 @@ color_echo "Installing Write-good, Linter for English proves for devs... " cyan
 #############################################################################//
 
 color_echo "Cleaning up!..." cyan
-  apt-get purge banshee
+  apt-get purge -y banshee
   apt-get autoremove
   rm -rf /tmp/* 2> /dev/null
 echo
