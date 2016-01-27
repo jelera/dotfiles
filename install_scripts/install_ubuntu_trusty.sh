@@ -6,7 +6,7 @@
 #  Description: This is a helper script that automates the installation of
 #                software for Development, SysAdmin, etc.
 #
-# Last Updated: Tue 26 Jan 2016 08:15:58 PM CST
+# Last Updated: Tue 26 Jan 2016 10:33:55 PM CST
 #
 #    Tested on: Ubuntu 14.04 LTS Trusty Tahr
 #
@@ -471,8 +471,9 @@ color_echo "Installing Node.js ... " cyan
 #-----------------------------//
 color_echo "Installing Universal Ctags, a more updated alternative to Exuberant Ctags ... " cyan
   # Getting Ctags
+  cd /tmp
   wget -q https://github.com/universal-ctags/ctags/archive/master.zip -O /tmp/u_ctags.zip
-  unzip -q /tmp/u_ctags.zip; cd ctags-master
+  unzip -q /tmp/u_ctags.zip; cd /tmp/ctags-master
 
   # Building Ctags
   ./autogen.sh
