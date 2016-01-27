@@ -1,0 +1,32 @@
+#!/bin/bash
+###############################################################################
+##
+##         Name : mate_wallpaper_changer
+##        Usage : ./mate_wallpaper_changer
+##  Description : This script will randomly change the wallpaper image in the
+##                MATE Desktop, using a set interval.
+##
+## Last Updated : Sat 23 Jan 2016 03:00:08 PM CST
+##
+##        Notes : It's recommended to run automatically at startup.
+##
+##       Author : Jose Elera Campana <https://github.com/jelera>
+##
+##      License : Copyright (c) 2014 Jose Elera Campana
+##                The MIT License
+##
+###############################################################################
+
+while true; do
+	# SETTINGS
+	INTERVAL=360  # Time in seconds
+	WALLPAPER_DIR="$HOME/Pictures/Wallpapers"
+
+
+	# This will randomly select an image from the wallpaper directory
+	WALLPAPER_IMG=$(ls -d -1 "$WALLPAPER_DIR"/*.* | shuf -n1)
+
+	# Finally, setting the image as the current wallpaper
+	gsettings set org.mate.background picture-filename "$WALLPAPER_IMG"
+	sleep $INTERVAL
+done
