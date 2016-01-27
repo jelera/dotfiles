@@ -3,7 +3,7 @@
 ##
 ##         Name : install_atom_packages.sh
 ##       Author : Jose Elera <jelera@gmail.com>
-## Last Updated : Thu 21 Jan 2016 02:45:09 PM CST
+## Last Updated : Tue 26 Jan 2016 08:06:15 PM CST
 ##
 ## Copyright © 2016 Jose Elera
 ## Distributed under terms of the MIT license.
@@ -41,10 +41,8 @@ function color_echo(){
 #-----------------------------------//
 # => Check if apm/atom is installed
 #-----------------------------------//
-if ! [[ -x apm ]]; then
-	color_echo "------------------------------------------------------" red
-	color_echo "|  You must install atom before running this script  |" red
-	color_echo "------------------------------------------------------" red
+if ! [[ -x /usr/bin/atom ]]; then
+	echo "Error: Atom was not found on /usr/bin/atom" 1>&2
 	exit 1
 fi
 
