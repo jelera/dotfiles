@@ -434,16 +434,19 @@ color_echo "Installing Ag The Silver Searcher as a Grep replacement ... " cyan
 # => Common shared libraries for compilation
 #===============================================//
 color_echo "Installing Essential tools for building and compiling ... " cyan
-  apt-get install -y build-essential automake
+  apt-get install -y build-essential automake cmake
 
-color_echo "Installing Ruby 2.0 Development Libraries ... " cyan
-  apt-get install -y ruby2.0-dev
+color_echo "Installing Ruby 2.0 and its Development Libraries ... " cyan
+  apt-get install -y ruby2.0 ruby2.0-dev
 
 color_echo "Installing Python 3.4 Development Libraries ... " cyan
-  apt-get install -y python3.4-dev
+  apt-get install -y python3 python3-dev python3.4-dev python3-pip
+
+color_echo "Installing iPython 2/3 with QT Consoles ..." cyan
+  apt-get install -y ipython-qtconsole ipython3-qtconsole
 
 color_echo "Installing Common Libraries for Python and Ruby ... " cyan
-  apt-get install -y libxslt1-dev libcurl4-openssl-dev libksba8 libksba-dev libqtwebkit-dev libreadline-dev libssl-dev zlib1g-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev python-software-properties libffi-dev postgresql-server-dev-all python-pip libbz2-dev
+  apt-get install -y libxslt2-dev libcurl4-openssl-dev libksba8 libksba-dev libqtwebkit-dev libreadline-dev libssl-dev zlib1g-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev python-software-properties libffi-dev postgresql-server-dev-all python-pip libbz2-dev php5-gd txt2tags
 
 #===============================================//
 # => STACKS
@@ -528,20 +531,23 @@ color_echo "Installing Atom text editor ... " cyan
   cd "$HOME"
 
 #===============================================//
+# => Ruby Gems
+#===============================================//
+color_echo "Install Sass, a CSS Preprocessor" cyan
+  gem2.0 install sass
+
+#===============================================//
 # => NPM Packages
 #===============================================//
 color_echo "Upgrading npm with npm" cyan
   npm install -g npm
 
-color_echo "Installing Commonmark, an strict implementation of Markdown" cyan
+color_echo "Installing Commonmark, an strict superset of Markdown" cyan
   npm install -g commonmark
   ln -s /usr/bin/commonmark /usr/bin/markdown
 
   color_echo "Installing Markdown to PDF" cyan
   npm install -g markdown-pdf
-
-color_echo "Installing JSHint, Unopinionated JavaScript Linter ... " cyan
-  npm install -g jshint
 
 color_echo "Installing Tern, Code-analysis engine for JavaScript ... " cyan
   npm install -g tern
