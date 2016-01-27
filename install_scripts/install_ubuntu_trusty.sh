@@ -578,6 +578,59 @@ color_echo "Installing Yeoman and generator for webapps ... " cyan
 color_echo "Installing Write-good, Linter for English proves for devs... " cyan
   npm install -g write-good
 
+#===============================================//
+# => LINTERS
+#===============================================//
+color_echo "Installing CSSLint, for CSS" cyan
+  npm install -g csslint
+
+color_echo "Installing HTMLHint, for HTML5" cyan
+  npm install -g htmlhint
+
+color_echo "Installing HTML5 Tidy, for HTML5" cyan
+	wget https://github.com/htacg/tidy-html5/archive/master.zip -O /tmp/tidy-html5-master.zip
+	unzip /tmp/tidy-html5-master.zip
+	cd /tmp/tidy-html5-master
+	cd build/cmake
+	cmake ../..
+	make && make install
+	cd "$HOME"
+
+color_echo "Installing JSHint, for JavaScript" cyan
+  npm install -g jshint
+
+color_echo "Installing JSONlint, for JSON" cyan
+  npm install -g jsonlint
+
+color_echo "Installing MDL, for Markdown" cyan
+  gem2.0 install mdl
+
+color_echo "Installing Flake8, for Python" cyan
+  pip3 install flake8
+
+color_echo "Installing Reek, for Ruby" cyan
+  gem2.0 install reek
+
+color_echo "Installing XML, for XML" cyan
+  apt-get install -y libxml2-utils
+
+color_echo "Installing JS-Yaml, for YAML" cyan
+  npm install -g js-yaml
+
+color_echo "Installing Language-check, for Text Proof-reading" cyan
+  pip3 install --upgrade language-check
+
+color_echo "Install Haml_lint, a Linter for HAML" cyan
+  gem2.0 install haml_lint
+
+# BASH
+color_echo "Installing ShellCheck, for Bash" cyan
+cd /tmp
+wget http://security.ubuntu.com/ubuntu/pool/universe/s/shellcheck/shellcheck_0.3.3-1~ubuntu14.04.1_amd64.deb
+dpkg -i shellcheck_0.3.3-1~ubuntu14.04.1_amd64.deb
+cd "$HOME"
+
+
 
 #############################################################################//
 #
