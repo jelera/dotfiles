@@ -6,7 +6,7 @@
 #  Description: This is a helper script that automates the installation of
 #                software for Development, SysAdmin, etc.
 #
-# Last Updated: Thu 21 Jan 2016 02:35:55 PM CST
+# Last Updated: Tue 26 Jan 2016 08:15:58 PM CST
 #
 #    Tested on: Ubuntu 14.04 LTS Trusty Tahr
 #
@@ -104,20 +104,19 @@ set -e
 # => Require root privileges
 #-----------------------------//
 if [[ $EUID -ne 0 ]]; then
-    color_echo "----------------------------------------" red
-    color_echo "|  This script must be run with sudo.  |" red
-    color_echo "----------------------------------------" red
-    exit 1
+	echo "ERROR: This script must be run with sudo" 1>&2
+	exit 1
+
 fi
 
 #-----------------------------//
 # => Distro Testing
 #-----------------------------//
 if ! grep -qiE 'trusty' /etc/os-release; then
-    color_echo "----------------------------------------------------" red
-    color_echo "|  Sorry! we don't currently support that distro.  |" red
-    color_echo "----------------------------------------------------" red
-    exit 1
+	echo "ERROR: This Linux Distro is not currently supported" 1>&2
+	echo "       Try forking it and implement it" 1>&2
+	exit 1
+
 fi
 
 
