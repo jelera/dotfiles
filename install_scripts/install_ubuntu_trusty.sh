@@ -580,6 +580,38 @@ color_echo "Installing Write-good, Linter for English proves for devs... " cyan
   npm install -g write-good
 
 #===============================================//
+# => LAMP STACK SETUP
+#===============================================//
+
+color_echo "Creating $HOME/Sites..." cyan
+cd /var/www
+
+sudo chown "$USERNAME":www-data ./* -R
+sudo usermod -a -G www-data "$USERNAME"
+
+sudo chgrp -R www-data /var/www
+sudo chmod -R g+rw /var/www
+find /var/www -type d -print0 | sudo xargs -0 chmod g+s
+ln -s /var/www "$HOME"/Sites
+
+# Installing WP-Cli
+color_echo "Installing WP-CLI, a Command Line Interface for WordPress" cyan
+cd "$HOME"
+curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+chmod +x wp-cli.phar
+sudo mv wp-cli.phar /usr/local/bin/wp
+
+color_echo "Setting Up /etc/hosts for virtual domains" cyan
+# Create a backup for /etc/hosts
+sudo cp /etc/hosts /etc/hosts.backup
+
+# Add lines to /etc/hosts
+echo "# These are the Virtual Domains " | sudo tee -a /etc/hosts
+echo "# for developing WordPress Sites" | sudo tee -a /etc/hosts
+echo "#===============================" | sudo tee -a /etc/hosts
+echo "# 127.0.1.1      test.dev" | sudo tee -a /etc/hosts
+
+#===============================================//
 # => LINTERS
 #===============================================//
 color_echo "Installing CSSLint, for CSS" cyan
