@@ -6,7 +6,7 @@
 #  Description: This is a helper script that automates the installation of
 #                software for Development, SysAdmin, etc.
 #
-# Last Updated: Sat 06 Feb 2016 02:47:25 PM CST
+# Last Updated: Sat 06 Feb 2016 03:12:00 PM CST
 #
 #    Tested on: Ubuntu 14.04 LTS Trusty Tahr
 #
@@ -401,8 +401,6 @@ color_echo "Installing Handbrake, an open source video converter ..." cyan
   apt-get install -y handbrake-gtk handbrake-cli
 
 
-
-
 #############################################################################//
 #
 # => SOFTWARE INSTALLATION (DEVELOPMENT)
@@ -438,6 +436,17 @@ color_echo "Installing Git-extras, more porcelain for git ... " cyan
 
 color_echo "Installing Ag The Silver Searcher as a Grep replacement ... " cyan
   apt-get install -y silversearcher-ag
+
+#-----------------------------//
+# => xcape
+#-----------------------------//
+color_echo "Installing Xcape, remap pressing one time CTRL to ESC, very good for Vim" cyan
+  cd /tmp
+  git clone https://github.com/alols/xcape.git
+  cd xcape
+  make
+  make install
+  cd "$HOME"
 
 #===============================================//
 # => Common shared libraries for compilation
