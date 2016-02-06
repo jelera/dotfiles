@@ -6,7 +6,7 @@
 #  Description: This is a helper script that automates the installation of
 #                software for Development, SysAdmin, etc.
 #
-# Last Updated: Tue 26 Jan 2016 10:33:55 PM CST
+# Last Updated: Sat 06 Feb 2016 02:47:25 PM CST
 #
 #    Tested on: Ubuntu 14.04 LTS Trusty Tahr
 #
@@ -391,6 +391,15 @@ color_echo "Installing PlayOnLinux, A Frontend for Wine ... " cyan
   wget http://deb.playonlinux.com/playonlinux_trusty.list -O /etc/apt/sources.list.d/playonlinux.list
   apt-get update
   apt-get install -y playonlinux
+
+#-----------------------------//
+# => Handbrake
+#-----------------------------//
+color_echo "Installing Handbrake, an open source video converter ..." cyan
+  add-apt-repository -y ppa:stebbins/handbrake-releases
+  apt-get update
+  apt-get install -y handbrake-gtk handbrake-cli
+
 
 
 
