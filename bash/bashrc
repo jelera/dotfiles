@@ -5,7 +5,7 @@
 #               / /    _  | |_) | (_| \__ \ | | | | | (__
 #              /_/    (_) |_.__/ \__,_|___/_| |_|_|  \___|
 #
-# Last Updated: Mon 27 Oct 2014 12:24:57 AM CDT
+# Last Updated: Sat 06 Feb 2016 03:16:57 PM CST
 #
 #   Maintainer: Jose Elera (https://github.com/jelera)
 #
@@ -89,7 +89,8 @@ undwht='\e[4;37m' # White
 #----------------------------------------------------------------------------//
 # => PROMPT
 #----------------------------------------------------------------------------//
-PS1="\n\[$bldgrn\]\u@\h\[$txtrst\] \[$txtpur\][\A]\[$txtrst\] [\[$txtgrn\]\w\[$txtrst\]] \[$bldcyn\]\$(vcprompt)\[$txtrst\]  \n\[$txtpur\] $\[$txtrst\] "
+PS1="\n\[$bldgrn\]\u@\h\[$txtrst\] \[$txtpur\][\A]\[$txtrst\] [\[$txtgrn\]\w\[$txtrst\]]  \n\[$txtpur\] $\[$txtrst\] "
+# PS1="\n\[$bldgrn\]\u@\h\[$txtrst\] \[$txtpur\][\A]\[$txtrst\] [\[$txtgrn\]\w\[$txtrst\]] \[$bldcyn\]\$(vcprompt)\[$txtrst\]  \n\[$txtpur\] $\[$txtrst\] "
 
 
 #----------------------------------------------------------------------------//
