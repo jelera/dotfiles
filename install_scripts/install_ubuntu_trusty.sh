@@ -6,7 +6,7 @@
 #  Description: This is a helper script that automates the installation of
 #                software for Development, SysAdmin, etc.
 #
-# Last Updated: Sat 06 Feb 2016 03:12:00 PM CST
+# Last Updated: Wed 17 Feb 2016 01:14:58 AM CST
 #
 #    Tested on: Ubuntu 14.04 LTS Trusty Tahr
 #
@@ -254,6 +254,9 @@ color_echo "Installing Gpick Color Picker ... " cyan
 
 color_echo "Installing Scribus, an Open Source Publishing Tool ... " cyan
   apt-get install -y scribus
+
+color_echo "Installing pngquant, PNG quantization tool for reducing image filesize  ... " cyan
+  apt-get install -y pngquant
 
 #===============================================//
 # => Games
