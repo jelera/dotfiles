@@ -57,3 +57,6 @@
 	tool = vimdiff
 [merge]
 	ff = only
+[user]
+	name = Jose Elera
+	email = jelera@gmail.com
