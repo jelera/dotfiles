@@ -6,7 +6,7 @@
 #  Description: This is a helper script that automates the installation of
 #                software for Development, SysAdmin, etc.
 #
-# Last Updated: Wed 17 Feb 2016 01:14:58 AM CST
+# Last Updated: Wed 17 Feb 2016 03:22:45 AM CST
 #
 #    Tested on: Ubuntu 14.04 LTS Trusty Tahr
 #
@@ -440,17 +440,6 @@ color_echo "Installing Git-extras, more porcelain for git ... " cyan
 color_echo "Installing Ag The Silver Searcher as a Grep replacement ... " cyan
   apt-get install -y silversearcher-ag
 
-#-----------------------------//
-# => xcape
-#-----------------------------//
-color_echo "Installing Xcape, remap pressing one time CTRL to ESC, very good for Vim" cyan
-  cd /tmp
-  git clone https://github.com/alols/xcape.git
-  cd xcape
-  make
-  make install
-  cd "$HOME"
-
 #===============================================//
 # => Common shared libraries for compilation
 #===============================================//
@@ -550,6 +539,17 @@ color_echo "Installing Atom text editor ... " cyan
   cd /tmp
   wget https://atom.io/download/deb -O atom.deb
   dpkg -i atom.deb
+  cd "$HOME"
+
+#-----------------------------//
+# => xcape
+#-----------------------------//
+color_echo "Installing Xcape, remap pressing one time CTRL to ESC, very good for Vim" cyan
+  cd /tmp
+  git clone https://github.com/alols/xcape.git
+  cd xcape
+  make
+  make install
   cd "$HOME"
 
 #===============================================//
