@@ -6,7 +6,7 @@
 #  Description: This is a helper script that automates the installation of
 #                software for Development, SysAdmin, etc.
 #
-# Last Updated: Wed 17 Feb 2016 03:22:45 AM CST
+# Last Updated: Wed 17 Feb 2016 04:44:55 AM CST
 #
 #    Tested on: Ubuntu 14.04 LTS Trusty Tahr
 #
@@ -456,7 +456,7 @@ color_echo "Installing iPython 2/3 with QT Consoles ..." cyan
   apt-get install -y ipython-qtconsole ipython3-qtconsole
 
 color_echo "Installing Common Libraries for Python and Ruby ... " cyan
-  apt-get install -y libxslt2-dev libcurl4-openssl-dev libksba8 libksba-dev libqtwebkit-dev libreadline-dev libssl-dev zlib1g-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev python-software-properties libffi-dev postgresql-server-dev-all python-pip libbz2-dev php5-gd txt2tags
+  apt-get install -y libxslt1-dev libcurl4-openssl-dev libksba8 libksba-dev libqtwebkit-dev libreadline-dev libssl-dev zlib1g-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev python-software-properties libffi-dev postgresql-server-dev-all python-pip libbz2-dev php5-gd txt2tags
 
 #===============================================//
 # => STACKS
@@ -545,6 +545,7 @@ color_echo "Installing Atom text editor ... " cyan
 # => xcape
 #-----------------------------//
 color_echo "Installing Xcape, remap pressing one time CTRL to ESC, very good for Vim" cyan
+  apt-get install -y gcc make pkg-config libx11-dev libxtst-dev libxi-dev
   cd /tmp
   git clone https://github.com/alols/xcape.git
   cd xcape
