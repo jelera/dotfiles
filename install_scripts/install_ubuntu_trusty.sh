@@ -6,7 +6,7 @@
 #  Description: This is a helper script that automates the installation of
 #                software for Development, SysAdmin, etc.
 #
-# Last Updated: Tue 26 Jan 2016 10:33:55 PM CST
+# Last Updated: Wed 17 Feb 2016 01:14:58 AM CST
 #
 #    Tested on: Ubuntu 14.04 LTS Trusty Tahr
 #
@@ -255,6 +255,9 @@ color_echo "Installing Gpick Color Picker ... " cyan
 color_echo "Installing Scribus, an Open Source Publishing Tool ... " cyan
   apt-get install -y scribus
 
+color_echo "Installing pngquant, PNG quantization tool for reducing image filesize  ... " cyan
+  apt-get install -y pngquant
+
 #===============================================//
 # => Games
 #===============================================//
@@ -392,6 +395,13 @@ color_echo "Installing PlayOnLinux, A Frontend for Wine ... " cyan
   apt-get update
   apt-get install -y playonlinux
 
+#-----------------------------//
+# => Handbrake
+#-----------------------------//
+color_echo "Installing Handbrake, an open source video converter ..." cyan
+  add-apt-repository -y ppa:stebbins/handbrake-releases
+  apt-get update
+  apt-get install -y handbrake-gtk handbrake-cli
 
 
 #############################################################################//
@@ -429,6 +439,17 @@ color_echo "Installing Git-extras, more porcelain for git ... " cyan
 
 color_echo "Installing Ag The Silver Searcher as a Grep replacement ... " cyan
   apt-get install -y silversearcher-ag
+
+#-----------------------------//
+# => xcape
+#-----------------------------//
+color_echo "Installing Xcape, remap pressing one time CTRL to ESC, very good for Vim" cyan
+  cd /tmp
+  git clone https://github.com/alols/xcape.git
+  cd xcape
+  make
+  make install
+  cd "$HOME"
 
 #===============================================//
 # => Common shared libraries for compilation
