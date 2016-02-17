@@ -48,6 +48,7 @@
 	pr = !hub pull-request
 	up = !git fetch origin && git rebase origin/master
 	lol = log --pretty=oneline --abbrev-commit --graph --decorate
+	fl = flow
 
 [include]
 	path = ~/Dropbox/dotfiles/gitconfig/gitconfig.local
@@ -57,3 +58,6 @@
 	tool = vimdiff
 [merge]
 	ff = only
+[user]
+	name = Jose Elera
+	email = jelera@gmail.com
