@@ -6,7 +6,7 @@
 #  Description: This is a helper script that automates the installation of
 #                software for Development, SysAdmin, etc.
 #
-# Last Updated: Wed 17 Feb 2016 04:44:55 AM CST
+# Last Updated: Thu 18 Feb 2016 03:37:56 PM CST
 #
 #    Tested on: Ubuntu 14.04 LTS Trusty Tahr
 #
@@ -552,6 +552,12 @@ color_echo "Installing Xcape, remap pressing one time CTRL to ESC, very good for
   make
   make install
   cd "$HOME"
+
+#===============================================//
+# => Python Pip packages
+#===============================================//
+color_echo "Install Jedi, Awesome autocompletion and static analysis library for python" cyan
+  pip3 install jedi
 
 #===============================================//
 # => Ruby Gems
