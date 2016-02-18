@@ -6,7 +6,7 @@
 #  Description: This is a helper script that automates the installation of
 #                software for Development, SysAdmin, etc.
 #
-# Last Updated: Thu 18 Feb 2016 03:37:56 PM CST
+# Last Updated: Thu 18 Feb 2016 03:41:41 PM CST
 #
 #    Tested on: Ubuntu 14.04 LTS Trusty Tahr
 #
@@ -531,6 +531,12 @@ color_echo "Installing Git-Cola Git Viewer ... " cyan
   cd git-cola-2.5
   python setup.py install
   cd "$HOME"
+
+#-----------------------------//
+# => Git-cola
+#-----------------------------//
+color_echo "Installing Gitg and Gitk GUI Viewers ... " cyan
+  apt-get install -y gitg gitk
 
 #-----------------------------//
 # => Atom Text Editor
