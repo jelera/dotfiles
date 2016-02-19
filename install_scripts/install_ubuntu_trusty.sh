@@ -6,7 +6,7 @@
 #  Description: This is a helper script that automates the installation of
 #                software for Development, SysAdmin, etc.
 #
-# Last Updated: Thu 18 Feb 2016 03:41:41 PM CST
+# Last Updated: Fri 19 Feb 2016 02:53:38 PM CST
 #
 #    Tested on: Ubuntu 14.04 LTS Trusty Tahr
 #
@@ -199,7 +199,7 @@ color_echo "Installing Skype ... " cyan
   apt-get install -y skype
 
 color_echo "Installing Dropbox ... " cyan
-  apt-get install -y dropbox
+  apt-get install -y dropbox python-gpgme
 
 color_echo "Installing Filezilla FTP Client ... " cyan
   apt-get install -y filezilla
