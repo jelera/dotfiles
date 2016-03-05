@@ -6,7 +6,7 @@
 #  Description: This is a helper script that automates the installation of
 #                software for Development, SysAdmin, etc.
 #
-# Last Updated: Wed 17 Feb 2016 04:44:55 AM CST
+# Last Updated: Sat 05 Mar 2016 02:41:24 PM CST
 #
 #    Tested on: Ubuntu 14.04 LTS Trusty Tahr
 #
@@ -307,6 +307,9 @@ color_echo "Installing LuckyBackup, a Rsync frontend ... " cyan
 color_echo "Installing Google Chrome, A fast Web Browser... " cyan
   cd /tmp
   wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+  # This is a fix for Google's error when stopping support for 32-bit chrome and not fixing their repo
+  sed -i -e 's/deb http/deb [arch=amd64] http/' "/etc/apt/sources.list.d/google-chrome.list"
+  sed -i -e 's/deb http/deb [arch=amd64] http/' "/opt/google/chrome/cron/google-chrome"
   dpkg -i google-chrome-stable_current_amd64.deb
   cd "$HOME"
 
