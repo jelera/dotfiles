@@ -6,7 +6,7 @@
 #  Description: This is a helper script that automates the installation of
 #                software for Development, SysAdmin, etc.
 #
-# Last Updated: Sat 05 Mar 2016 02:41:24 PM CST
+# Last Updated: Mon 02 May 2016 03:19:42 PM CDT
 #
 #    Tested on: Ubuntu 14.04 LTS Trusty Tahr
 #
@@ -173,6 +173,9 @@ fi
 #===============================================//
 # => Look and Feel
 #===============================================//
+color_echo "Installing Steam ... " cyan
+  apt-get install -y steam
+
 color_echo "Installing Fonts ... " cyan
   apt-get install -y fonts-roboto
   apt-get install -y fonts-inconsolata
@@ -193,7 +196,7 @@ color_echo "Installing Themes and Icons ... " cyan
 # => Desktop Software
 #===============================================//
 color_echo "Installing restricted extras ... " cyan
-  apt-get install -y ubuntu-restricted-extras
+  apt-get install -y xubuntu-restricted-extras
 
 color_echo "Installing Skype ... " cyan
   apt-get install -y skype
@@ -261,8 +264,6 @@ color_echo "Installing pngquant, PNG quantization tool for reducing image filesi
 #===============================================//
 # => Games
 #===============================================//
-color_echo "Installing Steam ... " cyan
-  apt-get install -y steam
 
 color_echo "Installing OpenTTD, a Open Source Transport Tycoon clone ... " cyan
   apt-get install -y openttd
@@ -283,14 +284,14 @@ color_echo "Installing Curl ... " cyan
 color_echo "Installing Par, a text formatter filter... " cyan
   apt-get install -y par
 
-color_echo "Installing Guake, the Dropdown Terminal ... " cyan
-  apt-get install -y guake
+# color_echo "Installing Guake, the Dropdown Terminal ... " cyan
+#   apt-get install -y guake
 
 color_echo "Installing Hardinfo, a system information tool ... " cyan
   apt-get install -y hardinfo
 
-color_echo "Installing Glipper, a Gnome/Mate Clipboard Manager ... " cyan
-  apt-get install -y glipper
+# color_echo "Installing Glipper, a Gnome/Mate Clipboard Manager ... " cyan
+#   apt-get install -y glipper
 
 color_echo "Installing Gufw, a GUI for UFW firewall ... " cyan
   apt-get install -y gufw
@@ -308,8 +309,8 @@ color_echo "Installing Google Chrome, A fast Web Browser... " cyan
   cd /tmp
   wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
   # This is a fix for Google's error when stopping support for 32-bit chrome and not fixing their repo
-  sed -i -e 's/deb http/deb [arch=amd64] http/' "/etc/apt/sources.list.d/google-chrome.list"
-  sed -i -e 's/deb http/deb [arch=amd64] http/' "/opt/google/chrome/cron/google-chrome"
+  # sed -i -e 's/deb http/deb [arch=amd64] http/' "/etc/apt/sources.list.d/google-chrome.list"
+  # sed -i -e 's/deb http/deb [arch=amd64] http/' "/opt/google/chrome/cron/google-chrome"
   dpkg -i google-chrome-stable_current_amd64.deb
   cd "$HOME"
 
@@ -321,14 +322,6 @@ color_echo "Installing Pandoc, a swiss armyknife for Documents... " cyan
   wget https://github.com/jgm/pandoc/releases/download/1.16.0.2/pandoc-1.16.0.2-1-amd64.deb
   dpkg -i pandoc-1.16.0.2-1-amd64.deb
   cd "$HOME"
-
-#-----------------------------//
-# => Uget
-#-----------------------------//
-color_echo "Installing uGet, a Download Manager ... " cyan
-  add-apt-repository -y ppa:plushuang-tw/uget-stable
-  apt-get update
-  apt-get install -y uget
 
 #-----------------------------//
 # => Pithos
@@ -345,25 +338,25 @@ color_echo "Pencil, a wireframe and UI designer" cyan
   cd /tmp
   wget https://github.com/prikhi/pencil/releases/download/v2.0.15/pencil-2.0.15-ubuntu-all.deb
   dpkg -i pencil-2.0.15-ubuntu-all.deb
-  sed -i -e 's/MaxVersion\=42/MaxVersion\=44/g' /usr/share/pencil/application.ini
+  sed -i -e 's/MaxVersion\=42/MaxVersion\=49/g' /usr/share/pencil/application.ini
   cd "$HOME"
 
 #-----------------------------//
 # => X-Tile
 #-----------------------------//
-color_echo "Installing X-tile Tiling Manager ... " cyan
-  cd /tmp
-  wget http://www.giuspen.com/software/x-tile_2.5.1-1_all.deb
-  dpkg -i x-tile_2.5.1-1_all.deb
-  cd "$HOME"
+# color_echo "Installing X-tile Tiling Manager ... " cyan
+#   cd /tmp
+#   wget http://www.giuspen.com/software/x-tile_2.5.1-1_all.deb
+#   dpkg -i x-tile_2.5.1-1_all.deb
+#   cd "$HOME"
 
 #-----------------------------//
 # => Albert Launcher
 #-----------------------------//
-color_echo "Installing Albert Launcher ... " cyan
-  add-apt-repository -y ppa:flexiondotorg/albert
-  apt-get update
-  apt-get install -y albert
+# color_echo "Installing Albert Launcher ... " cyan
+#   add-apt-repository -y ppa:flexiondotorg/albert
+#   apt-get update
+#   apt-get install -y albert
 
 #-----------------------------//
 # => Zeal Docs
@@ -476,7 +469,7 @@ color_echo "Installing LAMP Stack ... " cyan
 # => Node.js
 #-----------------------------//
 color_echo "Installing Node.js ... " cyan
-  curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
+  curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
   apt-get install -y nodejs
 
 #-----------------------------//
@@ -509,6 +502,7 @@ color_echo "Installing Git Source Code Management ... " cyan
 color_echo "Installing VirtualBox 5 ... " cyan
 if grep -qiE 'trusty' /etc/os-release; then
 	apt-add-repository "deb http://download.virtualbox.org/virtualbox/debian trusty contrib"
+	wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -	
 	wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -
 	apt-get update
 	apt-get install -y virtualbox-5.0
