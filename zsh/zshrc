@@ -5,7 +5,7 @@
 #                / /    _   / /\__ \ | | | | | (__
 #               /_/    (_) /___|___/_| |_|_|  \___|
 #
-# Last Updated: Wed 20 Jan 2016 04:52:10 PM CST
+# Last Updated: Fri 19 Aug 2016 12:31:50 PM CDT
 #
 #   Maintainer: Jose Elera (https://github.com/jelera)
 #
@@ -91,7 +91,7 @@ ZSH_THEME="candy"
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(git git-flow systemd vi-mode colored-man vagrant tmux ubuntu wp-cli git-extras gulp grunt pyenv rbenv rsync bower git-prompt)
+plugins=(git git-flow systemd vi-mode colored-man vagrant tmux wp-cli git-extras gulp rbenv rsync bower git-prompt)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -102,17 +102,8 @@ source $ZSH/oh-my-zsh.sh
 #   xcape -e 'Control_L=Escape'
 # fi
 
-# export PATH="$HOME/.rbenv/bin:$PATH"
-# eval "$(rbenv init - zsh --no-rehash)"
+export PATH="/usr/local/bin:$PATH"
 
-# export PATH="$HOME/.pyenv/bin:$PATH"
-# eval "$(pyenv init - zsh --no-rehash)"
-
-# echo
-# $HOME/.bin/on_this_day | head -n 1 | sed 's/^\s//'
 export PATH="$HOME/.rbenv/bin:$PATH"
 eval "$(rbenv init -)"
 export PATH="$HOME/.rbenv/plugins/ruby-build/bin:$PATH"
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
