@@ -6,7 +6,7 @@
 #  Description: Simple script to autocreate the symlinks for my dotfiles and
 #               copy some helper programs to /usr/local/bin
 #
-# Last Updated: Thu 21 Jan 2016 02:18:10 PM CST
+# Last Updated: Sun 28 May 2017 09:56:44 AM CDT
 #
 #    Tested on: Ubuntu 14.04 LTS Trusty Tahr
 #               CentOS 7 / Red Hat Enterprise Linux 7
@@ -224,12 +224,12 @@ mkdir -p ~/.vim/.cache/undo
 mkdir -p ~/.vim/.cache/unite
 mkdir -p ~/.vim/.cache/junk
 
-# Install Neobundle
-echo
-color_echo "Installing Neobundle for managing Vim Plugins ..." cyan
-mkdir -p ~/.vim/bundle
-git clone https://github.com/Shougo/neobundle.vim ~/.vim/bundle/neobundle.vim
-sleep 1
+# # Install Neobundle
+# echo
+# color_echo "Installing Neobundle for managing Vim Plugins ..." cyan
+# mkdir -p ~/.vim/bundle
+# git clone https://github.com/Shougo/neobundle.vim ~/.vim/bundle/neobundle.vim
+# sleep 1
 
 
 ##---------------------------------------------------------------------------//
@@ -244,12 +244,12 @@ color_echo "Copying helper programs to /usr/local/bin/  ..." cyan
 # Tested with Ubuntu Linux 14.04 LTS / CentOS 7 / RHEL 7
 sudo cp "$HOME"/.config/dotfiles/bin/tmux-vim-select-pane /usr/local/bin/
 
-# xcape adds extra remap to single keypress
-sudo cp "$HOME"/.config/dotfiles/bin/xcape /usr/local/bin/
+# # xcape adds extra remap to single keypress
+# sudo cp "$HOME"/.config/dotfiles/bin/xcape /usr/local/bin/
 
-# vcprompt displays the current working VCS branch (git/hg)
-sudo cp "$HOME"/.config/dotfiles/bin/vcprompt /usr/local/bin/
-sleep 1
+# # vcprompt displays the current working VCS branch (git/hg)
+# sudo cp "$HOME"/.config/dotfiles/bin/vcprompt /usr/local/bin/
+# sleep 1
 
 color_echo "Install the rest using this line" green
 color_echo " Run this line as a regular user" green
