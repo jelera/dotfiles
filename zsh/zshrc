@@ -5,12 +5,12 @@
 #                / /    _   / /\__ \ | | | | | (__
 #               /_/    (_) /___|___/_| |_|_|  \___|
 #
-# Last Updated: Wed 20 Jan 2016 04:52:10 PM CST
+# Last Updated: Sun 07 Apr 2019 07:26:33 PM CDT
 #
 #   Maintainer: Jose Elera (https://github.com/jelera)
 #
 #      License: MIT
-#               Copyright (c) 2014 Jose Elera Campana
+#               Copyright (c) 2019 Jose Elera
 #               Permission is hereby granted, free of charge, to any person
 #               obtaining a copy of this software and associated documentation
 #               files (the "Software"), to deal in the Software without
@@ -91,28 +91,37 @@ ZSH_THEME="candy"
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(git git-flow systemd vi-mode colored-man vagrant tmux ubuntu wp-cli git-extras gulp grunt pyenv rbenv rsync bower git-prompt)
+plugins=(
+	git
+	git-flow
+	git-extras
+	git-prompt
+	vi-mode
+	brew
+	cask
+	vagrant
+	tmux
+	wp-cli
+	gulp
+	npm
+	rsync
+	osx
+	ruby
+	rvm
+)
 
 source $ZSH/oh-my-zsh.sh
 
-# Generate an ESC when CTRL is pressed and released by itself
-# Run xcape once.
-# if [ -z $XCAPE ]; then
-#   export XCAPE=1
-#   xcape -e 'Control_L=Escape'
-# fi
+export PATH="/usr/local/bin:$PATH"
 
-# export PATH="$HOME/.rbenv/bin:$PATH"
-# eval "$(rbenv init - zsh --no-rehash)"
+export PATH="$HOME/.bin:$PATH"
 
-# export PATH="$HOME/.pyenv/bin:$PATH"
-# eval "$(pyenv init - zsh --no-rehash)"
+# recommended by brew doctor
+source /Users/jelera/.asdf/asdf.sh
 
-# echo
-# $HOME/.bin/on_this_day | head -n 1 | sed 's/^\s//'
-export PATH="$HOME/.rbenv/bin:$PATH"
-eval "$(rbenv init -)"
-export PATH="$HOME/.rbenv/plugins/ruby-build/bin:$PATH"
-export PYENV_ROOT="$HOME/.pyenv"
-export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
+# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
+export PATH="$PATH:$HOME/.rvm/bin"
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
