@@ -25,7 +25,7 @@
 	pager = less -FRSX
 	whitespace=fix,-indent-with-non-tab,trailing-space,cr-at-eol
 	quotepath = false
-	excludesfile = ~/.config/dotfiles/gitconfig/gitignore
+	excludesfile = /Users/jelera/.config/dotfiles/gitconfig/gitignore
 	editor = vim
 	autocrif = input
 
@@ -61,3 +61,14 @@
 [user]
 	name = Jose Elera
 	email = jelera@gmail.com
+[filter "lfs"]
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+	clean = git-lfs clean -- %f
+[difftool "sourcetree"]
+	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+	path = 
+[mergetool "sourcetree"]
+	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	trustExitCode = true
