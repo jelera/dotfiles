@@ -5,7 +5,7 @@
 #                / /    _   / /\__ \ | | | | | (__
 #               /_/    (_) /___|___/_| |_|_|  \___|
 #
-# Last Updated: Sun 07 Apr 2019 08:35:54 PM CDT
+# Last Updated: Thu 25 Apr 2019 09:14:22 AM CDT
 #
 #   Maintainer: Jose Elera (https://github.com/jelera)
 #
@@ -105,7 +105,7 @@ plugins=(
 	npm
 	rsync
 	osx
-	ruby
+	# ruby
 	rvm
 )
 
@@ -116,7 +116,7 @@ export PATH="/usr/local/bin:$PATH"
 export PATH="$HOME/.bin:$PATH"
 
 # recommended by brew doctor
-source /Users/jelera/.asdf/asdf.sh
+# source /Users/jelera/.asdf/asdf.sh
 
 # Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
 export PATH="$PATH:$HOME/.rvm/bin"
@@ -125,3 +125,6 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 export PATH="/usr/local/opt/sqlite/bin:$PATH"
+
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
+
