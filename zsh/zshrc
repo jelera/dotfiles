@@ -5,12 +5,12 @@
 #                / /    _   / /\__ \ | | | | | (__
 #               /_/    (_) /___|___/_| |_|_|  \___|
 #
-# Last Updated: Thu 25 Apr 2019 09:14:22 AM CDT
+# Last Updated: Tue 10 Mar 2020 09:33:57 PM CDT
 #
 #   Maintainer: Jose Elera (https://github.com/jelera)
 #
 #      License: MIT
-#               Copyright (c) 2019 Jose Elera
+#               Copyright (c) 2020 Jose Elera
 #               Permission is hereby granted, free of charge, to any person
 #               obtaining a copy of this software and associated documentation
 #               files (the "Software"), to deal in the Software without
@@ -35,19 +35,15 @@
 
 
 ##---------------------------------------------------------------------------//
-##
 ## => SOURCES
-##
 ##---------------------------------------------------------------------------//
-source ~/.config/dotfiles/bash/alias
-source ~/.config/dotfiles/bash/shellscripts
-source ~/.config/dotfiles/bash/env
+source ~/.config/dotfiles/shell/alias
+source ~/.config/dotfiles/shell/shellscripts
+source ~/.config/dotfiles/shell/env
 
 
 ##---------------------------------------------------------------------------//
-##
 ## => OH-MY-ZSH CONFIG
-##
 ##---------------------------------------------------------------------------//
 # Path to your oh-my-zsh configuration.
 ZSH=$HOME/.oh-my-zsh
@@ -56,7 +52,12 @@ ZSH=$HOME/.oh-my-zsh
 # Look in ~/.oh-my-zsh/themes/
 # Optionally, if you set this to "random", it'll load a random theme each
 # time that oh-my-zsh is loaded.
-ZSH_THEME="candy"
+# ZSH_THEME="candy"
+ZSH_THEME="bira"
+# ZSH_THEME="spaceship"
+
+# SPACESHIP_TIME_SHOW="default"
+# SPACESHIP_DIR_TRUNC=0
 
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
@@ -69,7 +70,7 @@ ZSH_THEME="candy"
 # DISABLE_AUTO_UPDATE="true"
 
 # Uncomment to change how often before auto-updates occur? (in days)
-# export UPDATE_ZSH_DAYS=13
+# export UPDSHATE_ZSH_DAYS=13
 
 # Uncomment following line if you want to disable colors in ls
 # DISABLE_LS_COLORS="true"
@@ -88,43 +89,48 @@ ZSH_THEME="candy"
 # much faster.
 # DISABLE_UNTRACKED_FILES_DIRTY="true"
 
+#==============================================================================#
+# => OH MY ZSH PLUGINS
+#==============================================================================#
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 plugins=(
+	vi-mode
+	tmux
+	tmuxinator
 	git
-	git-flow
+	git-flow-avh
 	git-extras
 	git-prompt
-	vi-mode
-	brew
-	vagrant
-	tmux
-	wp-cli
-	gulp
-	npm
-	rsync
 	osx
-	# ruby
-	rvm
+	brew
+	command-not-found
+	rsync
+	asdf
+	ruby
+	bundler
+	# rails
+	yarn
+	npm
 )
 
+#==============================================================================#
+# => ASDF
+#==============================================================================#
+source /home/jelera/.asdf/asdf.sh
+. $HOME/.asdf/asdf.sh
+. $HOME/.asdf/completions/asdf.bash
+
+#==============================================================================#
+# => FZF
+#==============================================================================#
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+bindkey -r "^E"
+
+#==============================================================================#
+# => Support for Italics
+#==============================================================================#
+export TERM=xterm-256color-italic
+
 source $ZSH/oh-my-zsh.sh
-
-export PATH="/usr/local/bin:$PATH"
-
-export PATH="$HOME/.bin:$PATH"
-
-# recommended by brew doctor
-# source /Users/jelera/.asdf/asdf.sh
-
-# Add RVM to PATH for scripting. Make sure this is the last PATH variable change.
-export PATH="$PATH:$HOME/.rvm/bin"
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-export PATH="/usr/local/opt/sqlite/bin:$PATH"
-
-[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm"
-

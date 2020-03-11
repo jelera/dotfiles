@@ -108,7 +108,7 @@ decrypt ()
 # Creates a directory and sets the PWD to it
 take ()
 {
-	mkdir $1
+	mkdir -p $1
 	cd $1
 }
 
@@ -118,4 +118,3 @@ convert_video_to_mp4 () {
 	mkdir ./oldmovies/
 	find . -iname '*.mov' -print0 | xargs -0 -I fff mv fff ./oldmovies/
 }
-

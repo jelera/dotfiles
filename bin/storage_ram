@@ -1,6 +1,0 @@
-#!/bin/bash
-
-storage=$(df -h --total | awk '/total/ { OFS=""; print $3,"/",$2 }')
-ram=$(free -h | awk '/Mem/ { OFS=""; print $3,"/",$2 }')
-
-echo $storage "|" $ram " "

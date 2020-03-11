@@ -1,0 +1,10 @@
+export EDITOR=vim
+export PATH=$PATH:$HOME/.bin
+# export PATH=/usr/local/bin/:/usr/local:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:$HOME/.bin:/snap/bin:$PATH
+export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g ""'
+
+# for tmux: export 256color
+# export TERM=xterm-256color
+# [ -n "$TMUX" ] && export TERM=screen-256color
+export TERM=xterm-256color-italic
+[ -n "$TMUX" ] && export TERM=screen-256color-italic

@@ -1,2 +1,0 @@
-#!/bin/bash 
-lynx -dump -nolist http://en.wikipedia.org/wiki/Main_Page | awk '/In the news/,/On this day/' | awk '{ if (NR > 3) print}' | head -n -2 | sed 's/^\s.//'

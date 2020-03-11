@@ -3,7 +3,12 @@ alias dotfiles='cd ~/.config/dotfiles'
 alias ..='cd ..'
 
 # FZF
-alias vf='vim $(fzf --height 40%)'
+alias vif='vim $(fzf --height 40%)'
+alias vrc='vim ~/.vim/vimrc'
+
+# # Jupyter Notebook
+# alias jn='jupyter notebook'
+# alias jl='jupyter lab'
 
 # GIT
 alias g='git'
@@ -13,9 +18,9 @@ alias gaa='git add --all'
 alias gap='git add --patch'
 alias gst='git status'
 
+
 # alias gau='git add --update'
 # alias gav='git add --verbose'
-# alias gap='git apply'
 
 # alias gb='git branch'
 # alias gba='git branch -a'
@@ -31,7 +36,7 @@ alias gst='git status'
 # alias gbsr='git bisect reset'
 # alias gbss='git bisect start'
 
-# alias gc='git commit -v'
+alias gc='git commit -v'
 # alias gc!='git commit -v --amend'
 # alias gcn!='git commit -v --no-edit --amend'
 # alias gca='git commit -v -a'
@@ -56,7 +61,7 @@ alias gst='git status'
 # alias gcpc='git cherry-pick --continue'
 # alias gcs='git commit -S'
 
-# alias gd='git diff'
+alias gd='git diff'
 # alias gdca='git diff --cached'
 # alias gdcw='git diff --cached --word-diff'
 # alias gdct='git describe --tags `git rev-list --tags --max-count=1`'

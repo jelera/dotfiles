@@ -6,7 +6,7 @@
 #  Description: Simple script to autocreate the symlinks for my dotfiles and
 #               copy some helper programs to /usr/local/bin
 #
-# Last Updated: Sun 07 Apr 2019 07:29:13 PM CDT
+# Last Updated: Tue 10 Mar 2020 09:34:37 PM CDT
 #
 #    Tested on: Ubuntu 14.04 LTS Trusty Tahr
 #               CentOS 7 / Red Hat Enterprise Linux 7
@@ -165,7 +165,16 @@ sleep 1.5
 ##---------------------------------------------------------------------------//
 echo
 color_echo "Installing oh-my-zsh ..." cyan
-git clone git://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
+# git clone git://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
+
+if type curl > /dev/null; then
+	if type wget > /dev/null; then
+		sh -c "$(wget -O- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+	else
+		sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+	fi
+fi
+
 sleep 1
 
 
@@ -186,6 +195,17 @@ ln -s "$HOME"/.config/dotfiles/gitconfig/gitignore  "$HOME"/.gitignore_global
 ln -s "$HOME"/.config/dotfiles/tmux/tmux.conf       "$HOME"/.tmux.conf
 
 ln -s "$HOME"/.config/dotfiles/zsh/zshrc            "$HOME"/.zshrc
+sleep 1
+
+##---------------------------------------------------------------------------//
+##
+## => SETTING UP TMUX
+##
+##---------------------------------------------------------------------------//
+echo
+color_echo "Tmux Plugin Manager ..." cyan
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+
 sleep 1
 
 
@@ -224,32 +244,13 @@ mkdir -p ~/.vim/.cache/undo
 mkdir -p ~/.vim/.cache/unite
 mkdir -p ~/.vim/.cache/junk
 
-# Install Neobundle
+# Install Vim-plug
 echo
-color_echo "Installing Neobundle for managing Vim Plugins ..." cyan
-# mkdir -p ~/.vim/bundle
-# git clone https://github.com/Shougo/neobundle.vim ~/.vim/bundle/neobundle.vim
+color_echo "Installing Vim Plug for managing Vim Plugins ..." cyan
+curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+vim +PlugInstall +qall
 sleep 1
 
-
-##---------------------------------------------------------------------------//
-##
-## => COPYING THE HELPER PROGRAMS TO /usr/local/bin
-##
-##---------------------------------------------------------------------------//
-echo
-color_echo "Copying helper programs to /usr/local/bin/  ..." cyan
-
-# This script is needed for advanced tmux vim integration
-# Tested with Ubuntu Linux 14.04 LTS / CentOS 7 / RHEL 7
-# sudo cp "$HOME"/.config/dotfiles/bin/tmux-vim-select-pane /usr/local/bin/
-
-# xcape adds extra remap to single keypress
-# sudo cp "$HOME"/.config/dotfiles/bin/xcape /usr/local/bin/
-
-# vcprompt displays the current working VCS branch (git/hg)
-# sudo cp "$HOME"/.config/dotfiles/bin/vcprompt /usr/local/bin/
-sleep 1
 
 color_echo "Install the rest using this line" green
 color_echo " Run this line as a regular user" green
@@ -263,4 +264,6 @@ figlet_echo "░░░▀█▀░█░█░█▀▀░░░█▀▀░█�
 figlet_echo "░░░░█░░█▀█░█▀▀░░░█▀▀░█░█░█░█░░░"
 figlet_echo "░░░░▀░░▀░▀░▀▀▀░░░▀▀▀░▀░▀░▀▀░░░░"
 figlet_echo "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░"
-figlet_echo "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░\n\n"
+figlet_echo "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░"
+echo
+echo
