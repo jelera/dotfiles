@@ -167,13 +167,7 @@ echo
 color_echo "Installing oh-my-zsh ..." cyan
 # git clone git://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
 
-if type curl > /dev/null; then
-	if type wget > /dev/null; then
-		sh -c "$(wget -O- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-	else
-		sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-	fi
-fi
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 sleep 1
 
