@@ -5,7 +5,7 @@
 #                / /    _   / /\__ \ | | | | | (__
 #               /_/    (_) /___|___/_| |_|_|  \___|
 #
-# Last Updated: Tue 10 Mar 2020 09:33:57 PM CDT
+# Last Updated: Fri 13 Mar 2020 10:15:29 AM CDT
 #
 #   Maintainer: Jose Elera (https://github.com/jelera)
 #
@@ -118,9 +118,14 @@ plugins=(
 #==============================================================================#
 # => ASDF
 #==============================================================================#
-source /home/jelera/.asdf/asdf.sh
-. $HOME/.asdf/asdf.sh
-. $HOME/.asdf/completions/asdf.bash
+# source /home/jelera/.asdf/asdf.sh
+# . $HOME/.asdf/asdf.sh
+# . $HOME/.asdf/completions/asdf.bash
+
+#==============================================================================#
+# => RVM
+#==============================================================================#
+eval "$(rbenv init -)"
 
 #==============================================================================#
 # => FZF
@@ -134,3 +139,5 @@ bindkey -r "^E"
 export TERM=xterm-256color-italic
 
 source $ZSH/oh-my-zsh.sh
+
+# export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
