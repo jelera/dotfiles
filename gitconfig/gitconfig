@@ -1,6 +1,7 @@
 [user]
 	name = Jose Elera
-	email = jelera@gmail.com
+	email = jelera@users.noreply.github.com
+	signingkey = 837EB1D5ED15AABC
 [core]
 	pager = less -FRSX
 	whitespace=fix,-indent-with-non-tab,trailing-space,cr-at-eol
@@ -30,6 +31,7 @@
 	untracked = cyan
 [commit]
 	template = ~/.config/dotfiles/gitconfig/gitmessage
+	gpgsign = true
 [push]
 	default = current
 [alias]
@@ -60,3 +62,12 @@
 	process = git-lfs filter-process
 	required = true
 	clean = git-lfs clean -- %f
+[difftool "sourcetree"]
+	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+[mergetool "sourcetree"]
+	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	trustExitCode = true
+[pull]
+	rebase = false
+[gpg]
+	program = gpg2

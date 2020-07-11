@@ -1,2 +1,3 @@
 # Add to the original path
 source ~/.bashrc
+export GPG_TTY=$(tty)
