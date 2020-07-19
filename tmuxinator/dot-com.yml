@@ -1,0 +1,53 @@
+name: dot-com
+root: ~/kin/dot-com
+
+# Runs on project start, always
+# on_project_start: command
+
+# Run on project start, the first time
+on_project_first_start: docker-compose up -d
+
+# Run on project start, after the first time
+# on_project_restart: command
+
+# Run on project exit ( detaching from tmux session )
+# on_project_exit: killall -9 rails
+
+# Run on project stop
+# on_project_stop: command
+
+
+# Runs in each window and pane before window/pane specific commands. Useful for setting up interpreter versions.
+# pre_window: rbenv shell 2.6.5
+
+# Pass command line options to tmux. Useful for specifying a different tmux.conf.
+# tmux_options: -f ~/.tmux.mac.conf
+
+# Change the command to call tmux.  This can be used by derivatives/wrappers like byobu.
+# tmux_command: byobu
+
+# Specifies (by name or index) which window will be selected on project startup. If not set, the first window is used.
+# startup_window: editor
+
+# Specifies (by index) which pane of the specified window will be selected on project startup. If not set, the first pane is used.
+startup_pane: 3
+
+# Controls whether the tmux session should be attached to automatically. Defaults to true.
+# attach: false
+
+
+
+windows:
+  - editor:
+      layout: 3092,379x65,0,0{119x65,0,0[119x32,0,0,0,119x32,0,33,6],259x65,120,0,4}
+      panes:
+        - sleep 15; rails console
+        - clear
+        - vim
+  - server:
+      layout: 2710,379x65,0,0{134x65,0,0,1,159x65,135,0,3,84x65,295,0,5}
+      panes:
+        - bin/start-dev-workers
+        - sleep 8; rails server
+        - clear
+  - logs: tail -f log/development.log
