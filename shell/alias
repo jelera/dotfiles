@@ -2,13 +2,20 @@
 alias dotfiles='cd ~/.config/dotfiles'
 alias ..='cd ..'
 
-# FZF
+# vim
 alias vif='vim $(fzf --height 40%)'
 alias vrc='vim ~/.vim/vimrc'
 
 # # Jupyter Notebook
 # alias jn='jupyter notebook'
 # alias jl='jupyter lab'
+
+# tmux
+alias tx='tmuxinator'
+
+alias dcom='tmuxinator start dot-com'
+
+alias retag='ag -l | ctags -R --links=no -L-'
 
 # GIT
 alias g='git'
@@ -68,3 +75,5 @@ alias gd='git diff'
 # alias gds='git diff --staged'
 # alias gdt='git diff-tree --no-commit-id --name-only -r'
 # alias gdw='git diff --word-diff'
+
+source ~/.alias.local

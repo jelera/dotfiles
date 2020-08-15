@@ -5,7 +5,7 @@ root: ~/kin/dot-com
 # on_project_start: command
 
 # Run on project start, the first time
-on_project_first_start: docker-compose up -d
+# on_project_first_start: docker-compose up -d
 
 # Run on project start, after the first time
 # on_project_restart: command
@@ -38,16 +38,17 @@ startup_pane: 3
 
 
 windows:
-  - editor:
+  - vim:
       layout: 3092,379x65,0,0{119x65,0,0[119x32,0,0,0,119x32,0,33,6],259x65,120,0,4}
       panes:
-        - sleep 15; rails console
+        - sleep 18; rails console
         - clear
-        - vim
+        - clear
   - server:
       layout: 2710,379x65,0,0{134x65,0,0,1,159x65,135,0,3,84x65,295,0,5}
       panes:
-        - bin/start-dev-workers
-        - sleep 8; rails server
+        - sleep 3; bin/start-dev-workers
+        - sleep 9; rails server
         - clear
+  - docker: docker-compose down; docker-compose up
   - logs: tail -f log/development.log
