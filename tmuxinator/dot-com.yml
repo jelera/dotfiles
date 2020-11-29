@@ -41,14 +41,14 @@ windows:
   - vim:
       layout: 3092,379x65,0,0{119x65,0,0[119x32,0,0,0,119x32,0,33,6],259x65,120,0,4}
       panes:
-        - sleep 18; rails console
+        - sleep 18; bin/rails console
         - clear
         - clear
   - server:
       layout: 2710,379x65,0,0{134x65,0,0,1,159x65,135,0,3,84x65,295,0,5}
       panes:
         - sleep 3; bin/start-dev-workers
-        - sleep 9; rails server
+        - sleep 9; bin/rails server
         - clear
   - docker: docker-compose down; docker-compose up
   - logs: tail -f log/development.log

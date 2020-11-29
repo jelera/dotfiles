@@ -1,9 +1,16 @@
 export EDITOR=vim
+
+# Local
 export PATH=$PATH:$HOME/.bin
-export PATH="$HOME/.rbenv/bin:$PATH"
+# Rbenv
+export PATH="$HOME/.rbenv:$HOME/.rbenv/bin:$PATH"
+# Yarn
 export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
-# export PATH=/usr/local/bin/:/usr/local:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin:$HOME/.bin:/snap/bin:$PATH
-export PATH=$HOME/.rbenv:$PATH
+# Homebrew
+export PATH="/usr/local/sbin/:/usr/local/bin:$PATH"
+
+export PGHOST=localhost
+
 export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g ""'
 export FZF_CTRL_T_OPTS="--preview '(highlight -O ansi -l {} 2> /dev/null || cat {} || tree -C {}) 2> /dev/null | head -200'"
 
