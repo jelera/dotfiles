@@ -1,5 +1,5 @@
-name: dot-com
-root: ~/kin/dot-com
+name: kingular
+root: ~/kin/ng-kin
 
 # Runs on project start, always
 # on_project_start: command
@@ -30,7 +30,7 @@ root: ~/kin/dot-com
 # startup_window: editor
 
 # Specifies (by index) which pane of the specified window will be selected on project startup. If not set, the first pane is used.
-startup_pane: 3
+startup_pane: 2
 
 # Controls whether the tmux session should be attached to automatically. Defaults to true.
 # attach: false
@@ -38,17 +38,8 @@ startup_pane: 3
 
 
 windows:
-  - vim:
-      layout: 43e5,379x65,0,0{85x65,0,0[85x32,0,0,0,85x32,0,33,4],293x65,86,0,5}
+  - main:
+      layout: b4cc,379x65,0,0{78x65,0,0,0,300x65,79,0,1}
       panes:
-        - sleep 18; bin/rails console
+        - sleep 3; ng serve
         - clear
-        - clear
-  - server:
-      layout: 2710,379x65,0,0{134x65,0,0,1,159x65,135,0,3,84x65,295,0,5}
-      panes:
-        - sleep 3; bin/start-dev-workers
-        - sleep 9; bin/rails server
-        - clear
-  - docker: docker-compose down; docker-compose up
-  - logs: tail -f log/development.log

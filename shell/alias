@@ -14,6 +14,7 @@ alias vrc='vim ~/.vim/vimrc'
 alias tx='tmuxinator'
 
 alias dcom='tmuxinator start dot-com'
+alias king='tmuxinator start kingular'
 
 alias retag='ag -l | ctags -R --links=no -L-'
 
