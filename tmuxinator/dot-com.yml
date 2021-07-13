@@ -41,14 +41,18 @@ windows:
   - vim:
       layout: 43e5,379x65,0,0{85x65,0,0[85x32,0,0,0,85x32,0,33,4],293x65,86,0,5}
       panes:
-        - sleep 18; bin/rails console
+        - clear
         - clear
         - clear
   - server:
       layout: 2710,379x65,0,0{134x65,0,0,1,159x65,135,0,3,84x65,295,0,5}
       panes:
-        - sleep 3; bin/start-dev-workers
-        - sleep 9; bin/rails server
+        - bin/start-dev-workers
+        - echo "rails server here"
         - clear
-  - docker: docker-compose down; docker-compose up
+  - docker: docker stop $(docker ps -a -q); docker rm $(docker ps -a -q); bin/maestro-compose up
+  - kingular:
+      panes:
+        - cd ..; cd ng-kin; ng serve
+        - cd ..; cd ng-kin; clear
   - logs: tail -f log/development.log
