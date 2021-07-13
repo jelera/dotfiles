@@ -1,0 +1,27 @@
+#!/bin/bash
+
+if ! command -v git &> /dev/null
+then
+    echo "git could not be found"
+    exit 1
+fi
+
+my_name=$(basename -- "$0")
+
+display_usage() {
+	echo -e "\nUsage: $my_name [name (case-insensitive)] \n"
+	echo "$my_name jose"
+}
+
+if [[ $# -eq 0 ]] ; then
+	display_usage
+	exit 1
+fi
+
+if [  $# -gt 2 ]
+then
+	display_usage
+	exit 1
+fi
+
+git log | awk -F ":" '/Author/ {print $2}' | sort --unique | grep -i "$1"
