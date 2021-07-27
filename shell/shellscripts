@@ -1,5 +1,9 @@
 #!/bin/bash
 
+branches() {
+	git for-each-ref --sort=-committerdate refs/heads/ | head -n 10 | awk -F "\t" 'BEGIN { OFS=FS }; { print substr($1, 1, 7), substr($2, 12) }'
+}
+
 # It pretty prints a basic system info
 sysinfo() {
 	# => Distro Detection
@@ -84,7 +88,7 @@ myip ()
 # Shows the uptime for this terminal
 #upinfo ()
 #{
-	#echo -ne "${txtgrn}$HOSTNAME ${txtred}uptime is ${txtcyn} \t ";uptime | awk /'up/ {print $3,$4,$5,$6,$7,$8,$9,$10}'
+#echo -ne "${txtgrn}$HOSTNAME ${txtred}uptime is ${txtcyn} \t ";uptime | awk /'up/ {print $3,$4,$5,$6,$7,$8,$9,$10}'
 #}
 
 # Fetch the weather from Weather Underground
