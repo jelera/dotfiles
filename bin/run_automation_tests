@@ -1,0 +1,124 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'optparse'
+
+DEFAULT_FRONTEND = 'https://staging.welcome.kin.com'
+DEFAULT_BACKEND = 'https://app.kin.haus/'
+DEFAULT_SPEC_FOLDER = 'spec'
+HEADLESS_DRIVER = 'selenium_chrome_headless'
+RSPEC_EXEC = 'bundle exec rspec'
+SCRIPT_NAME = File.basename(__FILE__, File.extname(__FILE__))
+
+@options = {
+  backend_host: DEFAULT_BACKEND,
+  frontend_host: DEFAULT_FRONTEND,
+  selenium_driver: HEADLESS_DRIVER
+}
+
+def files_to_test
+  if ARGV.empty?
+    DEFAULT_SPEC_FOLDER
+  else
+    ARGV.join(' ')
+  end
+end
+
+def selenium_driver_env_var
+  "CAPYBARA_JAVASCRIPT_DRIVER=\"#{@options[:selenium_driver]}\""
+end
+
+def angular_hosts_env_vars
+  backend = "ANGULAR_BE=\"#{@options[:backend_host]}\""
+  frontend = "ANGULAR_FE=\"#{@options[:frontend_host]}\""
+
+  "#{backend} #{frontend}"
+end
+
+def test_command
+  "#{angular_hosts_env_vars} #{selenium_driver_env_var} #{RSPEC_EXEC} #{files_to_test}"
+end
+
+def interactive_mode
+  puts 'Enter backend endpoint:'
+  print "#{DEFAULT_BACKEND} [Press Enter to leave the default] "
+  backend_answer = gets.chomp
+
+  @options[:backend_host] = if backend_answer.empty?
+                              DEFAULT_BACKEND
+                            else
+                              backend_answer
+                            end
+
+  puts 'Enter frontend endpoint:'
+  print "#{DEFAULT_FRONTEND} [Press Enter to leave the default] "
+  frontend_answer = gets.chomp
+
+  @options[:frontend_host] = if frontend_answer.empty?
+                               DEFAULT_FRONTEND
+                             else
+                               frontend_answer
+                             end
+
+  puts 'Enter the Selenium driver: '
+  print "#{HEADLESS_DRIVER} [Press Enter to leave default value]"
+  selenium_driver_answer = gets.chomp
+
+  @options[:selenium_driver] = if selenium_driver_answer.empty?
+                                 HEADLESS_DRIVER
+                               else
+                                 selenium_driver_answer
+                               end
+end
+
+def options
+  OptionParser.new do |opts|
+    opts.banner = "Usage: #{SCRIPT_NAME} [options]"
+
+    opts.on('-d', '--headful', 'Run selenium headful (not headless)') do
+      @options[:selenium_driver] = 'selenium_chrome'
+    end
+
+    opts.on('-bBACKEND_HOST',
+            '--backend=BACKEND_HOST',
+            'backend host') do |backend_host|
+      @options[:backend_host] = backend_host
+    end
+
+    opts.on('-fFRONTEND_HOST',
+            '--frontend=FRONTEND_HOST',
+            'frontend host') do |frontend_host|
+      @options[:frontend_host] = frontend_host
+    end
+
+    opts.on('-l', '--local', 'run local automated tests') do
+      @options[:backend_host] = 'https://localhost:3000'
+      @options[:frontend_host] = 'https://localhost:4200/'
+    end
+
+    opts.on('-i', '--interactive', 'Interactive mode') do
+      interactive_mode
+    end
+
+    opts.on('-v', '--verbose', 'Verbose mode') do
+      puts "Running...\n#{test_command}\n"
+    end
+
+    opts.on('-h', '--help', 'prints this help') do
+      puts opts
+      exit
+    end
+  end
+end
+
+def run_tests!
+  puts test_command
+  system(test_command)
+end
+
+def main
+  options.parse!
+  run_tests!
+end
+
+main

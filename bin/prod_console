@@ -1,0 +1,5 @@
+#!/bin/bash
+
+saml2aws login
+sh bin/assume-role prod
+sh bin/ecs-connect

@@ -50,7 +50,7 @@ windows:
         - bin/start-dev-workers
         - echo "rails server here"
         - clear
-  - docker: docker stop $(docker ps -a -q); docker rm $(docker ps -a -q); bin/maestro-compose up
+  - docker: docker stop $(docker ps -a -q); docker rm $(docker ps -a -q); bin/compose up
   - kingular:
       panes:
         - cd ..; cd ng-kin; ng serve

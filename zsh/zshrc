@@ -40,6 +40,7 @@
 source ~/.config/dotfiles/shell/alias
 source ~/.config/dotfiles/shell/shellscripts
 source ~/.config/dotfiles/shell/env
+source ~/kin/dot-com/bin/local/ecs_completions.sh
 
 
 ##---------------------------------------------------------------------------//
