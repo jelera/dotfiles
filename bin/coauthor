@@ -2,15 +2,19 @@
 
 if ! command -v git &> /dev/null
 then
-    echo "git could not be found"
-    exit 1
+	echo "git could not be found"
+	exit 1
 fi
 
-my_name=$(basename -- "$0")
+SCRIPT_NAME=$(basename -- "$0")
+NAME_TO_LOOKUP=${*}
 
 display_usage() {
-	echo -e "\nUsage: $my_name [name (case-insensitive)] \n"
-	echo "$my_name jose"
+	echo -e "Usage: $SCRIPT_NAME [name (case-insensitive)] \n"
+	echo "Examples:"
+	echo "---------"
+	echo "$SCRIPT_NAME jose"
+	echo "$SCRIPT_NAME jose elera"
 }
 
 if [[ $# -eq 0 ]] ; then
@@ -18,10 +22,4 @@ if [[ $# -eq 0 ]] ; then
 	exit 1
 fi
 
-if [  $# -gt 2 ]
-then
-	display_usage
-	exit 1
-fi
-
-git log | awk -F ":" '/Author/ {print $2}' | sort --unique | grep -i "$1"
+git shortlog --summary --numbered --email --all --regexp-ignore-case --author="$NAME_TO_LOOKUP" | cut -f2-
