@@ -21,3 +21,6 @@ export TERM=xterm-256color-italic
 export ZSH_DISABLE_COMPFIX=true
 
 source ~/.dev_env_vars
+
+# For gpg signing
+export GPG_TTY=$(tty)
