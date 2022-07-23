@@ -1,7 +1,6 @@
 [user]
 	name = Jose Elera
 	email = jelera@users.noreply.github.com
-	signingkey = 837EB1D5ED15AABC
 [core]
 	pager = less -FRSX
 	whitespace=fix,-indent-with-non-tab,trailing-space,cr-at-eol
@@ -64,7 +63,7 @@
 	clean = git-lfs clean -- %f
 [difftool "sourcetree"]
 	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
-	path = 
+	path =
 [mergetool "sourcetree"]
 	cmd = /Applications/Sourcetree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
 	trustExitCode = true
