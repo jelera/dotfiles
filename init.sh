@@ -8,10 +8,6 @@
 #
 # Last Updated: Tue 10 Mar 2020 09:34:37 PM CDT
 #
-#    Tested on: Ubuntu 14.04 LTS Trusty Tahr
-#               CentOS 7 / Red Hat Enterprise Linux 7
-#               Mac OS X Mountain Lion
-#
 #   Maintainer: Jose Elera (https://github.com/jelera)
 #
 #      License: MIT
