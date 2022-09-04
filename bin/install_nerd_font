@@ -1,0 +1,119 @@
+#!/usr/bin/env ruby
+
+# frozen_string_literal: true
+
+require 'mkmf'
+require 'etc'
+require 'tmpdir'
+require 'fileutils'
+
+class NerdFontDownloader
+  REMOTE_DIR = 'https://github.com/ryanoasis/nerd-fonts/releases/download/'
+  NERD_FONT_RELEASE = 'v2.2.1'
+  NERD_FONTS = %w[
+    FiraCode
+    CascadiaCode
+    Iosevka
+    SourceCodePro
+    UbuntuMono
+  ].freeze
+
+  def self.call
+    new.call
+  end
+
+  def initialize; end
+
+  def call
+    fetch_nerd_fonts
+    copy_files_to_sys_font_dir
+    refresh_font_cache if linux?
+  ensure
+    FileUtils.remove_entry tmp_dir
+  end
+
+  private
+
+  def fetch_nerd_fonts
+    nerd_fonts.each do |font_name|
+      font_zip = "#{font_name}.zip"
+      url = "#{REMOTE_DIR}/#{NERD_FONT_RELEASE}/#{font_zip}"
+      font_zip_path = File.join(tmp_dir, font_zip)
+
+      download(url)
+      unzip(font_zip_path)
+      cleanup_tmp_dir
+    end
+  end
+
+  def refresh_font_cache
+    system('fc-cache -fv')
+  end
+
+  def download(uri)
+    warn 'wget not found' unless find_executable 'wget'
+
+    system("wget -P #{tmp_dir} #{uri}")
+  end
+
+  def unzip(zip_file)
+    warn 'unzip not found' unless find_executable 'unzip'
+
+    system("unzip #{zip_file} -d #{tmp_dir}")
+  end
+
+  def cleanup_tmp_dir
+    deleteable_fonts = if linux? || macos?
+                         tmp_dir_children.select { |path| path.match?(/windows/i) }
+                       else
+                         tmp_dir_children.reject { |path| path.match?(/windows/i) }
+                       end
+
+    other_deleteables = tmp_dir_children.reject { |path| path.match?(/ttf|otf/i) }
+    deleteables = deleteable_fonts + other_deleteables
+
+    FileUtils.rm(deleteables)
+  end
+
+  def copy_files_to_sys_font_dir
+    FileUtils.cp(tmp_dir_children, sys_font_dir)
+  end
+
+  def sys_font_dir
+    return @sys_font_dir if instance_variable_defined?(:@sys_font_dir)
+
+    @sys_font_dir = if linux?
+                      File.join(Dir.home, '.local', 'share', 'fonts')
+                    elsif macos?
+                      File.join(Dir.home, 'Library', 'Fonts')
+                    else
+                      warn 'Not linux or mac_os'
+                    end
+
+    Dir.mkdir(@sys_font_dir) unless Dir.exist? @sys_font_dir
+
+    @sys_font_dir
+  end
+
+  def linux?
+    Etc.uname[:sysname] == 'Linux' || RUBY_PLATFORM.match?('linux')
+  end
+
+  def macos?
+    Etc.uname[:sysname] == 'Darwin' || RUBY_PLATFORM.match?('darwin')
+  end
+
+  def tmp_dir
+    @tmp_dir ||= Dir.mktmpdir
+  end
+
+  def tmp_dir_children
+    Dir.children(tmp_dir).map { |path| File.join(tmp_dir, path) }
+  end
+
+  def nerd_fonts
+    @nerd_fonts ||= ARGV.empty? ? NERD_FONTS : ARGV
+  end
+end
+
+NerdFontDownloader.call

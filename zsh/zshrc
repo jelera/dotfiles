@@ -146,3 +146,4 @@ source $ZSH/oh-my-zsh.sh
 export PATH="/usr/local/opt/node@14/bin:$PATH"
 
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
+fpath+=${ZDOTDIR:-~}/.zsh_functions
