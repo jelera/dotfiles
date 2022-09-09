@@ -1,25 +1,85 @@
-#!/bin/bash
-case "$(uname -s)" in
+#!usr/bin/env ruby
 
-   Darwin)
-     echo 'Mac OS X'
-     ;;
-
-   Linux)
-     echo 'Linux'
-			sudo apt install ruby
-     ;;
-
-   CYGWIN*|MINGW32*|MSYS*|MINGW*)
-     echo 'MS Windows'
-     ;;
-
-   # Add here more strings to compare
-   # See correspondence table at the bottom of this answer
-
-   *)
-     echo 'Other OS' 
-     ;;
-esac
-
-
+# Download requirements
+#  - git
+#  - curl
+#  - wget
+#  - zsh
+#
+#  if mac install homebrew
+#
+#  install ruby, python, node, rust and postgresql
+#
+# set up ssh and gpg keys
+#
+# install and login github_cli
+#
+# set up dotfiles
+#
+# install basics
+#  - vim
+#  - neovim
+#  - tmux
+#  - universal ctags ?
+#  - ripgrep
+#  - ag
+#  - redis
+#  - docker
+#  - virtualbox
+#  - vagrant
+#
+#  install dev env
+#  - RUBY
+#  - bundler
+#  - rubocop
+#  - pry
+#  - solargraph
+#
+#  - JS/NODE
+#  - eslint
+#  - yarn
+#  - standardjs
+#  - typescript
+#
+#  - POSTRESQL
+#  - pgcli
+#  - pgadmin
+#
+#  - SHELL
+#  - shellshock
+#
+#  - LUA
+#  - linter for lua
+#  - formatter for lua
+#
+#
+#  install fonts
+#
+#  install extra dev software
+#  - vscode
+#  - google chrome / chromium
+#  - chromedriver
+#  - Firefox
+#  - Slack
+#  - postman
+#  - alacritty
+#  - kitty
+#  - Dbeaver
+#  - if linux gitg
+#  - tig
+#  - lazygit
+#  - bat
+#  - bat-extras
+#  - fzf
+#  - delta
+#  - par
+#  -
+#
+#  install misc software
+#  - calibre
+#  - alfred / albert
+#  -
+#
+#
+#  install cli software
+#  - exa (modern ls replacement)
