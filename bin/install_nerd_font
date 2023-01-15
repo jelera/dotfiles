@@ -10,7 +10,7 @@ require 'fileutils'
 class NerdFontDownloader
   REMOTE_DIR = 'https://github.com/ryanoasis/nerd-fonts/releases/download/'
   NERD_FONT_RELEASE = 'v2.2.1'
-  NERD_FONTS = %w[
+  DEFAULT_NERD_FONTS = %w[
     FiraCode
     CascadiaCode
     Iosevka
@@ -26,7 +26,7 @@ class NerdFontDownloader
 
   def call
     fetch_nerd_fonts
-    copy_files_to_sys_font_dir
+    copy_files_to_home_font_dir
     refresh_font_cache if linux?
   ensure
     FileUtils.remove_entry tmp_dir
@@ -37,12 +37,12 @@ class NerdFontDownloader
   def fetch_nerd_fonts
     nerd_fonts.each do |font_name|
       font_zip = "#{font_name}.zip"
-      url = "#{REMOTE_DIR}/#{NERD_FONT_RELEASE}/#{font_zip}"
       font_zip_path = File.join(tmp_dir, font_zip)
+      nerd_font_url = "#{REMOTE_DIR}/#{NERD_FONT_RELEASE}/#{font_zip}"
 
-      download(url)
+      download(nerd_font_url)
       unzip(font_zip_path)
-      cleanup_tmp_dir
+      keep_usable_font_files
     end
   end
 
@@ -62,7 +62,7 @@ class NerdFontDownloader
     system("unzip #{zip_file} -d #{tmp_dir}")
   end
 
-  def cleanup_tmp_dir
+  def keep_usable_font_files
     deleteable_fonts = if linux? || macos?
                          tmp_dir_children.select { |path| path.match?(/windows/i) }
                        else
@@ -75,14 +75,14 @@ class NerdFontDownloader
     FileUtils.rm(deleteables)
   end
 
-  def copy_files_to_sys_font_dir
-    FileUtils.cp(tmp_dir_children, sys_font_dir)
+  def copy_files_to_home_font_dir
+    FileUtils.cp(tmp_dir_children, home_font_dir)
   end
 
-  def sys_font_dir
-    return @sys_font_dir if instance_variable_defined?(:@sys_font_dir)
+  def home_font_dir
+    return @home_font_dir if instance_variable_defined?(:@home_font_dir)
 
-    @sys_font_dir = if linux?
+    @home_font_dir = if linux?
                       File.join(Dir.home, '.local', 'share', 'fonts')
                     elsif macos?
                       File.join(Dir.home, 'Library', 'Fonts')
@@ -90,9 +90,9 @@ class NerdFontDownloader
                       warn 'Not linux or mac_os'
                     end
 
-    Dir.mkdir(@sys_font_dir) unless Dir.exist? @sys_font_dir
+    Dir.mkdir(@home_font_dir) unless Dir.exist? @home_font_dir
 
-    @sys_font_dir
+    @home_font_dir
   end
 
   def linux?
@@ -112,7 +112,7 @@ class NerdFontDownloader
   end
 
   def nerd_fonts
-    @nerd_fonts ||= ARGV.empty? ? NERD_FONTS : ARGV
+    @nerd_fonts ||= ARGV.empty? ? DEFAULT_NERD_FONTS : ARGV
   end
 end
 

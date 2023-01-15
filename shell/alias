@@ -76,5 +76,3 @@ alias gd='git diff'
 # alias gds='git diff --staged'
 # alias gdt='git diff-tree --no-commit-id --name-only -r'
 # alias gdw='git diff --word-diff'
-
-source ~/.alias.local

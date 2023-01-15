@@ -2,20 +2,24 @@ export EDITOR=vim
 
 # Local
 export PATH=$PATH:$HOME/.bin
+export PATH=$HOME/bin:/usr/local/bin:$PATH
+
+export PATH=$HOME/.local/bin:$PATH
+
 # Rbenv
-export PATH="$HOME/.rbenv:$HOME/.rbenv/bin:$PATH"
+# export PATH="$HOME/.rbenv:$HOME/.rbenv/bin:$PATH"
 # Yarn
-export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+# export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 # Homebrew
-export PATH="/usr/local/sbin/:/usr/local/bin:$PATH"
+# export PATH="/usr/local/sbin/:/usr/local/bin:$PATH"
 
-. $HOME/.asdf/asdf.sh
-source $HOME/.config/dotfiles/asdf/env
+# . $HOME/.asdf/asdf.sh
+# source $HOME/.config/dotfiles/asdf/env
 
-export PGHOST=localhost
+# export PGHOST=localhost
 
-export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g ""'
-export FZF_CTRL_T_OPTS="--preview '(highlight -O ansi -l {} 2> /dev/null || cat {} || tree -C {}) 2> /dev/null | head -200'"
+# export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g ""'
+# export FZF_CTRL_T_OPTS="--preview '(highlight -O ansi -l {} 2> /dev/null || cat {} || tree -C {}) 2> /dev/null | head -200'"
 
 
 # for tmux: export 256color
@@ -23,7 +27,9 @@ export TERM=xterm-256color-italic
 [ -n "$TMUX" ] && export TERM=screen-256color
 export ZSH_DISABLE_COMPFIX=true
 
-source ~/.dev_env_vars
+# source ~/.dev_env_vars
 
 # For gpg signing
-export GPG_TTY=$(tty)
+# export GPG_TTY=$(tty)
+
+# vi: ft=sh

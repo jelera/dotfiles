@@ -6,7 +6,7 @@
 #  - wget
 #  - zsh
 #
-#  if mac install homebrew
+#  if mac install xcode and homebrew
 #
 #  install ruby, python, node, rust and postgresql
 #
@@ -52,6 +52,14 @@
 #  - linter for lua
 #  - formatter for lua
 #
+#  install other linters
+#  - CSS: stylelint
+#  - Dockerfile: dockerfile_lint
+#  - erb: erblint
+#  - html: htmllint
+#  - sql: sqlfluff
+#  - xml: xmllint
+#
 #
 #  install fonts
 #
@@ -65,7 +73,6 @@
 #  - alacritty
 #  - kitty
 #  - Dbeaver
-#  - if linux gitg
 #  - tig
 #  - lazygit
 #  - bat
@@ -75,6 +82,10 @@
 #  - par
 #  -
 #
+#  install linux software
+#  - xcape
+#  - if linux gitg
+#
 #  install misc software
 #  - calibre
 #  - alfred / albert
@@ -83,3 +94,5 @@
 #
 #  install cli software
 #  - exa (modern ls replacement)
+#  - irssi
+#  - calcurse + todotxtcli
