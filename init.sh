@@ -163,7 +163,9 @@ echo
 color_echo "Installing oh-my-zsh ..." cyan
 # git clone git://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
 
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+# sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O /tmp/ohmyzsh-install.sh
 
 sleep 1
 
@@ -257,3 +259,4 @@ figlet_echo "░░░░░░░░░░░░░░░░░░░░░░�
 figlet_echo "░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░"
 echo
 echo
+sh /tmp/ohmyzsh-install.sh
