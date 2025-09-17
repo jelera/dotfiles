@@ -1,0 +1,609 @@
+#!/bin/bash
+
+# Multi-Language Development Environment Setup Script
+# Supports: Ruby/Rails, Elixir, Python, Go, Next.js
+# Platforms: macOS (Homebrew), Ubuntu Linux
+# Tools: mise, neovim, tmux, git, Docker, PostgreSQL
+
+set -e  # Exit on any error
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Logging functions
+log_info() {
+    echo -e "${BLUE}[INFO]${NC} $1"
+}
+
+log_success() {
+    echo -e "${GREEN}[SUCCESS]${NC} $1"
+}
+
+log_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+log_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+# Detect operating system
+detect_os() {
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        OS="macos"
+        log_info "Detected macOS"
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        if command -v apt-get &> /dev/null; then
+            # Check Ubuntu version
+            if [[ -f /etc/lsb-release ]]; then
+                source /etc/lsb-release
+                if [[ "$DISTRIB_ID" == "Ubuntu" ]]; then
+                    OS="ubuntu"
+                    log_info "Detected Ubuntu $DISTRIB_RELEASE"
+                    if [[ "$DISTRIB_RELEASE" < "20.04" ]]; then
+                        log_warning "This script is optimized for Ubuntu 20.04+ but will attempt to continue"
+                    fi
+                else
+                    log_error "Unsupported distribution: $DISTRIB_ID"
+                    exit 1
+                fi
+            else
+                OS="ubuntu"
+                log_info "Detected Ubuntu Linux"
+            fi
+        else
+            log_error "Unsupported Linux distribution. This script supports Ubuntu only."
+            exit 1
+        fi
+    else
+        log_error "Unsupported operating system: $OSTYPE"
+        exit 1
+    fi
+}
+
+# Check if command exists
+command_exists() {
+    command -v "$1" &> /dev/null
+}
+
+# Install package manager (Homebrew for macOS)
+install_package_manager() {
+    if [[ "$OS" == "macos" ]]; then
+        if ! command_exists brew; then
+            log_info "Installing Homebrew..."
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+            log_success "Homebrew installed"
+        else
+            log_info "Homebrew already installed"
+        fi
+    elif [[ "$OS" == "ubuntu" ]]; then
+        log_info "Updating package lists..."
+        sudo apt-get update
+        log_success "Package lists updated"
+    fi
+}
+
+# Install system dependencies
+install_system_dependencies() {
+    log_info "Installing system dependencies..."
+    
+    if [[ "$OS" == "macos" ]]; then
+        # macOS dependencies
+        local packages=(
+            "curl"
+            "wget" 
+            "git"
+            "openssl"
+            "readline"
+            "sqlite3"
+            "xz"
+            "zlib"
+            "libyaml"
+            "libffi"
+            "autoconf"
+            "automake"
+            "libtool"
+            "pkg-config"
+            "wxwidgets"
+            "libxslt"
+            "fop"
+        )
+        
+        for package in "${packages[@]}"; do
+            if brew list "$package" &>/dev/null; then
+                log_info "$package already installed"
+            else
+                log_info "Installing $package..."
+                brew install "$package"
+            fi
+        done
+        
+    elif [[ "$OS" == "ubuntu" ]]; then
+        # Ubuntu 24.04 LTS dependencies
+        local packages=(
+            "curl"
+            "wget"
+            "git"
+            "build-essential"
+            "libssl-dev"
+            "libreadline-dev"
+            "zlib1g-dev"
+            "sqlite3"
+            "libsqlite3-dev"
+            "libffi-dev"
+            "libyaml-dev"
+            "libgdbm-dev"
+            "libncurses-dev"
+            "libbz2-dev"
+            "libgdbm-compat-dev"
+            "uuid-dev"
+            "tk-dev"
+            "autoconf"
+            "automake"
+            "libtool"
+            "pkg-config"
+            "libwxgtk3.2-dev"
+            "libsctp-dev"
+            "libxslt1-dev"
+            "fop"
+            "libxml2-utils"
+            "default-jdk"
+            "m4"
+            "unixodbc-dev"
+            "libpq-dev"
+            "ca-certificates"
+            "gnupg"
+            "lsb-release"
+            "software-properties-common"
+            "apt-transport-https"
+        )
+        
+        sudo apt-get install -y "${packages[@]}"
+    fi
+    
+    log_success "System dependencies installed"
+}
+
+# Install mise (version manager)
+install_mise() {
+    if command_exists mise; then
+        log_info "mise already installed"
+        return
+    fi
+    
+    log_info "Installing mise..."
+    curl https://mise.run | sh
+    
+    # Add mise to shell configs
+    if [[ -f ~/.bashrc ]]; then
+        if ! grep -q "mise activate" ~/.bashrc; then
+            echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+            echo 'eval "$(~/.local/bin/mise activate bash)"' >> ~/.bashrc
+        fi
+    fi
+    
+    if [[ -f ~/.zshrc ]]; then
+        if ! grep -q "mise activate" ~/.zshrc; then
+            echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+            echo 'eval "$(~/.local/bin/mise activate zsh)"' >> ~/.zshrc
+        fi
+    fi
+    
+    export PATH="$HOME/.local/bin:$PATH"
+    log_success "mise installed"
+}
+
+# Install development tools
+install_dev_tools() {
+    log_info "Installing development tools..."
+    
+    if [[ "$OS" == "macos" ]]; then
+        local tools=("neovim" "tmux" "ripgrep" "fd" "bat" "exa" "fzf" "tree")
+        for tool in "${tools[@]}"; do
+            if brew list "$tool" &>/dev/null; then
+                log_info "$tool already installed"
+            else
+                log_info "Installing $tool..."
+                brew install "$tool"
+            fi
+        done
+        
+    elif [[ "$OS" == "ubuntu" ]]; then
+        # Install neovim using AppImage for Ubuntu 24.04
+        if ! command_exists nvim; then
+            log_info "Installing neovim..."
+            # Download the latest stable neovim AppImage
+            curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
+            chmod +x nvim.appimage
+            sudo mv nvim.appimage /usr/local/bin/nvim
+        fi
+        
+        # Install other tools
+        sudo apt-get install -y tmux ripgrep fd-find bat tree
+        
+        # Install fzf
+        if ! command_exists fzf; then
+            log_info "Installing fzf..."
+            git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+            ~/.fzf/install --all --no-bash --no-zsh --no-fish
+        fi
+        
+        # Install exa (modern ls replacement) - use eza as exa is deprecated
+        if ! command_exists eza; then
+            log_info "Installing eza (modern ls replacement)..."
+            # Add eza repository and install
+            sudo mkdir -p /etc/apt/keyrings
+            wget -qO- https://raw.githubusercontent.com/eza-community/eza/main/deb.asc | sudo gpg --dearmor -o /etc/apt/keyrings/gierens.gpg
+            echo "deb [signed-by=/etc/apt/keyrings/gierens.gpg] http://deb.gierens.de stable main" | sudo tee /etc/apt/sources.list.d/gierens.list
+            sudo chmod 644 /etc/apt/keyrings/gierens.gpg /etc/apt/sources.list.d/gierens.list
+            sudo apt-get update
+            sudo apt-get install -y eza
+        fi
+    fi
+    
+    log_success "Development tools installed"
+}
+
+# Install Ruby via mise
+install_ruby() {
+    log_info "Installing Ruby..."
+    
+    export PATH="$HOME/.local/bin:$PATH"
+    
+    if $HOME/.local/bin/mise list ruby 2>/dev/null | grep -q "3.3"; then
+        log_info "Ruby already installed"
+    else
+        $HOME/.local/bin/mise install ruby@latest
+        $HOME/.local/bin/mise use -g ruby@latest
+        log_success "Ruby installed"
+    fi
+    
+    # Install Rails and common gems
+    log_info "Installing Rails and common gems..."
+    eval "$($HOME/.local/bin/mise activate bash)"
+    gem install rails bundler pry rubocop solargraph
+    log_success "Rails and common gems installed"
+}
+
+# Install Erlang via mise (required for Elixir)
+install_erlang() {
+    log_info "Installing Erlang (required for Elixir)..."
+    
+    export PATH="$HOME/.local/bin:$PATH"
+    
+    if $HOME/.local/bin/mise list erlang 2>/dev/null | grep -q "26"; then
+        log_info "Erlang already installed"
+    else
+        # Set environment variables for Erlang compilation
+        if [[ "$OS" == "macos" ]]; then
+            export KERL_CONFIGURE_OPTIONS="--disable-debug --disable-silent-rules --without-javac --enable-shared-zlib --enable-dynamic-ssl-lib --enable-hipe --enable-sctp --enable-smp-support --enable-threads --enable-kernel-poll --enable-wx --enable-darwin-64bit"
+            export CC=clang
+            export CPP="clang -E"
+        elif [[ "$OS" == "ubuntu" ]]; then
+            export KERL_CONFIGURE_OPTIONS="--disable-debug --disable-silent-rules --without-javac --enable-shared-zlib --enable-dynamic-ssl-lib --enable-hipe --enable-sctp --enable-smp-support --enable-threads --enable-kernel-poll --enable-wx"
+        fi
+        
+        $HOME/.local/bin/mise install erlang@latest
+        $HOME/.local/bin/mise use -g erlang@latest
+        log_success "Erlang installed"
+    fi
+}
+
+# Install Elixir via mise
+install_elixir() {
+    log_info "Installing Elixir..."
+    
+    # Ensure Erlang is installed first
+    install_erlang
+    
+    export PATH="$HOME/.local/bin:$PATH"
+    
+    if $HOME/.local/bin/mise list elixir 2>/dev/null | grep -q "1.15"; then
+        log_info "Elixir already installed"
+    else
+        $HOME/.local/bin/mise install elixir@latest
+        $HOME/.local/bin/mise use -g elixir@latest
+        log_success "Elixir installed"
+    fi
+    
+    # Install Phoenix and common packages
+    log_info "Installing Phoenix and common packages..."
+    eval "$($HOME/.local/bin/mise activate bash)"
+    mix local.hex --force
+    mix local.rebar --force
+    mix archive.install hex phx_new --force
+    log_success "Phoenix and common packages installed"
+}
+
+# Install Python via mise
+install_python() {
+    log_info "Installing Python..."
+    
+    export PATH="$HOME/.local/bin:$PATH"
+    
+    if $HOME/.local/bin/mise list python 2>/dev/null | grep -q "3.11"; then
+        log_info "Python already installed"
+    else
+        $HOME/.local/bin/mise install python@latest
+        $HOME/.local/bin/mise use -g python@latest
+        log_success "Python installed"
+    fi
+    
+    # Install common Python packages
+    log_info "Installing common Python packages..."
+    eval "$($HOME/.local/bin/mise activate bash)"
+    pip install --upgrade pip
+    pip install poetry black flake8 mypy pytest jupyter ipython requests django flask fastapi
+    log_success "Common Python packages installed"
+}
+
+# Install Go via mise
+install_go() {
+    log_info "Installing Go..."
+    
+    export PATH="$HOME/.local/bin:$PATH"
+    
+    if $HOME/.local/bin/mise list go 2>/dev/null | grep -q "1.21"; then
+        log_info "Go already installed"
+    else
+        $HOME/.local/bin/mise install go@latest
+        $HOME/.local/bin/mise use -g go@latest
+        log_success "Go installed"
+    fi
+    
+    # Install common Go tools
+    log_info "Installing common Go tools..."
+    eval "$($HOME/.local/bin/mise activate bash)"
+    go install golang.org/x/tools/gopls@latest
+    go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+    go install golang.org/x/tools/cmd/goimports@latest
+    log_success "Common Go tools installed"
+}
+
+# Install Node.js and Next.js tools via mise
+install_nodejs() {
+    log_info "Installing Node.js..."
+    
+    export PATH="$HOME/.local/bin:$PATH"
+    
+    if $HOME/.local/bin/mise list node 2>/dev/null | grep -q "20"; then
+        log_info "Node.js already installed"
+    else
+        $HOME/.local/bin/mise install node@lts
+        $HOME/.local/bin/mise use -g node@lts
+        log_success "Node.js installed"
+    fi
+    
+    # Install global npm packages for Next.js development
+    log_info "Installing Next.js and common Node.js tools..."
+    eval "$($HOME/.local/bin/mise activate bash)"
+    npm install -g create-next-app@latest
+    npm install -g typescript@latest
+    npm install -g @typescript-eslint/parser@latest
+    npm install -g eslint@latest
+    npm install -g prettier@latest
+    npm install -g yarn@latest
+    npm install -g pnpm@latest
+    npm install -g vercel@latest
+    log_success "Next.js and Node.js tools installed"
+}
+
+# Install Docker
+install_docker() {
+    log_info "Installing Docker..."
+    
+    if command_exists docker; then
+        log_info "Docker already installed"
+    else
+        if [[ "$OS" == "macos" ]]; then
+            log_info "Installing Docker Desktop for Mac..."
+            brew install --cask docker
+            log_success "Docker Desktop installed"
+            log_warning "Please start Docker Desktop manually from Applications folder"
+            
+        elif [[ "$OS" == "ubuntu" ]]; then
+            log_info "Installing Docker Engine for Ubuntu..."
+            
+            # Remove old versions
+            sudo apt-get remove -y docker docker-engine docker.io containerd runc 2>/dev/null || true
+            
+            # Install dependencies
+            sudo apt-get update
+            sudo apt-get install -y ca-certificates curl gnupg lsb-release
+            
+            # Add Docker's official GPG key
+            sudo mkdir -p /etc/apt/keyrings
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+            
+            # Set up repository
+            echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+            
+            # Install Docker Engine
+            sudo apt-get update
+            sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+            
+            # Add user to docker group
+            sudo usermod -aG docker $USER
+            
+            # Enable and start Docker service
+            sudo systemctl enable docker
+            sudo systemctl start docker
+            
+            log_success "Docker installed"
+            log_warning "Please log out and log back in for Docker group changes to take effect"
+        fi
+    fi
+    
+    # Install docker-compose if not already installed via plugin
+    if ! command_exists docker-compose; then
+        log_info "Installing docker-compose..."
+        if [[ "$OS" == "macos" ]]; then
+            brew install docker-compose
+        elif [[ "$OS" == "ubuntu" ]]; then
+            log_info "docker-compose available as 'docker compose' (plugin)"
+        fi
+    fi
+    
+    log_success "Docker setup complete"
+}
+
+# Install PostgreSQL
+install_postgresql() {
+    log_info "Installing PostgreSQL..."
+    
+    if command_exists psql; then
+        log_info "PostgreSQL already installed"
+    else
+        if [[ "$OS" == "macos" ]]; then
+            log_info "Installing PostgreSQL via Homebrew..."
+            brew install postgresql@15
+            
+            # Start PostgreSQL service
+            brew services start postgresql@15
+            
+            log_success "PostgreSQL installed and started"
+            
+        elif [[ "$OS" == "ubuntu" ]]; then
+            log_info "Installing PostgreSQL via apt..."
+            
+            # Install PostgreSQL
+            sudo apt-get install -y postgresql postgresql-contrib postgresql-client-common
+            
+            # Start and enable PostgreSQL service
+            sudo systemctl start postgresql
+            sudo systemctl enable postgresql
+            
+            log_success "PostgreSQL installed and started"
+        fi
+    fi
+    
+    # Install PostgreSQL development libraries
+    if [[ "$OS" == "macos" ]]; then
+        if ! brew list libpq &>/dev/null; then
+            log_info "Installing PostgreSQL development libraries..."
+            brew install libpq
+        fi
+    elif [[ "$OS" == "ubuntu" ]]; then
+        log_info "PostgreSQL development libraries already installed"
+    fi
+    
+    log_success "PostgreSQL setup complete"
+}
+
+# Setup PostgreSQL for development
+setup_postgresql() {
+    log_info "Setting up PostgreSQL for development..."
+    
+    if [[ "$OS" == "macos" ]]; then
+        # Create development database and user
+        createdb $USER 2>/dev/null || log_info "Database $USER already exists"
+        
+    elif [[ "$OS" == "ubuntu" ]]; then
+        # Setup PostgreSQL user and development database
+        sudo -u postgres createuser --createdb --superuser $USER 2>/dev/null || log_info "User $USER already exists"
+        sudo -u postgres createdb $USER 2>/dev/null || log_info "Database $USER already exists"
+        
+        # Set up peer authentication for local development
+        sudo -u postgres psql -c "ALTER USER $USER PASSWORD '$USER';" 2>/dev/null || true
+    fi
+    
+    log_success "PostgreSQL development setup complete"
+}
+
+# Setup shell configuration
+setup_shell_config() {
+    log_info "Setting up shell configuration..."
+    
+    # Add PostgreSQL paths for macOS
+    if [[ "$OS" == "macos" ]]; then
+        if [[ -f ~/.bashrc ]]; then
+            if ! grep -q "postgresql@15" ~/.bashrc; then
+                echo "" >> ~/.bashrc
+                echo "# PostgreSQL paths" >> ~/.bashrc
+                echo 'export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH"' >> ~/.bashrc
+                echo 'export PATH="/opt/homebrew/opt/libpq/bin:$PATH"' >> ~/.bashrc
+            fi
+        fi
+        
+        if [[ -f ~/.zshrc ]]; then
+            if ! grep -q "postgresql@15" ~/.zshrc; then
+                echo "" >> ~/.zshrc
+                echo "# PostgreSQL paths" >> ~/.zshrc
+                echo 'export PATH="/opt/homebrew/opt/postgresql@15/bin:$PATH"' >> ~/.zshrc
+                echo 'export PATH="/opt/homebrew/opt/libpq/bin:$PATH"' >> ~/.zshrc
+            fi
+        fi
+    fi
+    
+    log_success "Shell configuration updated"
+}
+
+# Create basic development directories
+create_dev_directories() {
+    log_info "Creating development directories..."
+    
+    local directories=(
+        "$HOME/dev"
+        "$HOME/dev/ruby"
+        "$HOME/dev/elixir"
+        "$HOME/dev/python"
+        "$HOME/dev/go"
+        "$HOME/dev/javascript"
+        "$HOME/dev/nextjs"
+        "$HOME/dev/docker"
+        "$HOME/dev/databases"
+    )
+    
+    for dir in "${directories[@]}"; do
+        if [[ ! -d "$dir" ]]; then
+            mkdir -p "$dir"
+            log_info "Created directory: $dir"
+        fi
+    done
+    
+    log_success "Development directories created"
+}
+
+# Main installation function
+main() {
+    log_info "Starting multi-language development environment setup..."
+    echo "This script will install tools for Ruby/Rails, Elixir, Python, Go, and Next.js development"
+    echo "Press Ctrl+C to cancel or Enter to continue..."
+    read
+    
+    detect_os
+    install_package_manager
+    install_system_dependencies
+    install_mise
+    install_dev_tools
+    install_ruby
+    install_erlang
+    install_elixir
+    install_python
+    install_go
+    install_nodejs
+    install_docker
+    install_postgresql
+    setup_postgresql
+    setup_shell_config
+    create_dev_directories
+    
+    log_success "Development environment setup complete!"
+    echo ""
+    log_info "Please restart your shell or run 'source ~/.bashrc' (or ~/.zshrc) to load the new configuration"
+    log_info "You can now use 'mise' to manage language versions:"
+    echo "  - mise list          # Show installed versions"
+    echo "  - mise install X@Y   # Install specific version"
+    echo "  - mise use X@Y       # Use version in current directory"
+    echo "  - mise use -g X@Y    # Set global version"
+    echo ""
+    log_info "Development directories created in ~/dev/"
+    log_info "Happy coding! 🚀"
+}
+
+# Run main function
+main "$@"
