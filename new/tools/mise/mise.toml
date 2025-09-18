@@ -1,0 +1,42 @@
+[tools]
+# Programming Languages
+node = "lts"
+python = "3.12"
+go = "latest"
+rust = "latest"
+lua = "5.4"
+ruby = "3.3"
+elixir = "1.16"
+erlang = "26.2"
+
+# Node.js global packages
+"npm:@angular/cli" = "latest"
+"npm:express-generator" = "latest"
+"npm:prettier" = "latest"
+"npm:eslint" = "latest"
+"npm:typescript" = "latest"
+"npm:@types/node" = "latest"
+"npm:nodemon" = "latest"
+"npm:pm2" = "latest"
+"npm:jest" = "latest"
+"npm:mocha" = "latest"
+"npm:chai" = "latest"
+"npm:supertest" = "latest"
+
+# Python tools
+"pipx:black" = "latest"
+"pipx:flake8" = "latest"
+"pipx:mypy" = "latest"
+"pipx:pytest" = "latest"
+"pipx:ipython" = "latest"
+"pipx:poetry" = "latest"
+"pipx:cookiecutter" = "latest"
+
+# Ruby tools
+"gem:bundler" = "latest"
+"gem:rails" = "latest"
+"gem:rubocop" = "latest"
+"gem:solargraph" = "latest"
+
+[settings]
+experimental = true

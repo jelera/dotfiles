@@ -1,0 +1,22 @@
+# Node.js aliases
+alias n='node'
+alias nr='npm run'
+alias nrd='npm run dev'
+alias nrb='npm run build'
+alias nrt='npm run test'
+alias nrs='npm start'
+alias ni='npm install'
+alias nid='npm install --save-dev'
+alias nig='npm install -g'
+alias nu='npm update'
+alias nci='npm ci'
+alias npx='npx'
+
+# Yarn aliases
+alias y='yarn'
+alias ya='yarn add'
+alias yad='yarn add --dev'
+alias yr='yarn run'
+alias ys='yarn start'
+alias yb='yarn build'
+alias yt='yarn test'

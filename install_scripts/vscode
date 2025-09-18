@@ -1,0 +1,66 @@
+#!/bin/bash
+
+# A script to install VS Code on macOS (with Homebrew) or Ubuntu (with APT).
+
+# --- Function to check for and install Homebrew if needed ---
+install_homebrew() {
+    if ! command -v brew &> /dev/null; then
+        echo "Homebrew not found. Installing Homebrew..."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        # Add Homebrew to PATH for this session
+        (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> ~/.zprofile
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    fi
+}
+
+# --- Installation logic based on OS detection ---
+case "$(uname -s)" in
+    Darwin)
+        # --- macOS Installation ---
+        echo "Detected macOS. Installing VS Code with Homebrew..."
+        install_homebrew
+        brew install --cask visual-studio-code
+        echo "VS Code installation on macOS complete."
+        ;;
+    Linux)
+        # --- Ubuntu Installation (using the official Microsoft repository) ---
+        if [ -f /etc/os-release ]; then
+            source /etc/os-release
+            if [[ "$ID" == "ubuntu" ]]; then
+                echo "Detected Ubuntu. Installing VS Code with the official APT repository..."
+                
+                # Check for dependencies
+                sudo apt-get update
+                sudo apt-get install -y software-properties-common apt-transport-https wget
+
+                # Add the Microsoft GPG key
+                wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+                sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
+                rm packages.microsoft.gpg
+                
+                # Add the VS Code repository to the APT sources
+                echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list > /dev/null
+
+                # Update the package list and install VS Code
+                sudo apt-get update
+                sudo apt-get install -y code
+                echo "VS Code installation on Ubuntu complete."
+            else
+                echo "Unsupported Linux distribution detected. Exiting."
+                exit 1
+            fi
+        fi
+        ;;
+    *)
+        echo "Unsupported operating system detected. Exiting."
+        exit 1
+        ;;
+esac
+
+# --- Post-installation steps ---
+echo "Opening VS Code to run the 'code' command installer (macOS only)..."
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  open -a "Visual Studio Code"
+  echo "Once VS Code is open, press Cmd+Shift+P, type 'Shell Command', and select 'Install 'code' command in PATH'."
+  echo "You can also simply run 'brew install --cask visual-studio-code', and it will add the 'code' command to your PATH."
+fi
