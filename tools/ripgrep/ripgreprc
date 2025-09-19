@@ -1,0 +1,13 @@
+# Ripgrep configuration
+--type-add
+web:*.{html,css,js,jsx,ts,tsx,vue,svelte}
+--type-add
+config:*.{json,yaml,yml,toml,ini,conf}
+--smart-case
+--follow
+--hidden
+--glob=!.git/*
+--glob=!node_modules/*
+--glob=!.next/*
+--glob=!dist/*
+--glob=!build/*

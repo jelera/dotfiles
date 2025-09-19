@@ -1,0 +1,25 @@
+# commit_type(optional_scope) issue_num 50-character subject line
+#
+# @example: "feat(api): Add support to create coupons"
+#
+# Conventional commits
+# feat 	    - Introduce a new feature to the codebase
+# fix 	    - Fix a bug in the codebase
+# docs 	    - Create/update documentation
+# style 	  - Feature and updates related to styling
+# refactor 	- Refactor a specific section of the codebase
+# test 	    - Add or update code related to testing
+# chore  	  - Regular code maintenance
+#
+#
+# 72-character wrapped longer description. This should answer:
+#
+# * Why was this change necessary?
+# * How does it address the problem?
+# * Are there any side effects?
+#
+#
+# Add co-authors if you worked on this code with others:
+#
+# Co-authored-by: Full Name <email@example.com>
+# Co-authored-by: Full Name <email@example.com>
