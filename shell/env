@@ -1,43 +1,107 @@
-export EDITOR=vim
+# Environment Variables
+# Loaded by both bash and zsh
 
-# Local
-export PATH="$PATH:$HOME/.bin"
+# Editor
+export EDITOR='nvim'
+export VISUAL='nvim'
+
+# PATH configuration
 export PATH="$HOME/.local/bin:$PATH"
-# Rbenv
-export PATH="$HOME/.rbenv:$HOME/.rbenv/bin:$PATH"
-# Yarn
-export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
-# Homebrew
-export PATH="/usr/local/sbin/:/usr/local/bin:$PATH"
+export PATH="$HOME/.bin:$PATH"
 
-. $HOME/.asdf/asdf.sh
-source $HOME/.config/dotfiles/asdf/env
+# Support for local scripts (add your own scripts here)
+# Create ~/.local/bin for personal scripts that aren't in dotfiles
+[[ -d "$HOME/bin.local" ]] && export PATH="$HOME/bin.local:$PATH"
 
-export OBJC_DISABLE_INITIALIZE_FORK_SAFETY="YES"
+# XDG Base Directory
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
 
+# Language-specific paths (managed by mise)
+# mise will handle: Ruby, Node, Python, Go, Erlang, Elixir
 
-# Postgres.app Postgres 16
+# PostgreSQL configuration
 export PGHOST=localhost
-export PATH="/Applications/Postgres.app/Contents/Versions/16/bin:$PATH"
-# export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
-# export LDFLAGS="-L/opt/homebrew/opt/postgresql@16/lib"
-# export CPPFLAGS="-I/opt/homebrew/opt/postgresql@16/include"
-# export PKG_CONFIG_PATH="/opt/homebrew/opt/postgresql@16/lib/pkgconfig"
+export PGGSSENCMODE="disable"
 
-export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+# Homebrew (macOS)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # Homebrew paths for macOS
+    if [[ -d "/opt/homebrew" ]]; then
+        # Apple Silicon
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [[ -d "/usr/local/Homebrew" ]]; then
+        # Intel Mac
+        eval "$(/usr/local/bin/brew shellenv)"
+    fi
 
+    # PostgreSQL (if installed via Homebrew)
+    if [[ -d "/opt/homebrew/opt/postgresql@16" ]]; then
+        export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
+    elif [[ -d "/Applications/Postgres.app/Contents/Versions/16" ]]; then
+        # Postgres.app
+        export PATH="/Applications/Postgres.app/Contents/Versions/16/bin:$PATH"
+    fi
 
-export FZF_DEFAULT_COMMAND='ag --hidden --ignore .git -g ""'
-export FZF_CTRL_T_OPTS="--preview '(highlight -O ansi -l {} 2> /dev/null || cat {} || tree -C {}) 2> /dev/null | head -200'"
+    # libpq (PostgreSQL client)
+    if [[ -d "/opt/homebrew/opt/libpq" ]]; then
+        export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+    fi
+fi
+
+# Homebrew (Linux)
+if [[ "$OSTYPE" == "linux-gnu"* ]] && [[ -d "/home/linuxbrew/.linuxbrew" ]]; then
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+fi
+
+# FZF configuration
+export FZF_DEFAULT_COMMAND='rg --files --hidden --follow --glob "!.git/*"'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_CTRL_T_OPTS="--preview '(bat --style=numbers --color=always {} || cat {}) 2> /dev/null | head -200'"
+export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+export FZF_ALT_C_OPTS="--preview 'tree -C {} | head -200'"
+
+# Terminal configuration
 export TERMINFO=/usr/share/terminfo
 
+# For tmux: export 256color
+if [[ -n "$TMUX" ]]; then
+    export TERM=screen-256color
+else
+    export TERM=xterm-256color
+fi
 
-# for tmux: export 256color
-export TERM=xterm-256color-italic
-[ -n "$TMUX" ] && export TERM=screen-256color
-export ZSH_DISABLE_COMPFIX=true
+# Shell options
+export HISTSIZE=10000
+export HISTFILESIZE=20000
+export HISTCONTROL=ignoredups:erasedups
 
-source ~/.dev_env_vars
+# Less configuration
+export LESS='-R -F -X'
+export LESSOPEN='|bat --style=numbers --color=always %s 2>/dev/null'
 
-# For gpg signing
+# GPG configuration
 export GPG_TTY=$(tty)
+
+# mise activation (already handled in shell rc files, but keep for reference)
+# eval "$(mise activate bash)"  # or zsh
+
+# Disable macOS fork safety for Python multiprocessing
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY="YES"
+
+# Locale
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+
+# Disable Homebrew analytics
+export HOMEBREW_NO_ANALYTICS=1
+
+# Better history across multiple terminal sessions
+export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
+
+# Load secure environment variables (NOT committed to git)
+[[ -f ~/.env.local ]] && source ~/.env.local
+
+# Load local environment overrides
+[[ -f ~/.env.local.override ]] && source ~/.env.local.override

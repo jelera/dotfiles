@@ -1,3 +1,16 @@
-# Add to the original path
-source ~/.bashrc
+# ~/.bash_profile
+# Executed for login shells
+
+# Source bashrc if it exists
+[[ -f ~/.bashrc ]] && source ~/.bashrc
+
+# GPG TTY configuration (for commit signing)
 export GPG_TTY=$(tty)
+
+# SSH Agent (if not already running)
+if [[ -z "$SSH_AUTH_SOCK" ]]; then
+    eval "$(ssh-agent -s)" >/dev/null
+fi
+
+# Source local bash_profile for machine-specific configuration
+[[ -f ~/.bash_profile.local ]] && source ~/.bash_profile.local

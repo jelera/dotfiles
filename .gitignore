@@ -1,2 +1,44 @@
-vim
+# Secrets and local configurations
+.env.local
+shell/.env.local
+*.local
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Thumbnails
+Thumbs.db
+
+# Backup files
+*.backup
+*.old
+*.swp
+*.swo
+*~
+.dotfiles.backup.*
+
+# IDE
+.idea/
+.vscode/
+*.sublime-*
+
+# Logs
 *.log
+
+# Test files
+test/
+tmp/
+
+# mise
+.mise.local.toml
+
+# OS generated files
+.Trashes
+.Spotlight-V100
+.TemporaryItems
+.fseventsd
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent

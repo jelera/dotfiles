@@ -1,0 +1,12 @@
+# mise configuration for dotfiles repository development
+# This is LOCAL to this repo only - global config is in mise/config.toml
+# https://mise.jdx.dev/configuration.html
+
+[tools]
+# Development tools specific to maintaining this dotfiles repo
+# Note: Language runtimes (ruby, node, python, etc.) are defined globally
+# in mise/config.toml which gets symlinked to ~/.config/mise/config.toml
+
+# Uncomment tools needed for repo development:
+# shellcheck = "latest"  # For linting shell scripts
+# shfmt = "latest"       # For formatting shell scripts

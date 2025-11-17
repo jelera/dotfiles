@@ -1,0 +1,7 @@
+# Gitleaks ignore patterns
+# These are intentional examples/templates, not real secrets
+
+# Example secrets in documentation
+shell/.env.local.example:*
+docs/SECRETS.md:*
+MIGRATION_PLAN.md:*

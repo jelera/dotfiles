@@ -1,0 +1,178 @@
+# Global mise configuration
+# This file is symlinked to ~/.config/mise/config.toml
+# https://mise.jdx.dev/configuration.html
+#
+# PHILOSOPHY: mise is the PRIMARY tool manager
+# Only fall back to Homebrew/apt for tools not available in mise
+# Benefits: version pinning, reproducibility, cross-platform consistency
+
+[tools]
+# ===== Language Runtimes =====
+ruby = "latest"
+node = "lts"        # Use LTS for stability
+python = "latest"
+go = "latest"
+erlang = "latest"
+elixir = "latest"
+
+# ===== Essential CLI Tools =====
+# These replace traditional package manager installations
+jq = "latest"                # JSON processor
+fzf = "latest"               # Fuzzy finder
+ripgrep = "latest"           # Better grep (rg command)
+bat = "latest"               # Better cat with syntax highlighting
+neovim = "latest"            # Modern vim
+shellcheck = "latest"        # Shell script linter
+
+# ===== Modern CLI Replacements =====
+# Better alternatives to standard Unix tools
+eza = "latest"               # Better ls with icons and colors
+fd = "latest"                # Better find (faster, simpler syntax)
+zoxide = "latest"            # Smart cd (z command, learns your habits)
+dust = "latest"              # Better du (disk usage visualizer)
+procs = "latest"             # Better ps (process viewer)
+bottom = "latest"            # Better top/htop (btm command)
+duf = "latest"               # Better df (disk usage viewer)
+httpie = "latest"            # Better curl (http command)
+
+# ===== Git & Version Control =====
+gh = "latest"                # GitHub CLI
+lazygit = "latest"           # Terminal UI for git
+delta = "latest"             # Better git diff pager (git-delta)
+gitleaks = "latest"          # Scan git repos for secrets
+pre-commit = "latest"        # Git pre-commit hook framework
+
+# ===== Development Tools =====
+# Essential dev utilities
+direnv = "latest"            # Auto-load environment variables per directory
+just = "latest"              # Command runner (modern make alternative)
+watchexec = "latest"         # Watch files and run commands on changes
+tokei = "latest"             # Count lines of code
+hyperfine = "latest"         # Command-line benchmarking tool
+grex = "latest"              # Generate regex from examples
+glow = "latest"              # Markdown previewer in terminal
+yq = "latest"                # YAML processor (like jq for YAML)
+
+# Infrastructure & Cloud (uncomment as needed)
+# terraform = "latest"       # Infrastructure as Code
+# kubectl = "latest"         # Kubernetes CLI
+# k9s = "latest"             # Kubernetes TUI
+# helm = "latest"            # Kubernetes package manager
+# docker-compose = "latest"  # Docker orchestration
+# ansible = "latest"         # Configuration management
+# vault = "latest"           # Secrets management
+# awscli = "latest"          # AWS CLI
+# gcloud = "latest"          # Google Cloud CLI
+# azure-cli = "latest"       # Azure CLI
+
+# Container Tools (uncomment as needed)
+# lazydocker = "latest"      # Docker TUI
+# dive = "latest"            # Docker image explorer
+# ctop = "latest"            # Container top
+
+# Database Tools (uncomment as needed)
+# usql = "latest"            # Universal SQL client
+
+# Documentation & Help
+tealdeer = "latest"          # Community man pages (tldr)
+
+# Network Tools (uncomment as needed)
+# gping = "latest"           # Ping with graph
+# dog = "latest"             # Modern dig
+# bandwhich = "latest"       # Network monitoring
+
+# Security Scanning (uncomment as needed)
+# trivy = "latest"           # Container vulnerability scanner
+# syft = "latest"            # SBOM generator
+# grype = "latest"           # Vulnerability matcher
+
+# Data Tools
+# visidata = "latest"        # Tabular data explorer
+# jless = "latest"           # JSON viewer
+# fx = "latest"              # Interactive JSON
+
+# ===== Language-Specific Tools =====
+# Uncomment tools for languages you use
+
+# Go tools
+"go:golang.org/x/tools/gopls" = "latest"                              # Go language server
+"go:github.com/golangci/golangci-lint/cmd/golangci-lint" = "latest"  # Go linter
+# "go:github.com/air-verse/air" = "latest"                            # Go hot reload
+
+# Node/TypeScript tools
+"npm:typescript" = "latest"                                           # TypeScript compiler
+"npm:typescript-language-server" = "latest"                           # TS language server
+"npm:prettier" = "latest"                                             # Code formatter
+"npm:eslint" = "latest"                                               # JS/TS linter
+"npm:pnpm" = "latest"                                                 # Fast package manager
+"npm:yarn" = "latest"                                                 # Package manager
+# "npm:@vscode/markdown-language-server" = "latest"                   # Markdown language server
+# "npm:vite" = "latest"                                               # Build tool
+# "npm:turbo" = "latest"                                              # Monorepo build system
+
+# Ruby tools
+"gem:rubocop" = "latest"                                              # Ruby linter
+"gem:solargraph" = "latest"                                           # Ruby language server
+"gem:standardrb" = "latest"                                           # Ruby style guide
+"gem:rails" = "latest"                                                # Rails framework
+# "gem:bundler" = "latest"                                            # Dependency manager
+
+# Python tools
+"pipx:black" = "latest"                                               # Python formatter
+"pipx:ruff" = "latest"                                                # Fast Python linter & formatter
+"pipx:mypy" = "latest"                                                # Type checker
+"pipx:poetry" = "latest"                                              # Dependency management
+"pipx:pipenv" = "latest"                                              # Virtual env & dependency manager
+"pipx:ipython" = "latest"                                             # Better Python REPL
+# "pipx:pytest" = "latest"                                            # Testing framework
+# "pipx:pylint" = "latest"                                            # Python linter
+
+# Rust tools (via cargo)
+"cargo:stylua" = "latest"                                             # Lua formatter
+"cargo:cargo-watch" = "latest"                                        # Watch Rust files and run commands
+# "cargo:cargo-edit" = "latest"                                       # Cargo commands for editing Cargo.toml
+
+[env]
+# Global environment variables for development
+EDITOR = "nvim"
+VISUAL = "nvim"
+PAGER = "less"
+
+# XDG Base Directory
+XDG_CONFIG_HOME = "~/.config"
+XDG_DATA_HOME = "~/.local/share"
+XDG_CACHE_HOME = "~/.cache"
+
+# FZF configuration
+FZF_DEFAULT_COMMAND = "fd --type f --hidden --follow --exclude .git"
+FZF_CTRL_T_COMMAND = "$FZF_DEFAULT_COMMAND"
+FZF_DEFAULT_OPTS = "--height 40% --layout=reverse --border"
+
+# Bat configuration
+BAT_THEME = "TwoDark"
+BAT_STYLE = "numbers,changes,header"
+
+# Ripgrep configuration
+RIPGREP_CONFIG_PATH = "~/.ripgreprc"
+
+# Development paths
+PROJECTS = "~/projects"
+
+[settings]
+# Enable experimental features
+experimental = true
+# Verbose output for debugging
+verbose = false
+# Automatically install missing tools
+always_keep_download = false
+# Use all CPU cores for compilation
+jobs = 4
+# Enable idiomatic version files (.ruby-version, .node-version, etc.)
+legacy_version_file = true
+# Shorten version output
+yes = false
+
+[plugins]
+# Add any custom plugins here if needed
+# Example: custom backend for a proprietary tool
+# my-tool = "https://github.com/company/mise-my-tool"

@@ -1,0 +1,39 @@
+# <type>: <subject> (max 50 characters)
+
+# <body> (wrap at 72 characters)
+# Explain the problem that this commit is solving. Focus on why you
+# are making this change as opposed to how (the code explains that).
+# Are there side effects or other unintuitive consequences of this
+# change? Here's the place to explain them.
+
+# Type can be:
+#   feat     (new feature)
+#   fix      (bug fix)
+#   docs     (changes to documentation)
+#   style    (formatting, missing semi colons, etc; no code change)
+#   refactor (refactoring production code)
+#   test     (adding missing tests, refactoring tests; no production code change)
+#   chore    (updating grunt tasks etc; no production code change)
+#   perf     (performance improvements)
+#   ci       (CI/CD changes)
+#   build    (build system changes)
+#   revert   (revert a previous commit)
+
+# --- COMMIT END ---
+# Remember to:
+#   - Capitalize the subject line
+#   - Use the imperative mood in the subject line
+#   - Do not end the subject line with a period
+#   - Separate subject from body with a blank line
+#   - Use the body to explain what and why vs. how
+#   - Reference issues and pull requests after the body
+#
+# Example:
+#   feat: Add user authentication system
+#
+#   Implement JWT-based authentication to secure API endpoints.
+#   This addresses the security concerns raised in the last review.
+#
+#   Closes #123
+#
+# Co-authored-by: Name <email@example.com>

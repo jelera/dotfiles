@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Shell Functions Loader
+# Loads all function files from functions.d/
+
+# Get the directory where this script is located
+FUNCTIONS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/functions.d"
+
+# Load all function files
+if [[ -d "$FUNCTIONS_DIR" ]]; then
+    for func_file in "$FUNCTIONS_DIR"/*.sh; do
+        if [[ -f "$func_file" ]]; then
+            # shellcheck source=/dev/null
+            source "$func_file"
+        fi
+    done
+fi
+
+# Load local functions if they exist
+# Create your own functions in ~/.functions.local
+# Example:
+#   myfunction() { echo "Hello from local function"; }
+if [[ -f ~/.functions.local ]]; then
+    # shellcheck source=/dev/null
+    source ~/.functions.local
+fi

@@ -1,0 +1,218 @@
+[user]
+	name = Jose Elera
+	email = jelera@users.noreply.github.com
+
+[core]
+	editor = nvim
+	pager = delta
+	whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
+	quotepath = false
+	excludesfile = ~/.gitignore_global
+	autocrlf = input
+
+[color]
+	ui = auto
+	diff = auto
+	status = auto
+	branch = auto
+	interactive = auto
+	pager = true
+
+[color "branch"]
+	current = yellow reverse
+	local = yellow
+	remote = green
+
+[color "diff"]
+	meta = yellow bold
+	frag = magenta bold
+	old = red bold
+	new = green bold
+	whitespace = red reverse
+
+[color "status"]
+	added = yellow
+	changed = green
+	untracked = cyan
+
+[commit]
+	template = ~/.gitmessage
+	gpgsign = true
+	verbose = true
+
+[push]
+	default = current
+	followTags = true
+
+[pull]
+	rebase = true
+
+[fetch]
+	prune = true
+
+[init]
+	defaultBranch = main
+
+[interactive]
+	diffFilter = delta --color-only
+
+[delta]
+	navigate = true
+	line-numbers = true
+	side-by-side = true
+	syntax-theme = Dracula
+	features = decorations
+	plus-style = "syntax #003800"
+	minus-style = "syntax #3f0001"
+
+[delta "decorations"]
+	commit-decoration-style = bold yellow box ul
+	file-style = bold yellow ul
+	file-decoration-style = none
+	hunk-header-decoration-style = cyan box ul
+
+[diff]
+	tool = nvimdiff
+	colorMoved = default
+	algorithm = histogram
+
+[difftool]
+	prompt = false
+
+[difftool "nvimdiff"]
+	cmd = nvim -d "$LOCAL" "$REMOTE"
+
+[merge]
+	tool = nvimdiff
+	conflictstyle = diff3
+
+[mergetool]
+	prompt = false
+	keepBackup = false
+
+[mergetool "nvimdiff"]
+	cmd = nvim -d "$LOCAL" "$REMOTE" "$MERGED" -c '$wincmd w' -c 'wincmd J'
+
+[rebase]
+	autoStash = true
+	autoSquash = true
+
+[alias]
+	# Add
+	aa = add --all
+	ap = add --patch
+	au = add --update
+
+	# Branch
+	b = branch
+	ba = branch -a
+	bd = branch -d
+	bD = branch -D
+	bm = branch -m
+
+	# Commit
+	c = commit -v
+	ca = commit -v -a
+	cm = commit -m
+	cam = commit -a -m
+	amend = commit --amend
+	amendf = commit --amend --no-edit
+
+	# Checkout
+	co = checkout
+	cob = checkout -b
+	com = checkout main
+	cod = checkout develop
+
+	# Clone
+	cl = clone --recurse-submodules
+
+	# Diff
+	d = diff
+	ds = diff --staged
+	dw = diff --word-diff
+
+	# Log
+	l = log --oneline --graph --decorate
+	ll = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+	lol = log --pretty=oneline --abbrev-commit --graph --decorate
+	la = log --all --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+
+	# Pull/Push
+	pl = pull
+	ps = push
+	pf = push --force-with-lease
+	pu = push -u origin HEAD
+
+	# Rebase
+	rb = rebase
+	rbi = rebase -i
+	rbc = rebase --continue
+	rba = rebase --abort
+	rbs = rebase --skip
+
+	# Remote
+	r = remote
+	ra = remote add
+	rr = remote remove
+	rv = remote -v
+	ru = remote update
+
+	# Reset
+	unstage = reset HEAD --
+	undo = reset --soft HEAD^
+	uncommit = reset --soft HEAD~1
+
+	# Status
+	s = status
+	st = status -sb
+	ss = status --short
+
+	# Stash
+	sa = stash apply
+	sc = stash clear
+	sd = stash drop
+	sl = stash list
+	sp = stash pop
+	ss = stash save
+	sw = stash show
+
+	# Worktree
+	wt = worktree
+	wta = worktree add
+	wtl = worktree list
+	wtp = worktree prune
+	wtr = worktree remove
+
+	# Utility
+	aliases = config --get-regexp alias
+	branches = for-each-ref --sort=-committerdate refs/heads/ --format='%(HEAD) %(color:yellow)%(refname:short)%(color:reset) - %(color:red)%(objectname:short)%(color:reset) - %(contents:subject) - %(authorname) (%(color:green)%(committerdate:relative)%(color:reset))'
+	contributors = shortlog --summary --numbered
+	tags = tag -l
+	remotes = remote -v
+	recent = for-each-ref --count=10 --sort=-committerdate refs/heads/ --format='%(refname:short)'
+	root = rev-parse --show-toplevel
+
+	# Advanced
+	cleanup = "!git branch --merged | grep -v '\\*\\|main\\|master\\|develop' | xargs -n 1 git branch -d"
+	fresh = "!git fetch --all --prune && git checkout main && git pull && git branch -vv | grep ': gone]' | awk '{print $1}' | xargs -n 1 git branch -D"
+	sync = "!git fetch --all --prune && git pull --rebase"
+
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+
+[help]
+	autocorrect = 1
+
+[rerere]
+	enabled = true
+
+[credential]
+	helper = cache --timeout=3600
+
+# Include local gitconfig (for machine-specific settings)
+[include]
+	path = ~/.gitconfig.local

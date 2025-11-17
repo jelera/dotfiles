@@ -1,80 +1,107 @@
-# alias reload='source ~/.bashrc'
-alias dotfiles='cd ~/.config/dotfiles'
+# Shell Aliases
+# Loaded by both bash and zsh
+
+# Navigation
 alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias dotfiles='cd ~/.config/dotfiles'
 
-# vim
-alias vif='vim $(fzf --height 40%)'
-alias vrc='vim ~/.vim/vimrc'
+# mise - version manager shortcuts
+alias mi='mise install'
+alias mig='mise install -g'
+alias miu='mise use'
+alias miug='mise use -g'
+alias mils='mise list'
+alias milsr='mise ls-remote'
+alias mic='mise current'
+alias miup='mise upgrade'
+alias miun='mise uninstall'
+alias mix='mise exec'
+alias miw='mise which'
+alias miconf='nvim ~/.config/mise/config.toml'
+alias midoc='mise doctor'
 
-# # Jupyter Notebook
-# alias jn='jupyter notebook'
-# alias jl='jupyter lab'
+# Neovim
+alias nv='nvim'
+alias nvif='nvim $(fzf --height 40%)'
+alias nvrc='nvim ~/.config/nvim/init.lua'
 
-# tmux
+# Tmux
 alias tx='tmuxinator'
 
-alias dcom='tmuxinator start dot-com'
-alias king='tmuxinator start kingular'
-
+# CTags
 alias retag='ag -l | ctags -R --links=no -L-'
 
-# GIT
+# Git aliases
 alias g='git'
 alias ga='git add'
 alias gaf='git add $(fzf --height 50%)'
 alias gaa='git add --all'
 alias gap='git add --patch'
 alias gst='git status'
-
-
-# alias gau='git add --update'
-# alias gav='git add --verbose'
-
-# alias gb='git branch'
-# alias gba='git branch -a'
-# alias gbd='git branch -d'
-# alias gbda='git branch --no-color --merged | command grep -vE "^(\*|\s*(master|develop|dev)\s*$)" | command xargs -n 1 git branch -d'
-# alias gbD='git branch -D'
-# alias gbl='git blame -b -w'
-# alias gbnm='git branch --no-merged'
-# alias gbr='git branch --remote'
-# alias gbs='git bisect'
-# alias gbsb='git bisect bad'
-# alias gbsg='git bisect good'
-# alias gbsr='git bisect reset'
-# alias gbss='git bisect start'
-
 alias gc='git commit -v'
-# alias gc!='git commit -v --amend'
-# alias gcn!='git commit -v --no-edit --amend'
-# alias gca='git commit -v -a'
-# alias gca!='git commit -v -a --amend'
-# alias gcan!='git commit -v -a --no-edit --amend'
-# alias gcans!='git commit -v -a -s --no-edit --amend'
-# alias gcam='git commit -a -m'
-# alias gcsm='git commit -s -m'
-# alias gcb='git checkout -b'
-# alias gcf='git config --list'
-# alias gcl='git clone --recurse-submodules'
-# alias gclean='git clean -id'
-# alias gpristine='git reset --hard && git clean -dfx'
-# alias gcm='git checkout master'
-# alias gcd='git checkout develop'
-# alias gcmsg='git commit -m'
-# alias gco='git checkout'
-# alias gcount='git shortlog -sn'
-# compdef _git gcount
-# alias gcp='git cherry-pick'
-# alias gcpa='git cherry-pick --abort'
-# alias gcpc='git cherry-pick --continue'
-# alias gcs='git commit -S'
-
 alias gd='git diff'
-# alias gdca='git diff --cached'
-# alias gdcw='git diff --cached --word-diff'
-# alias gdct='git describe --tags `git rev-list --tags --max-count=1`'
-# alias gds='git diff --staged'
-# alias gdt='git diff-tree --no-commit-id --name-only -r'
-# alias gdw='git diff --word-diff'
+alias gp='git push'
+alias gpl='git pull'
+alias gl='git log --oneline --graph --decorate'
+alias gco='git checkout'
+alias gcb='git checkout -b'
+alias gbr='git branch'
+alias gm='git merge'
 
-source ~/.alias.local
+# Modern CLI tools (if installed via mise or system)
+if command -v eza &> /dev/null; then
+    alias ls='eza --icons --group-directories-first'
+    alias la='eza -lah --icons --group-directories-first'
+    alias ll='eza -lh --icons --group-directories-first'
+    alias lt='eza --tree --icons --level=2'
+    alias lta='eza --tree --icons'
+else
+    alias la='ls -lah'
+    alias ll='ls -lh'
+fi
+
+if command -v bat &> /dev/null; then
+    alias cat='bat --paging=never'
+    alias cata='bat'  # cat with paging enabled
+    alias less='bat --paging=always'
+fi
+
+if command -v rg &> /dev/null; then
+    alias grep='rg'
+fi
+
+if command -v fd &> /dev/null; then
+    alias find='fd'
+fi
+
+if command -v lazygit &> /dev/null; then
+    alias lg='lazygit'
+fi
+
+if command -v zoxide &> /dev/null; then
+    alias cd='z'
+fi
+
+# Docker shortcuts
+alias dc='docker-compose'
+alias dcu='docker-compose up'
+alias dcd='docker-compose down'
+alias dcl='docker-compose logs -f'
+
+# System
+alias h='history'
+alias j='jobs'
+alias c='clear'
+alias reload='exec $SHELL -l'
+
+# Helpers
+alias path='echo -e ${PATH//:/\\n}'
+alias ports='netstat -tulanp'
+
+# Source local aliases if they exist
+# Create your own aliases in ~/.alias.local
+# Example:
+#   alias myproject='cd ~/projects/myproject'
+[[ -f ~/.alias.local ]] && source ~/.alias.local

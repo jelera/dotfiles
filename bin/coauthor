@@ -1,25 +1,55 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Find git co-author information by name
+# Usage: coauthor <name>
 
-if ! command -v git &> /dev/null
-then
-	echo "git could not be found"
-	exit 1
-fi
+set -e
 
 SCRIPT_NAME=$(basename -- "$0")
-NAME_TO_LOOKUP=${*}
+NAME_TO_LOOKUP="${*}"
 
 display_usage() {
-	echo -e "Usage: $SCRIPT_NAME [name (case-insensitive)] \n"
-	echo "Examples:"
-	echo "---------"
-	echo "$SCRIPT_NAME jose"
-	echo "$SCRIPT_NAME jose elera"
+    cat <<EOF
+Usage: $SCRIPT_NAME <name> [name...]
+
+Search for git commit authors across all branches.
+Name search is case-insensitive and can include partial matches.
+
+Examples:
+  $SCRIPT_NAME jose
+  $SCRIPT_NAME jose elera
+  $SCRIPT_NAME john
+
+Output format: name <email>
+EOF
 }
 
-if [[ $# -eq 0 ]] ; then
-	display_usage
-	exit 1
+# Check if git is available
+if ! command -v git &>/dev/null; then
+    echo "Error: git command not found"
+    exit 1
 fi
 
-git shortlog --summary --numbered --email --all --regexp-ignore-case --author="$NAME_TO_LOOKUP" | cut -f2-
+# Check if arguments provided
+if [[ $# -eq 0 ]]; then
+    display_usage
+    exit 1
+fi
+
+# Check if in a git repository
+if ! git rev-parse --git-dir &>/dev/null; then
+    echo "Error: not in a git repository"
+    exit 1
+fi
+
+# Search for authors
+echo "Searching for authors matching: $NAME_TO_LOOKUP"
+echo ""
+
+git shortlog \
+    --summary \
+    --numbered \
+    --email \
+    --all \
+    --regexp-ignore-case \
+    --author="$NAME_TO_LOOKUP" \
+    | cut -f2-

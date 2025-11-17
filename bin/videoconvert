@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+# Convert video files to MP4 format using ffmpeg
+# Optimized for quality and file size
+
+set -e
+
+SCRIPT_NAME=$(basename -- "$0")
+
+display_usage() {
+    cat <<EOF
+Usage: $SCRIPT_NAME <input> <output>
+
+Convert video files to MP4 format using H.264 codec.
+
+Arguments:
+  input   - Input video file (any format supported by ffmpeg)
+  output  - Output MP4 file
+
+Options:
+  -h, --help     Show this help message
+  -q, --quality  Quality preset (ultrafast, fast, medium, slow, veryslow)
+                 Default: veryslow (best quality)
+
+Examples:
+  $SCRIPT_NAME input.mov output.mp4
+  $SCRIPT_NAME --quality fast input.avi output.mp4
+
+Requirements:
+  - ffmpeg must be installed
+    macOS:  brew install ffmpeg
+    Ubuntu: sudo apt install ffmpeg
+
+Quality vs Speed:
+  ultrafast - Fastest encoding, larger file
+  fast      - Quick encoding, good quality
+  medium    - Balanced (default for most)
+  slow      - Better compression, takes longer
+  veryslow  - Best compression, slowest (recommended)
+EOF
+}
+
+# Check if ffmpeg is installed
+if ! command -v ffmpeg &>/dev/null; then
+    echo "Error: ffmpeg is not installed"
+    echo ""
+    echo "Install it with:"
+    echo "  macOS:  brew install ffmpeg"
+    echo "  Ubuntu: sudo apt install ffmpeg"
+    exit 1
+fi
+
+# Default quality preset
+QUALITY="veryslow"
+
+# Parse arguments
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -h|--help)
+            display_usage
+            exit 0
+            ;;
+        -q|--quality)
+            QUALITY="$2"
+            shift 2
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
+
+# Check arguments
+if [[ $# -ne 2 ]]; then
+    echo "Error: Invalid number of arguments"
+    echo ""
+    display_usage
+    exit 1
+fi
+
+INPUT="$1"
+OUTPUT="$2"
+
+# Validate input file
+if [[ ! -f "$INPUT" ]]; then
+    echo "Error: Input file does not exist: $INPUT"
+    exit 1
+fi
+
+# Validate quality preset
+case "$QUALITY" in
+    ultrafast|superfast|veryfast|faster|fast|medium|slow|slower|veryslow|placebo)
+        ;;
+    *)
+        echo "Error: Invalid quality preset: $QUALITY"
+        echo "Valid presets: ultrafast, fast, medium, slow, veryslow"
+        exit 1
+        ;;
+esac
+
+# Convert video
+echo "Converting: $INPUT -> $OUTPUT"
+echo "Quality preset: $QUALITY"
+echo ""
+
+ffmpeg \
+    -i "$INPUT" \
+    -vcodec libx264 \
+    -crf 23 \
+    -preset "$QUALITY" \
+    -acodec aac \
+    -b:a 128k \
+    -movflags +faststart \
+    "$OUTPUT"
+
+echo ""
+echo "Conversion complete!"
+echo "Output: $OUTPUT"
+
+# Show file sizes
+INPUT_SIZE=$(du -h "$INPUT" | cut -f1)
+OUTPUT_SIZE=$(du -h "$OUTPUT" | cut -f1)
+echo "Input size:  $INPUT_SIZE"
+echo "Output size: $OUTPUT_SIZE"

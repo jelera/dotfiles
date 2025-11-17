@@ -5,48 +5,49 @@
 #               / /    _  | |_) | (_| \__ \ | | | | | (__
 #              /_/    (_) |_.__/ \__,_|___/_| |_|_|  \___|
 #
-# Last Updated: Tue 10 Mar 2020 08:57:57 PM CDT
-#
 #   Maintainer: Jose Elera (https://github.com/jelera)
-#
 #      License: MIT
-#               Copyright (c) 2020 Jose Elera
-#               Permission is hereby granted, free of charge, to any person
-#               obtaining a copy of this software and associated documentation
-#               files (the "Software"), to deal in the Software without
-#               restriction, including without limitation the rights to use,
-#               copy, modify, merge, publish, distribute, sublicense, and/or
-#               sell copies of the Software, and to permit persons to whom the
-#               Software is furnished to do so, subject to the following
-#               conditions:
-#
-#               The above copyright notice and this permission notice shall be
-#               included in all copies or substantial portions of the Software.
-#
-#               THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-#               EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-#               OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-#               NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-#               HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-#               WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-#               FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-#               OTHER DEALINGS IN THE SOFTWARE.
 ###############################################################################
 
+# If not running interactively, don't do anything
+[[ $- != *i* ]] && return
 
 #----------------------------------------------------------------------------//
-# => SOURCES
+# => SHELL OPTIONS
 #----------------------------------------------------------------------------//
-source ~/.config/dotfiles/shell/alias
-source ~/.config/dotfiles/shell/shellscripts
-source ~/.config/dotfiles/shell/env
+# Append to history file, don't overwrite
+shopt -s histappend
+
+# Check window size after each command
+shopt -s checkwinsize
+
+# Enable extended globbing
+shopt -s extglob
+
+# Case-insensitive globbing
+shopt -s nocaseglob
+
+# Correct minor directory spelling errors
+shopt -s cdspell
+
+#----------------------------------------------------------------------------//
+# => HISTORY
+#----------------------------------------------------------------------------//
+HISTSIZE=10000
+HISTFILESIZE=20000
+HISTCONTROL=ignoredups:erasedups
+HISTTIMEFORMAT="%F %T "
+
+# Share history across all sessions
+shopt -s histappend
+PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
 
 #----------------------------------------------------------------------------//
 # => COLORS
 #----------------------------------------------------------------------------//
 txtrst='\e[0m'    # Text Reset
-# regular colors
-txtblk='\e[0;30m' # Black - Regular
+# Regular colors
+txtblk='\e[0;30m' # Black
 txtred='\e[0;31m' # Red
 txtgrn='\e[0;32m' # Green
 txtylw='\e[0;33m' # Yellow
@@ -55,7 +56,7 @@ txtpur='\e[0;35m' # Purple
 txtcyn='\e[0;36m' # Cyan
 txtwht='\e[0;37m' # White
 
-# emphasized (bolded) colors
+# Bold colors
 bldblk='\e[1;30m' # Black - Bold
 bldred='\e[1;31m' # Red
 bldgrn='\e[1;32m' # Green
@@ -65,73 +66,103 @@ bldpur='\e[1;35m' # Purple
 bldcyn='\e[1;36m' # Cyan
 bldwht='\e[1;37m' # White
 
-# background colors
-bakblk='\e[40m'   # Black - Background
-bakred='\e[41m'   # Red
-badgrn='\e[42m'   # Green
-bakylw='\e[43m'   # Yellow
-bakblu='\e[44m'   # Blue
-bakpur='\e[45m'   # Purple
-bakcyn='\e[46m'   # Cyan
-bakwht='\e[47m'   # White
-
-# underlined colors
-undblk='\e[4;30m' # Black - Underline
-undred='\e[4;31m' # Red
-undgrn='\e[4;32m' # Green
-undylw='\e[4;33m' # Yellow
-undblu='\e[4;34m' # Blue
-undpur='\e[4;35m' # Purple
-undcyn='\e[4;36m' # Cyan
-undwht='\e[4;37m' # White
-
-
 #----------------------------------------------------------------------------//
 # => PROMPT
 #----------------------------------------------------------------------------//
-PS1="\n\[$bldgrn\]\u@\h\[$txtrst\] \[$txtpur\][\A]\[$txtrst\] [\[$txtgrn\]\w\[$txtrst\]]  \n\[$txtpur\] $\[$txtrst\] "
+# Git prompt function
+parse_git_branch() {
+    git branch 2>/dev/null | grep '^*' | colrm 1 2
+}
 
+# Simple, clean prompt with git branch
+PS1="\n\[$bldgrn\]\u@\h\[$txtrst\] \[$txtpur\][\A]\[$txtrst\] [\[$txtgrn\]\w\[$txtrst\]]\[$txtylw\]\$(parse_git_branch)\[$txtrst\]\n\[$txtpur\]$\[$txtrst\] "
 
 #----------------------------------------------------------------------------//
-# => DEFAULT .BASHRC CONTENTS
+# => SOURCES
 #----------------------------------------------------------------------------//
-# If not running interactively, don't do anything
-[ -z "$PS1" ] && return
+# Dotfiles directory (update if different)
+DOTFILES_DIR="${HOME}/.config/dotfiles"
 
-# don't put duplicate lines in the history. See bash(1) for more options
-export HISTCONTROL=ignoredups
+# Source shared shell configuration
+[[ -f "${DOTFILES_DIR}/shell/env" ]] && source "${DOTFILES_DIR}/shell/env"
+[[ -f "${DOTFILES_DIR}/shell/alias" ]] && source "${DOTFILES_DIR}/shell/alias"
+[[ -f "${DOTFILES_DIR}/shell/functions" ]] && source "${DOTFILES_DIR}/shell/functions"
 
-# update the values of LINES and COLUMNS.
-# shopt -s checkwinsize
-
-# make less more friendly for non-text input files, see lesspipe(1)
-[ -x /usr/bin/lesspipe ] && eval "$(lesspipe)"
-
-# set variable identifying the chroot you work in (used in the prompt below)
-if [ -z "$debian_chroot" ] && [ -r /etc/debian_chroot ]; then
-	debian_chroot=$(cat /etc/debian_chroot)
+#----------------------------------------------------------------------------//
+# => COMPLETION
+#----------------------------------------------------------------------------//
+# Enable bash completion
+if [[ -f /etc/bash_completion ]]; then
+    source /etc/bash_completion
+elif [[ -f /usr/local/etc/bash_completion ]]; then
+    source /usr/local/etc/bash_completion
 fi
 
-# append to the history file, don't overwrite it
-# shopt -s histappend
-
-# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
-HISTSIZE=1000
-HISTFILESIZE=2000
-
-# check the window size after each command and, if necessary,
-# update the values of LINES and COLUMNS.
-# shopt -s checkwinsize
-
-#Auto completion for bash
-if [ -f /etc/bash_completion ]; then
- . /etc/bash_completion
+# Homebrew completion (macOS)
+if type brew &>/dev/null; then
+    HOMEBREW_PREFIX="$(brew --prefix)"
+    if [[ -r "${HOMEBREW_PREFIX}/etc/profile.d/bash_completion.sh" ]]; then
+        source "${HOMEBREW_PREFIX}/etc/profile.d/bash_completion.sh"
+    else
+        for COMPLETION in "${HOMEBREW_PREFIX}/etc/bash_completion.d/"*; do
+            [[ -r "$COMPLETION" ]] && source "$COMPLETION"
+        done
+    fi
 fi
 
-# Set vi Editing Mode
-set -o vi
+# Git completion
+[[ -f ~/.git-completion.bash ]] && source ~/.git-completion.bash
+
+#----------------------------------------------------------------------------//
+# => MISE (VERSION MANAGER)
+#----------------------------------------------------------------------------//
+# Initialize mise for bash
+if command -v mise &>/dev/null; then
+    eval "$(mise activate bash)"
+fi
 
 #----------------------------------------------------------------------------//
 # => FZF
 #----------------------------------------------------------------------------//
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+# FZF integration
+[[ -f ~/.fzf.bash ]] && source ~/.fzf.bash
+
+# FZF completion for common commands
+if command -v fzf &>/dev/null; then
+    # Use fd instead of find if available
+    if command -v fd &>/dev/null; then
+        export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+        export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+    fi
+fi
+
+#----------------------------------------------------------------------------//
+# => EDITOR KEYBINDINGS
+#----------------------------------------------------------------------------//
+# Vi mode for command line
+set -o vi
+
+# Show mode in prompt (optional)
+bind 'set show-mode-in-prompt on'
+bind 'set vi-ins-mode-string \1\e[34m\2+\1\e[0m\2'
+bind 'set vi-cmd-mode-string \1\e[35m\2:\1\e[0m\2'
+
+#----------------------------------------------------------------------------//
+# => LESS
+#----------------------------------------------------------------------------//
+# Make less more friendly
+[[ -x /usr/bin/lesspipe ]] && eval "$(lesspipe)"
+
+#----------------------------------------------------------------------------//
+# => DEBIAN CHROOT
+#----------------------------------------------------------------------------//
+# Set variable identifying the chroot
+if [[ -z "${debian_chroot:-}" ]] && [[ -r /etc/debian_chroot ]]; then
+    debian_chroot=$(cat /etc/debian_chroot)
+fi
+
+#----------------------------------------------------------------------------//
+# => LOCAL OVERRIDES
+#----------------------------------------------------------------------------//
+# Source local bashrc for machine-specific configuration
+[[ -f ~/.bashrc.local ]] && source ~/.bashrc.local

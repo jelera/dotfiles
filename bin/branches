@@ -1,3 +1,11 @@
 #!/usr/bin/env bash
+# Display recent git branches sorted by commit date
 
-git for-each-ref --sort=-committerdate refs/heads/ | head -n 50 | awk -F "\t" 'BEGIN { OFS=FS }; { print substr($1, 1, 7), substr($2, 12) }'
+set -e
+
+# Show top 50 most recently committed branches
+git for-each-ref \
+    --sort=-committerdate \
+    refs/heads/ \
+    --format='%(color:yellow)%(refname:short)%(color:reset) - %(color:green)%(committerdate:relative)%(color:reset) - %(color:blue)%(authorname)%(color:reset)' \
+    | head -n 50

@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(tree:*)",
+      "WebSearch",
+      "Bash(command -v:*)",
+      "Bash(shellcheck:*)",
+      "Bash(for file in install/*.sh shell/functions.d/*.sh bin/*)",
+      "Bash(do [[ -f \"$file\" ]])",
+      "Bash(echo:*)",
+      "Bash(done)",
+      "Bash(/bin/bash -c '\nfor file in install.sh install/*.sh shell/functions.d/*.sh bin/*; do\n  if [[ -f \"\"$file\"\" && \"\"$file\"\" == *.sh ]] || [[ -f \"\"$file\"\" && -x \"\"$file\"\" ]]; then\n    issues=$(shellcheck \"\"$file\"\" 2>&1 | grep -c \"\"SC[0-9]\"\" || echo \"\"0\"\")\n    if [[ \"\"$issues\"\" != \"\"0\"\" ]]; then\n      echo \"\"$file: $issues issues\"\"\n    else\n      echo \"\"$file: ✓ clean\"\"\n    fi\n  fi\ndone\n')",
+      "Bash(mise list:*)",
+      "Bash(for tool in jq ripgrep fzf neovim tmux htop bat eza fd delta lazygit)",
+      "Bash(do echo -n \"$tool: \")",
+      "Bash(mise registry:*)",
+      "Bash(mise ls-remote:*)",
+      "Bash(for tool in eza fd delta lazygit gh kubectl k9s helm terraform ansible vault yq)",
+      "Bash(find:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

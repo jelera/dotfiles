@@ -1,0 +1,45 @@
+# Lefthook Configuration
+# https://github.com/evilmartians/lefthook
+
+pre-commit:
+  parallel: true
+  commands:
+    shellcheck:
+      glob: "*.sh"
+      run: shellcheck {staged_files}
+      skip:
+        - merge
+        - rebase
+
+    shellcheck-install:
+      glob: "install/*.sh"
+      run: shellcheck -x {staged_files}
+      skip:
+        - merge
+        - rebase
+
+    gitleaks:
+      run: gitleaks protect --verbose --redact --staged
+      skip:
+        - merge
+        - rebase
+
+    trailing-whitespace:
+      glob: "*.{sh,md,yml,yaml,toml}"
+      run: |
+        if grep -n '[[:space:]]$' {staged_files}; then
+          echo "Error: Trailing whitespace found in {staged_files}"
+          exit 1
+        fi
+      skip:
+        - merge
+        - rebase
+
+pre-push:
+  parallel: true
+  commands:
+    gitleaks-full:
+      run: gitleaks detect --verbose --redact
+      skip:
+        - merge
+        - rebase
