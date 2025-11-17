@@ -9,7 +9,8 @@ if [[ -n "${BASH_SOURCE[0]}" ]]; then
     # Bash
     DOTFILES_SHELL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 elif [[ -n "${ZSH_VERSION}" ]]; then
-    # Zsh
+    # Zsh - uses zsh-specific syntax for getting script path
+    # shellcheck disable=SC2296
     DOTFILES_SHELL_DIR="$(cd "$(dirname "${(%):-%x}")" && pwd)"
 else
     # Fallback: assume standard location
@@ -35,6 +36,7 @@ elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
     if [[ -f /etc/os-release ]]; then
         # shellcheck disable=SC1091
         source /etc/os-release
+        # shellcheck disable=SC2154
         case "$ID" in
             ubuntu|kubuntu|xubuntu|lubuntu|ubuntu-*|pop)
                 # Ubuntu and derivatives

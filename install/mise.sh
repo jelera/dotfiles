@@ -170,7 +170,7 @@ install_mise_tools() {
     log_info "  • Languages: Ruby, Node, Python, Go, Erlang, Elixir"
     log_info "  • Essential CLI: jq, fzf, ripgrep, bat, neovim, shellcheck"
     log_info "  • Modern Tools: eza, fd, zoxide, dust, procs, bottom, duf, httpie"
-    log_info "  • Git Tools: gh, lazygit, delta, gitleaks, pre-commit"
+    log_info "  • Git Tools: gh, lazygit, delta, gitleaks, lefthook"
     log_info "  • Dev Utils: direnv, just, watchexec, tokei, hyperfine, grex, glow, yq"
     log_info "  • Go Tools: gopls, golangci-lint"
     log_info "  • Node Tools: typescript, prettier, eslint, pnpm, yarn"
@@ -195,7 +195,7 @@ install_mise_tools() {
         local cli_tools=(
             "jq@latest" "fzf@latest" "ripgrep@latest" "bat@latest" "neovim@latest" "shellcheck@latest"
             "eza@latest" "fd@latest" "zoxide@latest" "dust@latest" "procs@latest" "bottom@latest" "duf@latest" "httpie@latest"
-            "gh@latest" "lazygit@latest" "delta@latest" "gitleaks@latest" "pre-commit@latest"
+            "gh@latest" "lazygit@latest" "delta@latest" "gitleaks@latest" "lefthook@latest"
             "direnv@latest" "just@latest" "watchexec@latest" "tokei@latest" "hyperfine@latest" "grex@latest" "glow@latest" "yq@latest"
         )
 
@@ -220,6 +220,16 @@ install_mise_tools() {
     # Show installed tools
     log_step "Installed mise tools:"
     mise list
+
+    # Install lefthook git hooks if lefthook is installed
+    if mise list 2>/dev/null | grep -q "lefthook"; then
+        log_step "Setting up lefthook git hooks..."
+        if lefthook install 2>/dev/null; then
+            log_success "✓ Lefthook git hooks installed"
+        else
+            log_info "  Lefthook hooks will be installed on next shell session"
+        fi
+    fi
 
     return 0
 }

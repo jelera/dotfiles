@@ -32,7 +32,13 @@
       "Bash(/usr/bin/grep -v \"no matches found\")",
       "Bash(for script in install.sh install/*.sh shell/functions.d/*.sh)",
       "Bash(do echo \"=== Checking: $script ===\" shellcheck \"$script\")",
-      "Bash(/usr/bin/find:*)"
+      "Bash(/usr/bin/find:*)",
+      "Bash(/usr/bin/grep -B1 \"sh$\")",
+      "Bash(lefthook version:*)",
+      "Bash(lefthook install:*)",
+      "Bash(/usr/bin/grep:*)",
+      "Bash(eval '$(mise activate bash)')",
+      "Bash(lefthook --version:*)"
     ],
     "deny": [],
     "ask": []

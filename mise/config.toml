@@ -42,7 +42,7 @@ gh = "latest"
 lazygit = "latest"
 delta = "latest"
 gitleaks = "latest"
-pre-commit = "latest"
+lefthook = "latest"
 
 # ===== Development Tools =====
 # Essential dev utilities

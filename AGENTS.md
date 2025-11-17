@@ -393,6 +393,53 @@ echo "test" | gpg --clearsign
 
 ## Testing
 
+### Git Hooks (Lefthook)
+
+Git hooks are automatically managed by **lefthook** for code quality and security.
+
+**Automatic Installation**:
+Lefthook is automatically installed during the dotfiles setup:
+1. Installed via mise (see `mise/config.toml`)
+2. Git hooks are automatically set up in `.git/hooks/` during `./install.sh`
+3. No manual intervention required!
+
+**Manual Installation** (if needed):
+```bash
+# Install lefthook
+mise install lefthook@latest
+
+# Set up git hooks in a repository
+lefthook install
+```
+
+**Pre-commit hooks** (run before every commit):
+- `shellcheck`: Lint all `.sh` files
+- `shellcheck-no-ext`: Lint shell scripts without `.sh` extension (`bin/*`, `shell/functions`, `shell/env`)
+- `gitleaks`: Check staged files for secrets/credentials
+- `trailing-whitespace`: Check for trailing whitespace in code files
+
+**Pre-push hooks** (run before pushing to remote):
+- `gitleaks-full`: Full repository scan for secrets
+
+**Manual testing**:
+```bash
+# Test pre-commit hooks
+lefthook run pre-commit
+
+# Test pre-push hooks
+lefthook run pre-push
+
+# Skip hooks for a commit
+git commit --no-verify
+
+# Skip hooks for a push
+git push --no-verify
+```
+
+**Configuration**: Edit `lefthook.yml` to add or modify hooks.
+
+### Shell Scripts
+
 ```bash
 # Verify symlinks
 ./install/symlinks.sh verify
@@ -400,6 +447,9 @@ echo "test" | gpg --clearsign
 # Test shell syntax
 bash -n bash/bashrc
 zsh -n zsh/zshrc
+
+# Lint all shell scripts
+shellcheck install.sh install/*.sh shell/functions.d/*.sh shell/functions shell/env bin/*
 
 # Test scripts
 bash -n install.sh
