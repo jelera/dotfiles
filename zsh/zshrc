@@ -222,6 +222,22 @@ bindkey '^Z' foreground-vi
 bindkey '\e.' insert-last-word
 
 #----------------------------------------------------------------------------//
+# => MISE (VERSION MANAGER)
+#----------------------------------------------------------------------------//
+# Initialize mise for zsh (must be before loading aliases/functions)
+if command -v mise &>/dev/null; then
+    eval "$(mise activate zsh)"
+fi
+
+#----------------------------------------------------------------------------//
+# => ZOXIDE (SMART CD)
+#----------------------------------------------------------------------------//
+# Initialize zoxide for smart directory jumping (must be before loading aliases)
+if command -v zoxide &>/dev/null; then
+    eval "$(zoxide init zsh)"
+fi
+
+#----------------------------------------------------------------------------//
 # => SOURCES
 #----------------------------------------------------------------------------//
 # Dotfiles directory
@@ -231,22 +247,6 @@ DOTFILES_DIR="${HOME}/.config/dotfiles"
 # Note: shell/env is loaded in .zshenv (for all shells, including non-interactive)
 [[ -f "${DOTFILES_DIR}/shell/alias" ]] && source "${DOTFILES_DIR}/shell/alias"
 [[ -f "${DOTFILES_DIR}/shell/functions" ]] && source "${DOTFILES_DIR}/shell/functions"
-
-#----------------------------------------------------------------------------//
-# => MISE (VERSION MANAGER)
-#----------------------------------------------------------------------------//
-# Initialize mise for zsh
-if command -v mise &>/dev/null; then
-    eval "$(mise activate zsh)"
-fi
-
-#----------------------------------------------------------------------------//
-# => ZOXIDE (SMART CD)
-#----------------------------------------------------------------------------//
-# Initialize zoxide for smart directory jumping
-if command -v zoxide &>/dev/null; then
-    eval "$(zoxide init zsh)"
-fi
 
 #----------------------------------------------------------------------------//
 # => FZF
