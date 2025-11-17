@@ -1,5 +1,10 @@
 # ShellCheck configuration for dotfiles
 # https://github.com/koalaman/shellcheck/wiki/Directive
+#
+# This config is used by:
+# - Local development: shellcheck command reads this automatically
+# - Lefthook git hooks: pre-commit hooks use shellcheck
+# - GitHub Actions: .github/workflows/lint.yml CI pipeline
 
 # Target bash shell (compatible with bash 3.2 on macOS)
 shell=bash

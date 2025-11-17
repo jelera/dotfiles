@@ -1,0 +1,66 @@
+# ripgrep configuration
+# See: https://github.com/BurntSushi/ripgrep/blob/master/GUIDE.md
+
+# Smart case: case-insensitive if pattern is all lowercase, case-sensitive otherwise
+--smart-case
+
+# Follow symbolic links
+--follow
+
+# Search hidden files and directories (but respect .gitignore)
+--hidden
+
+# Always use colors
+--colors=line:fg:yellow
+--colors=line:style:bold
+--colors=path:fg:green
+--colors=path:style:bold
+--colors=match:fg:red
+--colors=match:style:bold
+
+# Sort results by file path
+--sort=path
+
+# Show line numbers by default
+--line-number
+
+# Ignore patterns (even when searching hidden files)
+--glob=!.git/
+--glob=!.svn/
+--glob=!.hg/
+--glob=!node_modules/
+--glob=!vendor/
+--glob=!.bundle/
+--glob=!.cache/
+--glob=!.DS_Store
+--glob=!*.min.js
+--glob=!*.min.css
+--glob=!*.swp
+--glob=!*.swo
+--glob=!*.bak
+--glob=!*.pyc
+--glob=!*.class
+--glob=!*.o
+--glob=!*.so
+--glob=!*.dylib
+--glob=!tags
+--glob=!TAGS
+--glob=!package-lock.json
+--glob=!yarn.lock
+--glob=!Gemfile.lock
+--glob=!Cargo.lock
+--glob=!.pytest_cache/
+--glob=!.mypy_cache/
+--glob=!__pycache__/
+--glob=!.coverage
+--glob=!htmlcov/
+--glob=!*.egg-info/
+--glob=!dist/
+--glob=!build/
+
+# Set max columns to prevent very long lines from being searched
+# (useful for minified files that might slip through)
+--max-columns=500
+
+# Use PCRE2 regex engine for more features (if available)
+# --pcre2

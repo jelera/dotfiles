@@ -13,13 +13,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Run ShellCheck
-        uses: ludeeus/action-shellcheck@master
-        with:
-          severity: warning
-          scandir: '.'
-          ignore_paths: '.git .github'
-          ignore_names: 'git-completion.bash'
+      - name: Install ShellCheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+
+      - name: Run ShellCheck on all shell scripts
+        run: |
+          find . -type f -name "*.sh" ! -path "*/node_modules/*" ! -path "*/.git/*" -print0 | \
+            xargs -0 shellcheck
 
   gitleaks:
     name: Secrets Detection

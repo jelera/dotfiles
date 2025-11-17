@@ -440,21 +440,31 @@ git push --no-verify
 
 ### Shell Scripts
 
+**Configuration**: Shell script linting rules are defined in `.shellcheckrc` and used everywhere:
+- ✅ Local development (`shellcheck` command)
+- ✅ Git pre-commit hooks (via lefthook)
+- ✅ GitHub Actions CI pipeline
+
+**Linting**:
 ```bash
+# Lint all shell scripts (uses .shellcheckrc automatically)
+shellcheck install.sh install/*.sh shell/functions.d/*.sh shell/functions shell/env bin/*
+
 # Verify symlinks
 ./install/symlinks.sh verify
 
 # Test shell syntax
 bash -n bash/bashrc
 zsh -n zsh/zshrc
-
-# Lint all shell scripts
-shellcheck install.sh install/*.sh shell/functions.d/*.sh shell/functions shell/env bin/*
-
-# Test scripts
 bash -n install.sh
 bash -n install/*.sh
 ```
+
+**ShellCheck configuration** (`.shellcheckrc`):
+- Target shell: bash (compatible with bash 3.2 on macOS)
+- Severity: warnings and above
+- Disabled: SC1091 (following sourced files)
+- Enabled optional checks: default-case, nullary-conditions, unassigned-uppercase, etc.
 
 ## Troubleshooting
 

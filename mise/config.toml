@@ -146,9 +146,10 @@ VISUAL = "nvim"
 PAGER = "less"
 
 # XDG Base Directory
-XDG_CONFIG_HOME = "~/.config"
-XDG_DATA_HOME = "~/.local/share"
-XDG_CACHE_HOME = "~/.cache"
+# Note: Use mise template syntax to expand $HOME
+XDG_CONFIG_HOME = "{{env.HOME}}/.config"
+XDG_DATA_HOME = "{{env.HOME}}/.local/share"
+XDG_CACHE_HOME = "{{env.HOME}}/.cache"
 
 # FZF configuration
 FZF_DEFAULT_COMMAND = "fd --type f --hidden --follow --exclude .git"
@@ -160,7 +161,8 @@ BAT_THEME = "TwoDark"
 BAT_STYLE = "numbers,changes,header"
 
 # Ripgrep configuration
-RIPGREP_CONFIG_PATH = "~/.ripgreprc"
+# Set explicit path so ripgrep uses our config (with expanded $HOME)
+RIPGREP_CONFIG_PATH = "{{env.HOME}}/.ripgreprc"
 
 # Development paths
 PROJECTS = "~/projects"

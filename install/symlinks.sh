@@ -225,6 +225,16 @@ symlink_iterm2_config() {
     return 0
 }
 
+symlink_ripgrep_config() {
+    log_step "Linking ripgrep configuration..."
+
+    if [[ -f "${DOTFILES_DIR}/config/ripgrep/ripgreprc" ]]; then
+        create_dotfile_symlink "${DOTFILES_DIR}/config/ripgrep/ripgreprc" "${HOME}/.ripgreprc"
+    fi
+
+    return 0
+}
+
 symlink_config_dirs() {
     log_step "Linking XDG config directories..."
 
@@ -252,6 +262,7 @@ create_all_symlinks() {
     symlink_git_configs
     symlink_gpg_config
     symlink_tmux_config
+    symlink_ripgrep_config
     symlink_bin_scripts
     symlink_config_dirs
     symlink_iterm2_config
@@ -283,6 +294,7 @@ remove_symlinks() {
         "${HOME}/.gitmessage"
         "${HOME}/.gnupg/gpg-agent.conf"
         "${HOME}/.tmux.conf"
+        "${HOME}/.ripgreprc"
         "${HOME}/.bin"
         "${HOME}/.config/mise"
         "${HOME}/.config/ghostty"
@@ -331,6 +343,7 @@ verify_symlinks() {
         "${HOME}/.gitconfig"
         "${HOME}/.gnupg/gpg-agent.conf"
         "${HOME}/.tmux.conf"
+        "${HOME}/.ripgreprc"
         "${HOME}/.bin"
         "${HOME}/.config/ghostty"
     )
