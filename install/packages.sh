@@ -159,6 +159,45 @@ install_via_homebrew() {
     return 1
 }
 
+# Install via Homebrew Cask (Priority 1b - GUI applications)
+install_via_homebrew_cask() {
+    local package="$1"
+
+    if ! command_exists brew; then
+        return 1
+    fi
+
+    log_info "Trying Homebrew Cask for $package..."
+
+    # Check if already installed via cask
+    if brew list --cask "$package" &>/dev/null; then
+        log_info "✓ $package (already installed via Homebrew Cask)"
+        add_install_method "$package" "homebrew-cask"
+        return 0
+    fi
+
+    if is_dry_run; then
+        # Check if cask exists
+        if brew info --cask "$package" &>/dev/null; then
+            log_dry_run "Would install $package via Homebrew Cask"
+            add_install_method "$package" "homebrew-cask"
+            return 0
+        else
+            log_info "  Cask not available in Homebrew"
+            return 1
+        fi
+    fi
+
+    if brew install --cask "$package" 2>/dev/null; then
+        log_success "✓ $package (installed via Homebrew Cask)"
+        add_install_method "$package" "homebrew-cask"
+        return 0
+    fi
+
+    log_info "  Cask not available in Homebrew"
+    return 1
+}
+
 # Install via maintained PPA (Priority 2 - Ubuntu only)
 install_via_ppa() {
     local package="$1"
@@ -313,7 +352,7 @@ build_from_source() {
 install_package() {
     local package="$1"
     shift
-    local options=("$@")  # Additional options: ppa_repo, flatpak_id, source_url, build_script
+    local options=("$@")  # Additional options: ppa_repo, flatpak_id, source_url, build_script, cask
 
     log_step "Installing: $package"
 
@@ -323,14 +362,31 @@ install_package() {
         return 0
     fi
 
-    # Priority 0: mise (HIGHEST - try first for all CLI tools)
-    if install_via_mise "$package"; then
-        return 0
+    # Check for cask option (GUI application)
+    local is_cask=false
+    for opt in "${options[@]}"; do
+        if [[ "$opt" == "cask" ]]; then
+            is_cask=true
+            break
+        fi
+    done
+
+    # Priority 0: mise (HIGHEST - try first for all CLI tools, skip for casks)
+    if [[ "$is_cask" == false ]]; then
+        if install_via_mise "$package"; then
+            return 0
+        fi
     fi
 
-    # Priority 1: Homebrew
-    if install_via_homebrew "$package"; then
-        return 0
+    # Priority 1: Homebrew (or Homebrew Cask for GUI apps)
+    if [[ "$is_cask" == true ]]; then
+        if install_via_homebrew_cask "$package"; then
+            return 0
+        fi
+    else
+        if install_via_homebrew "$package"; then
+            return 0
+        fi
     fi
 
     # Priority 2: PPA (Ubuntu only)
@@ -388,8 +444,13 @@ install_packages() {
 
     local failed_packages=()
 
-    for package in "${packages[@]}"; do
-        if ! install_package "$package"; then
+    for package_spec in "${packages[@]}"; do
+        # Parse package spec (format: "package" or "package:option1:option2")
+        IFS=':' read -ra parts <<< "$package_spec"
+        local package="${parts[0]}"
+        local options=("${parts[@]:1}")
+
+        if ! install_package "$package" "${options[@]}"; then
             failed_packages+=("$package")
         fi
     done
@@ -511,6 +572,30 @@ install_essential_packages() {
     install_packages "${packages[@]}"
 }
 
+# Install GUI applications (terminal emulators, etc.)
+install_gui_applications() {
+    log_step "Installing GUI applications..."
+
+    # Terminal emulators
+    local gui_apps=()
+
+    # Ghostty (macOS - Homebrew Cask, Linux - manual)
+    # shellcheck disable=SC2154
+    if [[ "$OS" == "macos" ]] || [[ "$OSTYPE" == "darwin"* ]]; then
+        gui_apps+=("ghostty:cask")
+    else
+        log_info "Ghostty: Install manually from https://ghostty.org/ (not in package managers yet)"
+    fi
+
+    if (( ${#gui_apps[@]} > 0 )); then
+        install_packages "${gui_apps[@]}"
+    else
+        log_info "No GUI applications to install on this platform"
+    fi
+
+    return 0
+}
+
 # Print installation summary
 print_installation_summary() {
     log_step "Installation Summary"
@@ -539,6 +624,7 @@ print_installation_summary() {
     # Count by method
     local mise_count=0
     local homebrew_count=0
+    local homebrew_cask_count=0
     local ppa_count=0
     local apt_count=0
     local flatpak_count=0
@@ -549,6 +635,7 @@ print_installation_summary() {
             case "$method" in
                 mise) ((mise_count++)) ;;
                 homebrew) ((homebrew_count++)) ;;
+                homebrew-cask) ((homebrew_cask_count++)) ;;
                 ppa) ((ppa_count++)) ;;
                 apt) ((apt_count++)) ;;
                 flatpak) ((flatpak_count++)) ;;
@@ -561,6 +648,7 @@ print_installation_summary() {
     log_info "Installation methods used:"
     [[ $mise_count -gt 0 ]] && echo "  mise: $mise_count packages"
     [[ $homebrew_count -gt 0 ]] && echo "  Homebrew: $homebrew_count packages"
+    [[ $homebrew_cask_count -gt 0 ]] && echo "  Homebrew Cask: $homebrew_cask_count packages"
     [[ $ppa_count -gt 0 ]] && echo "  PPA: $ppa_count packages"
     [[ $apt_count -gt 0 ]] && echo "  Apt: $apt_count packages"
     [[ $flatpak_count -gt 0 ]] && echo "  Flatpak: $flatpak_count packages"
@@ -584,6 +672,9 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 
     # Install essential packages
     install_essential_packages
+
+    # Install GUI applications (terminal emulators, etc.)
+    install_gui_applications
 
     # Print summary
     print_installation_summary

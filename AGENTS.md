@@ -90,6 +90,9 @@ All scripts in `install/`:
 - **Shared configs**: `shell/` (alias, functions, env)
 - **Bash**: `bash/bashrc`, `bash/bash_profile`
 - **Zsh**: `zsh/zshrc` with Zinit, `zsh/zshenv`
+  - **Plugin documentation**: See `zsh/PLUGINS.md` for complete plugin list
+  - **Development plugins**: Rails, Node.js, Docker, Bundler, npm, yarn
+  - **Platform-specific**: Brew (macOS), Ubuntu (Linux)
 - **Local overrides** (gitignored):
   - `~/.{bash,zsh}rc.local` - Shell-specific config
   - `~/.alias.local` - Custom aliases
@@ -229,6 +232,79 @@ echo $GNOME_KEYRING_CONTROL
 # Ubuntu (GNOME) - Check GNOME Keyring
 seahorse  # Open Passwords and Keys GUI
 ```
+
+### Terminal Emulators
+
+This dotfiles repository includes configurations for multiple terminal emulators:
+
+#### iTerm2 (macOS only)
+
+**Automatic Configuration**: The install script automatically configures iTerm2 to load preferences from the dotfiles directory.
+
+**How it works:**
+1. Your current iTerm2 settings are stored in `iterm2/com.googlecode.iterm2.plist`
+2. During installation, iTerm2 is configured to load preferences from `~/.config/dotfiles/iterm2`
+3. Changes made in iTerm2 are automatically saved back to the dotfiles directory
+
+**Manual setup:**
+```bash
+# If you need to manually configure iTerm2
+defaults write com.googlecode.iterm2 PrefsCustomFolder -string "~/.config/dotfiles/iterm2"
+defaults write com.googlecode.iterm2 LoadPrefsFromCustomFolder -bool true
+```
+
+**Update settings:**
+```bash
+# After making changes in iTerm2, commit them:
+cd ~/.config/dotfiles
+git add iterm2/com.googlecode.iterm2.plist
+git commit -m "Update iTerm2 settings"
+```
+
+See `iterm2/README.md` for detailed instructions.
+
+#### Ghostty (macOS and Linux)
+
+**Installation:**
+
+Ghostty is automatically installed during dotfiles setup on macOS.
+
+```bash
+# Automatic (via dotfiles install script)
+./install.sh
+
+# Manual installation if needed
+brew install --cask ghostty              # macOS
+# Linux - download from https://ghostty.org/
+```
+
+**Configuration**: Ghostty config is automatically symlinked during installation:
+- Source: `config/ghostty/config`
+- Target: `~/.config/ghostty/config`
+
+**Features configured:**
+- **Theme**: Catppuccin Mocha (customizable)
+- **Font**: JetBrainsMono Nerd Font
+- **Shell Integration**: Enabled for zsh with cursor, sudo, and title tracking
+- **Keybindings**: macOS-style shortcuts for window/tab/split management
+- **Performance**: GPU acceleration enabled
+
+**Keybindings quick reference:**
+- `⌘+D` / `⌘+Shift+D` - Split right/down
+- `⌘+T` - New tab
+- `⌘+1-9` - Go to tab
+- `⌘+←→↑↓` - Navigate splits
+- `⌘+Shift+R` - Reload config
+
+**Customize:**
+```bash
+# Edit config
+nvim ~/.config/dotfiles/config/ghostty/config
+
+# In Ghostty, reload with: ⌘+Shift+R
+```
+
+See `config/ghostty/README.md` for detailed documentation, customization options, and troubleshooting.
 
 ### GPG Commit Signing
 

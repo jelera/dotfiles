@@ -197,6 +197,34 @@ symlink_bin_scripts() {
     return 0
 }
 
+symlink_iterm2_config() {
+    log_step "Configuring iTerm2..."
+
+    if [[ "$OSTYPE" != "darwin"* ]]; then
+        log_info "Skipping iTerm2 config (macOS only)"
+        return 0
+    fi
+
+    if [[ ! -d "${DOTFILES_DIR}/iterm2" ]]; then
+        log_warning "iTerm2 directory not found"
+        return 1
+    fi
+
+    if is_dry_run; then
+        log_dry_run "Would configure iTerm2 to load preferences from: ${DOTFILES_DIR}/iterm2"
+        return 0
+    fi
+
+    # Configure iTerm2 to load preferences from dotfiles
+    defaults write com.googlecode.iterm2 PrefsCustomFolder -string "${DOTFILES_DIR}/iterm2"
+    defaults write com.googlecode.iterm2 LoadPrefsFromCustomFolder -bool true
+
+    log_success "iTerm2 configured to load preferences from dotfiles"
+    log_info "Restart iTerm2 for changes to take effect"
+
+    return 0
+}
+
 symlink_config_dirs() {
     log_step "Linking XDG config directories..."
 
@@ -206,6 +234,11 @@ symlink_config_dirs() {
     # Link mise config if exists
     if [[ -d "${DOTFILES_DIR}/config/mise" ]]; then
         create_dotfile_symlink "${DOTFILES_DIR}/config/mise" "${HOME}/.config/mise"
+    fi
+
+    # Link Ghostty config if exists
+    if [[ -d "${DOTFILES_DIR}/config/ghostty" ]]; then
+        create_dotfile_symlink "${DOTFILES_DIR}/config/ghostty" "${HOME}/.config/ghostty"
     fi
 
     return 0
@@ -221,6 +254,7 @@ create_all_symlinks() {
     symlink_tmux_config
     symlink_bin_scripts
     symlink_config_dirs
+    symlink_iterm2_config
 
     log_success "All symlinks created"
 
@@ -251,6 +285,7 @@ remove_symlinks() {
         "${HOME}/.tmux.conf"
         "${HOME}/.bin"
         "${HOME}/.config/mise"
+        "${HOME}/.config/ghostty"
     )
 
     for symlink in "${symlinks[@]}"; do
@@ -297,6 +332,7 @@ verify_symlinks() {
         "${HOME}/.gnupg/gpg-agent.conf"
         "${HOME}/.tmux.conf"
         "${HOME}/.bin"
+        "${HOME}/.config/ghostty"
     )
 
     local all_valid=true

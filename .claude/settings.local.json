@@ -23,7 +23,16 @@
       "Bash(zsh -c 'source ~/.config/dotfiles/shell/env && echo \"\"GPG_TTY after source: $GPG_TTY\"\"')",
       "Bash(zsh:*)",
       "Bash(bash -c:*)",
-      "Bash(bash:*)"
+      "Bash(bash:*)",
+      "Bash(mise ls-remote:*)",
+      "Bash(/usr/bin/grep -E \"Font|Cursor|Foreground|Background|Columns|Rows\" /tmp/iterm2_settings.xml)",
+      "Bash(/usr/bin/grep -A 2 \"Normal Font\" /tmp/iterm2_settings.xml)",
+      "Bash(/usr/bin/grep -B 5 -A 20 \"New Bookmarks\" /tmp/iterm2_settings.xml)",
+      "Bash(find:*)",
+      "Bash(/usr/bin/grep -v \"no matches found\")",
+      "Bash(for script in install.sh install/*.sh shell/functions.d/*.sh)",
+      "Bash(do echo \"=== Checking: $script ===\" shellcheck \"$script\")",
+      "Bash(/usr/bin/find:*)"
     ],
     "deny": [],
     "ask": []

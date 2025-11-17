@@ -88,14 +88,14 @@ zinit light hlissner/zsh-autopair
 zinit ice wait lucid
 zinit light MichaelAquilina/zsh-you-should-use
 
-# Git extras
+# Git support
 zinit ice wait lucid
 zinit snippet OMZ::lib/git.zsh
 
 zinit ice wait lucid
 zinit snippet OMZ::plugins/git/git.plugin.zsh
 
-# Additional utilities
+# Utility plugins
 zinit ice wait lucid
 zinit snippet OMZ::plugins/extract/extract.plugin.zsh
 
@@ -106,17 +106,54 @@ zinit snippet OMZ::plugins/command-not-found/command-not-found.plugin.zsh
 zinit ice wait lucid
 zinit light Aloxaf/fzf-tab
 
-# Docker completions
-zinit ice wait lucid as"completion"
-zinit snippet https://github.com/docker/cli/blob/master/contrib/completion/zsh/_docker
+#----------------------------------------------------------------------------//
+# => DEVELOPMENT PLUGINS
+#----------------------------------------------------------------------------//
 
-# macOS specific plugins
+# Docker
+zinit ice wait lucid
+zinit snippet OMZ::plugins/docker/docker.plugin.zsh
+
+zinit ice wait lucid as"completion"
+zinit snippet OMZ::plugins/docker-compose/docker-compose.plugin.zsh
+
+# Node.js / npm / yarn
+zinit ice wait lucid
+zinit snippet OMZ::plugins/node/node.plugin.zsh
+
+zinit ice wait lucid
+zinit snippet OMZ::plugins/npm/npm.plugin.zsh
+
+zinit ice wait lucid
+zinit snippet OMZ::plugins/yarn/yarn.plugin.zsh
+
+# Ruby / Rails
+zinit ice wait lucid
+zinit snippet OMZ::plugins/ruby/ruby.plugin.zsh
+
+zinit ice wait lucid
+zinit snippet OMZ::plugins/rails/rails.plugin.zsh
+
+zinit ice wait lucid
+zinit snippet OMZ::plugins/bundler/bundler.plugin.zsh
+
+#----------------------------------------------------------------------------//
+# => PLATFORM-SPECIFIC PLUGINS
+#----------------------------------------------------------------------------//
+
+# macOS specific
 if [[ "$OSTYPE" == "darwin"* ]]; then
     zinit ice wait lucid
-    zinit snippet OMZ::plugins/macos/macos.plugin.zsh
-
-    zinit ice wait lucid
     zinit snippet OMZ::plugins/brew/brew.plugin.zsh
+fi
+
+# Linux specific
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    # Ubuntu/Debian specific
+    if command -v apt-get &>/dev/null; then
+        zinit ice wait lucid
+        zinit snippet OMZ::plugins/ubuntu/ubuntu.plugin.zsh
+    fi
 fi
 
 #----------------------------------------------------------------------------//

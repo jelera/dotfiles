@@ -78,6 +78,11 @@ yq = "latest"
 # Documentation & Help
 tealdeer = "latest"          # Community man pages (tldr)
 
+# ===== Terminal Emulators =====
+# Note: Ghostty is automatically installed via Homebrew Cask on macOS
+# See install/packages.sh -> install_gui_applications()
+# Config: config/ghostty/config (symlinked to ~/.config/ghostty/config)
+
 # Network Tools (uncomment as needed)
 # gping = "latest"           # Ping with graph
 # dog = "latest"             # Modern dig

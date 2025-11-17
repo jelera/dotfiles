@@ -15,6 +15,7 @@ sysinfo() {
     elif [[ -f /etc/os-release ]]; then
         # shellcheck source=/dev/null
         . /etc/os-release
+        # shellcheck disable=SC2154
         echo "Distribution: $PRETTY_NAME"
     fi
 
