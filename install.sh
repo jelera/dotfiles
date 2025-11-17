@@ -158,12 +158,12 @@ setup_local_env() {
 
 # Configure Git credential helper based on OS
 configure_git_credentials() {
-    log_step "Configuring Git credential helper..."
+    log_step "Configuring Git credentials and credential helper..."
 
     local gitconfig_local="${HOME}/.gitconfig.local"
 
     if is_dry_run; then
-        log_dry_run "Would configure Git credential helper in ${gitconfig_local}"
+        log_dry_run "Would configure Git credentials and credential helper in ${gitconfig_local}"
         return 0
     fi
 
@@ -171,6 +171,22 @@ configure_git_credentials() {
     if [[ ! -f "$gitconfig_local" ]]; then
         touch "$gitconfig_local"
         log_info "Created ${gitconfig_local}"
+    fi
+
+    # Fetch user info from GitHub CLI
+    if fetch_git_user_from_gh; then
+        # Set user name and email from GitHub
+        git config --file="$gitconfig_local" user.name "$GH_USER_NAME"
+        git config --file="$gitconfig_local" user.email "$GH_USER_EMAIL"
+        log_success "Configured git user from GitHub: ${GH_USER_NAME} <${GH_USER_EMAIL}>"
+    else
+        log_info "Could not fetch user info from GitHub CLI"
+        log_info "To enable automatic user info, ensure gh is authenticated:"
+        log_info "  1. Run: gh auth refresh -h github.com -s user"
+        log_info "  2. Re-run: ./install.sh --symlinks-only"
+        log_info "Or manually set in ~/.gitconfig.local:"
+        log_info "  git config --file ~/.gitconfig.local user.name 'Your Name'"
+        log_info "  git config --file ~/.gitconfig.local user.email 'you@example.com'"
     fi
 
     # Remove any existing credential.helper settings from local config
@@ -220,7 +236,7 @@ configure_git_credentials() {
         git config --file="$gitconfig_local" credential.helper "cache --timeout=7200"
     fi
 
-    log_info "Git credential helper configured in ${gitconfig_local}"
+    log_info "Git configuration written to ${gitconfig_local}"
 }
 
 #----------------------------------------------------------------------------//

@@ -326,6 +326,73 @@ safe_source() {
     return 1
 }
 
+# Fetch git user info from GitHub CLI
+fetch_git_user_from_gh() {
+    # Check if gh is installed and authenticated
+    if ! command_exists gh; then
+        log_warning "GitHub CLI (gh) not installed, skipping user info fetch"
+        return 1
+    fi
+
+    # Check authentication status
+    if ! gh auth status &>/dev/null; then
+        log_warning "GitHub CLI not authenticated, skipping user info fetch"
+        return 1
+    fi
+
+    local name email
+
+    # Fetch name from GitHub API
+    name=$(gh api user --jq '.name' 2>/dev/null)
+    if [[ -z "$name" || "$name" == "null" ]]; then
+        log_warning "Could not fetch name from GitHub"
+        return 1
+    fi
+
+    # Try to fetch primary email from GitHub
+    # Note: This requires the 'user' scope
+    local email_response
+    email_response=$(gh api user/emails 2>&1)
+
+    # Check if the API call succeeded (check for error patterns)
+    if echo "$email_response" | /usr/bin/grep -q '"message"'; then
+        # API call failed, fallback to noreply email
+        local username
+        username=$(gh api user --jq '.login' 2>/dev/null)
+        if [[ -n "$username" && "$username" != "null" ]]; then
+            email="${username}@users.noreply.github.com"
+            log_info "Using GitHub noreply email (user scope not available): ${email}"
+            log_info "To use your primary email, grant 'user' scope:"
+            log_info "  gh auth refresh -h github.com -s user"
+        else
+            log_warning "Could not determine email from GitHub"
+            return 1
+        fi
+    else
+        # API call succeeded, extract primary email using jq directly
+        email=$(echo "$email_response" | jq -r '.[] | select(.primary == true) | .email' 2>/dev/null)
+
+        # If still empty, fallback to noreply
+        if [[ -z "$email" || "$email" == "null" ]]; then
+            local username
+            username=$(gh api user --jq '.login' 2>/dev/null)
+            if [[ -n "$username" && "$username" != "null" ]]; then
+                email="${username}@users.noreply.github.com"
+                log_info "Using GitHub noreply email: ${email}"
+            else
+                log_warning "Could not determine email from GitHub"
+                return 1
+            fi
+        fi
+    fi
+
+    # Export for caller to use
+    export GH_USER_NAME="$name"
+    export GH_USER_EMAIL="$email"
+
+    return 0
+}
+
 # Export all functions if sourced
 if is_sourced; then
     export -f command_exists
@@ -344,6 +411,7 @@ if is_sourced; then
     export -f retry
     export -f add_line_to_file
     export -f safe_source
+    export -f fetch_git_user_from_gh
     export -f init_log_file
     export -f write_to_log
     export -f log_info

@@ -1,6 +1,7 @@
-[user]
-	name = Jose Elera
-	email = jelera@users.noreply.github.com
+# User info is automatically configured from GitHub CLI during installation
+# Stored in ~/.gitconfig.local (see [include] section at bottom)
+# To refresh: ./install.sh --symlinks-only
+# Or manually set: git config --file ~/.gitconfig.local user.name "Your Name"
 
 [core]
 	editor = nvim
