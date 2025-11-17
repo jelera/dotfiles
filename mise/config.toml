@@ -32,10 +32,10 @@ eza = "latest"
 fd = "latest"
 zoxide = "latest"
 dust = "latest"
-procs = "latest"             # Better ps (process viewer)
+"cargo:procs" = "latest"     # Better ps (process viewer)
 bottom = "latest"
 duf = "latest"
-httpie = "latest"            # Better curl (http command)
+"pipx:httpie" = "latest"     # Better curl (http command)
 
 # ===== Git & Version Control =====
 gh = "latest"
@@ -76,7 +76,7 @@ yq = "latest"
 # usql = "latest"            # Universal SQL client
 
 # Documentation & Help
-tealdeer = "latest"          # Community man pages (tldr)
+"cargo:tealdeer" = "latest"  # Community man pages (tldr)
 
 # ===== Terminal Emulators =====
 # Note: Ghostty is automatically installed via Homebrew Cask on macOS
@@ -124,15 +124,15 @@ tealdeer = "latest"          # Community man pages (tldr)
 "gem:rails" = "latest"                                                # Rails framework
 # "gem:bundler" = "latest"                                            # Dependency manager
 
-# Python tools (using uv backend)
-"uv:black" = "latest"                                                 # Python formatter
-"uv:ruff" = "latest"                                                  # Fast Python linter & formatter
-"uv:mypy" = "latest"                                                  # Type checker
-"uv:poetry" = "latest"                                                # Dependency management
-"uv:pipenv" = "latest"                                                # Virtual env & dependency manager
-"uv:ipython" = "latest"                                               # Better Python REPL
-# "uv:pytest" = "latest"                                              # Testing framework
-# "uv:pylint" = "latest"                                              # Python linter
+# Python tools (using pipx backend)
+"pipx:black" = "latest"                                               # Python formatter
+"pipx:ruff" = "latest"                                                # Fast Python linter & formatter
+"pipx:mypy" = "latest"                                                # Type checker
+"pipx:poetry" = "latest"                                              # Dependency management
+"pipx:pipenv" = "latest"                                              # Virtual env & dependency manager
+"pipx:ipython" = "latest"                                             # Better Python REPL
+# "pipx:pytest" = "latest"                                            # Testing framework
+# "pipx:pylint" = "latest"                                            # Python linter
 
 # Rust tools (via cargo)
 "cargo:stylua" = "latest"                                             # Lua formatter

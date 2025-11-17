@@ -45,7 +45,7 @@ detect_os() {
             OS_VERSION="$VERSION_ID"
 
             # Detect Ubuntu variant (Ubuntu, Kubuntu, Xubuntu, etc.)
-            # shellcheck disable=SC2154
+            # shellcheck disable=SC2153,SC2154
             case "$NAME" in
                 *"Kubuntu"*)
                     OS_NAME="Kubuntu"
