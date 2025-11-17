@@ -4,7 +4,7 @@ Guidance for AI assistants (Claude Code, Copilot, etc.) working in this reposito
 
 ## Repository Overview
 
-Modern dotfiles setup using **mise** for version management, **Zinit** for zsh plugins, with cross-platform support (macOS, Ubuntu 22.04/24.04).
+Modern dotfiles setup using **mise** for version management, **Zinit** for zsh plugins, with cross-platform support (macOS, Ubuntu/Kubuntu/Xubuntu 22.04/24.04 LTS).
 
 **Repository**: https://github.com/jelera/dotfiles
 
@@ -13,6 +13,12 @@ Modern dotfiles setup using **mise** for version management, **Zinit** for zsh p
 - **Zinit**: Fast zsh plugin manager with lazy-loading
 - **Homebrew**: Primary package manager (macOS + Linux)
 - **Secrets**: Managed via `~/.env.local` (gitignored)
+
+### Supported Platforms
+- **macOS**: Latest 2 major versions (Ventura 13+, Sequoia 15+)
+- **Ubuntu**: 22.04 LTS (Jammy), 24.04 LTS (Noble)
+- **Kubuntu**: 22.04 LTS (Jammy), 24.04 LTS (Noble)
+- **Xubuntu**: 22.04 LTS (Jammy), 24.04 LTS (Noble)
 
 ## Installation
 
@@ -28,6 +34,18 @@ cd ~/.config/dotfiles
 # Options available
 ./install.sh --help
 ```
+
+### Safety Features
+
+**Automatic Backups**: Existing dotfiles are automatically backed up before being replaced:
+- Backup location: `~/.dotfiles.backup.YYYYMMDD_HHMMSS/`
+- Each installation run creates a new timestamped backup directory
+- To restore: `cp -r ~/.dotfiles.backup.YYYYMMDD_HHMMSS/. ~/`
+
+**Installation Logs**: Warnings and errors are automatically logged:
+- Log location: `~/.dotfiles-install-logs/install-YYYYMMDD_HHMMSS.log`
+- Logs are only created when warnings or errors occur
+- Check logs after installation if issues are reported
 
 ### Installation Modules
 All scripts in `install/`:
@@ -82,7 +100,7 @@ All scripts in `install/`:
 - Template: `shell/.env.local.example`
 - Actual secrets: `~/.env.local` (gitignored)
 - Sourced automatically by shell configs
-- Full guide: `docs/SECRETS.md`
+- After installation: `cp shell/.env.local.example ~/.env.local && nvim ~/.env.local`
 
 ## Common Tasks
 
@@ -116,6 +134,169 @@ Note: Most utilities are shell functions (faster than scripts)
 1. Add to `install/packages.sh` in `install_essential_packages()`
 2. Will automatically try: mise → Homebrew → apt → Flatpak → source
 
+### GitHub Authentication
+
+**Credential Helper Setup** (automatically configured during installation):
+
+**Platform-specific helpers:**
+- **macOS**: `osxkeychain` (built-in, uses macOS Keychain)
+- **Ubuntu/Xubuntu**: `libsecret` (uses GNOME Keyring via Secret Service API)
+- **Kubuntu**: `libsecret` (uses KWallet via Secret Service API)
+- **GitHub-specific**: `gh auth git-credential` (uses GitHub CLI for github.com)
+
+The install script automatically:
+1. Installs `libsecret` libraries on all Ubuntu variants
+2. Installs desktop-specific keyring (GNOME Keyring for Xubuntu, KWallet for Kubuntu)
+3. Builds `git-credential-libsecret` helper if needed
+4. Configures the appropriate helper in `~/.gitconfig.local`
+5. Sets up GitHub-specific credential handling
+
+**How keyring selection works:**
+- **Ubuntu (GNOME)**: Uses GNOME Keyring (usually pre-installed)
+- **Kubuntu (KDE)**: Uses KWallet (provides Secret Service API backend)
+- **Xubuntu (XFCE)**: Uses GNOME Keyring (lighter alternative to KWallet)
+- All use the same `libsecret` credential helper via Secret Service API
+
+**To authenticate with GitHub:**
+```bash
+gh auth login
+# Choose: GitHub.com → HTTPS → Login with browser or token → Authenticate
+# Credentials are stored securely (Keychain on macOS, Secret Service on Linux)
+```
+
+**How it works:**
+1. For **GitHub URLs** (`github.com`, `gist.github.com`): Uses `gh auth git-credential`
+2. For **other Git hosts**: Uses platform-specific helper (osxkeychain or libsecret)
+3. Empty `helper =` line clears defaults before setting GitHub-specific ones
+
+**Configuration hierarchy:**
+```gitconfig
+# In git/gitconfig (version controlled)
+[credential "https://github.com"]
+	helper =
+	helper = gh auth git-credential
+
+# In ~/.gitconfig.local (machine-specific, not version controlled)
+[credential]
+	helper = osxkeychain          # macOS
+	# OR
+	helper = /usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret  # Ubuntu
+```
+
+**Verify authentication:**
+```bash
+gh auth status                    # Check GitHub authentication
+git config --get credential.helper # Check configured helper
+
+# Test on macOS
+git credential-osxkeychain
+
+# Test on Ubuntu
+/usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret
+```
+
+**Troubleshooting credential storage:**
+
+**On Ubuntu/Xubuntu/Kubuntu:**
+```bash
+# Check if libsecret is installed
+dpkg -l | grep libsecret
+
+# Check if keyring is running
+ps aux | grep -E 'gnome-keyring|kwalletd'
+
+# Manually build the credential helper
+cd /usr/share/doc/git/contrib/credential/libsecret
+sudo make
+
+# Test it
+./git-credential-libsecret
+
+# Configure it
+git config --global credential.helper /usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret
+```
+
+**Desktop-specific checks:**
+```bash
+# Kubuntu (KDE) - Check KWallet
+kwalletmanager5  # Open KWallet manager
+qdbus org.kde.kwalletd5 /modules/kwalletd5 org.kde.KWallet.isEnabled
+
+# Xubuntu (XFCE) - Check GNOME Keyring
+gnome-keyring-daemon --version
+echo $GNOME_KEYRING_CONTROL
+
+# Ubuntu (GNOME) - Check GNOME Keyring
+seahorse  # Open Passwords and Keys GUI
+```
+
+### GPG Commit Signing
+
+**Automatic Configuration**: GPG agent is automatically configured during installation:
+- GPG agent config: `gnupg/gpg-agent.conf` → `~/.gnupg/gpg-agent.conf`
+- Platform-specific pinentry paths are automatically detected
+- GPG agent is restarted after configuration
+
+**Requirements:**
+- `pinentry` must be installed (automatically installed via `install/packages.sh`)
+- `GPG_TTY` environment variable must be set (automatically configured in shell)
+
+**How it works:**
+1. Install script installs `pinentry` via package manager
+2. Symlink script creates `~/.gnupg/gpg-agent.conf` with correct pinentry path
+3. Shell configs (`shell/env.d/macos`, `shell/env.d/linux`) export `GPG_TTY=$(tty)`
+
+**Platform-specific pinentry paths:**
+- **macOS**: `/opt/homebrew/bin/pinentry-tty` (ARM) or `/usr/local/bin/pinentry-tty` (Intel)
+- **Linux**: `/usr/bin/pinentry-tty` or `/usr/bin/pinentry-curses`
+
+**Troubleshooting GPG signing errors:**
+
+If you see `gpg: signing failed: Inappropriate ioctl for device`, the fix is:
+
+```bash
+# 1. Export GPG_TTY (required for passphrase prompts)
+export GPG_TTY=$(tty)
+
+# 2. Verify it's set
+echo $GPG_TTY
+# Should output something like: /dev/ttys001
+
+# 3. Restart GPG agent
+gpgconf --kill gpg-agent
+
+# 4. Try committing again
+git commit -m "Your message"
+```
+
+**For permanent fix:**
+```bash
+# Reload your shell configuration (already configured in dotfiles)
+source ~/.zshrc  # or source ~/.bashrc
+
+# Verify GPG_TTY is exported
+echo $GPG_TTY
+
+# Check GPG agent config
+cat ~/.gnupg/gpg-agent.conf
+
+# Verify pinentry is installed
+which pinentry-tty  # macOS/Linux
+```
+
+**Check GPG configuration:**
+```bash
+# Check GPG agent status
+gpgconf --list-dirs
+
+# Check signing key
+git config --get user.signingkey
+git config --get commit.gpgsign
+
+# Test GPG signing
+echo "test" | gpg --clearsign
+```
+
 ## Code Conventions
 
 ### Shell Scripts
@@ -123,7 +304,10 @@ Note: Most utilities are shell functions (faster than scripts)
 - Set `set -e` for error handling
 - Source `install/common.sh` for shared functions
 - Use logging functions: `log_info`, `log_success`, `log_warning`, `log_error`
+  - `log_warning` and `log_error` automatically write to log file
+  - Log file created only when first warning/error occurs
 - Check command availability: `command_exists <cmd>`
+- Backups are automatic via `backup_if_exists` or `create_symlink`
 
 ### Configuration Files
 - Use absolute paths or `~` for portability
@@ -179,10 +363,15 @@ grep -r "dotfiles" ~/.bashrc ~/.zshrc
 - Uses `pbcopy` for clipboard (tmux, zsh)
 - PostgreSQL via Postgres.app or Homebrew
 
-### Ubuntu 22.04/24.04
+### Ubuntu/Kubuntu/Xubuntu 22.04/24.04
 - Homebrew installed to `/home/linuxbrew/.linuxbrew`
-- Uses `xclip` for clipboard
+- Uses `xclip` for clipboard (all variants)
 - Requires `build-essential` for compilation
+- **Desktop-specific notes:**
+  - **Ubuntu (GNOME)**: Full GNOME integration, gnome-keyring
+  - **Kubuntu (KDE)**: KWallet for credential storage, KDE clipboard integration
+  - **Xubuntu (XFCE)**: Lightweight, uses GNOME Keyring for credentials
+- Credential storage via Secret Service API (works with all keyrings)
 
 ## File Naming Conventions
 
@@ -196,13 +385,11 @@ grep -r "dotfiles" ~/.bashrc ~/.zshrc
 When making significant changes:
 1. Update relevant section in this file
 2. Keep README.md in sync (brief overview only)
-3. Update MIGRATION_PLAN.md if architecture changes
-4. Add troubleshooting notes for common issues
+3. Add troubleshooting notes for common issues
 
 ## Related Documentation
 
 - `README.md` - Quick start and overview
-- `docs/TOOLS_REFERENCE.md` - Complete guide to all CLI tools, aliases, and functions
-- `docs/SECRETS.md` - Detailed secrets management
-- `MIGRATION_PLAN.md` - Original migration plan
+- `CLAUDE.md` - Quick reference for Claude Code
 - `install/common.sh` - Available helper functions
+- `shell/.env.local.example` - Secrets template

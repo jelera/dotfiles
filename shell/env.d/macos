@@ -1,0 +1,39 @@
+# macOS-specific Environment Variables
+
+# GPG configuration for macOS
+# Set GPG_TTY for signing commits
+# This is required for GPG to prompt for passphrases in the terminal
+export GPG_TTY=$(tty)
+
+# macOS: Ensure gpg-agent uses correct pinentry
+if command -v gpgconf &>/dev/null; then
+    # Check if pinentry-mac is available
+    if [[ -f "/opt/homebrew/bin/pinentry-mac" ]]; then
+        export GPG_AGENT_INFO="${HOME}/.gnupg/S.gpg-agent:0:1"
+    fi
+fi
+
+# Homebrew paths for macOS
+if [[ -d "/opt/homebrew" ]]; then
+    # Apple Silicon
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [[ -d "/usr/local/Homebrew" ]]; then
+    # Intel Mac
+    eval "$(/usr/local/bin/brew shellenv)"
+fi
+
+# PostgreSQL (if installed via Homebrew)
+if [[ -d "/opt/homebrew/opt/postgresql@16" ]]; then
+    export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
+elif [[ -d "/Applications/Postgres.app/Contents/Versions/16" ]]; then
+    # Postgres.app
+    export PATH="/Applications/Postgres.app/Contents/Versions/16/bin:$PATH"
+fi
+
+# libpq (PostgreSQL client)
+if [[ -d "/opt/homebrew/opt/libpq" ]]; then
+    export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+fi
+
+# Disable macOS fork safety for Python multiprocessing
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY="YES"

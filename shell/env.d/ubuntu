@@ -1,0 +1,24 @@
+# Ubuntu-specific Environment Variables
+
+# Source common Linux settings first
+UBUNTU_ENV_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=./linux
+source "${UBUNTU_ENV_DIR}/linux"
+unset UBUNTU_ENV_DIR
+
+# Ubuntu-specific PostgreSQL paths
+if [[ -d "/usr/lib/postgresql/16/bin" ]]; then
+    export PATH="/usr/lib/postgresql/16/bin:$PATH"
+elif [[ -d "/usr/lib/postgresql/15/bin" ]]; then
+    export PATH="/usr/lib/postgresql/15/bin:$PATH"
+fi
+
+# Snap bin directory (if snap is used, though we prefer not to)
+if [[ -d "/snap/bin" ]]; then
+    export PATH="/snap/bin:$PATH"
+fi
+
+# Flatpak support
+if command -v flatpak &>/dev/null; then
+    export XDG_DATA_DIRS="/var/lib/flatpak/exports/share:$HOME/.local/share/flatpak/exports/share:$XDG_DATA_DIRS"
+fi

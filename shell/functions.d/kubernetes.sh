@@ -49,12 +49,15 @@ klogs() {
     fi
 
     if command -v fzf &> /dev/null; then
-        local pod=$(kubectl get pods -o name | fzf --height 40% --reverse --header "Select Pod for Logs")
+        local pod
+        pod=$(kubectl get pods -o name | fzf --height 40% --reverse --header "Select Pod for Logs")
         if [[ -n "$pod" ]]; then
             # Check if pod has multiple containers
-            local containers=$(kubectl get "$pod" -o jsonpath='{.spec.containers[*].name}' | wc -w)
+            local containers
+            containers=$(kubectl get "$pod" -o jsonpath='{.spec.containers[*].name}' | wc -w)
             if [[ $containers -gt 1 ]]; then
-                local container=$(kubectl get "$pod" -o jsonpath='{.spec.containers[*].name}' | tr ' ' '\n' | fzf --height 40% --reverse --header "Select Container")
+                local container
+                container=$(kubectl get "$pod" -o jsonpath='{.spec.containers[*].name}' | tr ' ' '\n' | fzf --height 40% --reverse --header "Select Container")
                 [[ -n "$container" ]] && kubectl logs -f "$pod" -c "$container"
             else
                 kubectl logs -f "$pod"
@@ -76,12 +79,15 @@ kexec() {
     local shell="${1:-/bin/bash}"
 
     if command -v fzf &> /dev/null; then
-        local pod=$(kubectl get pods -o name | fzf --height 40% --reverse --header "Select Pod to Exec Into")
+        local pod
+        pod=$(kubectl get pods -o name | fzf --height 40% --reverse --header "Select Pod to Exec Into")
         if [[ -n "$pod" ]]; then
             # Check if pod has multiple containers
-            local containers=$(kubectl get "$pod" -o jsonpath='{.spec.containers[*].name}' | wc -w)
+            local containers
+            containers=$(kubectl get "$pod" -o jsonpath='{.spec.containers[*].name}' | wc -w)
             if [[ $containers -gt 1 ]]; then
-                local container=$(kubectl get "$pod" -o jsonpath='{.spec.containers[*].name}' | tr ' ' '\n' | fzf --height 40% --reverse --header "Select Container")
+                local container
+                container=$(kubectl get "$pod" -o jsonpath='{.spec.containers[*].name}' | tr ' ' '\n' | fzf --height 40% --reverse --header "Select Container")
                 [[ -n "$container" ]] && kubectl exec -it "$pod" -c "$container" -- "$shell"
             else
                 kubectl exec -it "$pod" -- "$shell"
@@ -106,7 +112,8 @@ kdesc() {
     fi
 
     local resource_type="${1:-pod}"
-    local resource=$(kubectl get "$resource_type" -o name | fzf --height 40% --reverse --header "Select $resource_type to Describe")
+    local resource
+    resource=$(kubectl get "$resource_type" -o name | fzf --height 40% --reverse --header "Select $resource_type to Describe")
     [[ -n "$resource" ]] && kubectl describe "$resource"
 }
 
@@ -123,7 +130,8 @@ kdel() {
     fi
 
     local resource_type="${1:-pod}"
-    local resource=$(kubectl get "$resource_type" -o name | fzf --height 40% --reverse --header "Select $resource_type to Delete (Ctrl-C to cancel)")
+    local resource
+    resource=$(kubectl get "$resource_type" -o name | fzf --height 40% --reverse --header "Select $resource_type to Delete (Ctrl-C to cancel)")
 
     if [[ -n "$resource" ]]; then
         echo "About to delete: $resource"
@@ -151,7 +159,8 @@ kport() {
 
     local local_port="${1:-8080}"
     local remote_port="${2:-$local_port}"
-    local pod=$(kubectl get pods -o name | fzf --height 40% --reverse --header "Select Pod for Port-Forward")
+    local pod
+    pod=$(kubectl get pods -o name | fzf --height 40% --reverse --header "Select Pod for Port-Forward")
 
     if [[ -n "$pod" ]]; then
         echo "Port-forwarding $local_port:$remote_port to $pod"

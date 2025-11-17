@@ -191,7 +191,7 @@ bindkey '\e.' insert-last-word
 DOTFILES_DIR="${HOME}/.config/dotfiles"
 
 # Source shared shell configuration
-[[ -f "${DOTFILES_DIR}/shell/env" ]] && source "${DOTFILES_DIR}/shell/env"
+# Note: shell/env is loaded in .zshenv (for all shells, including non-interactive)
 [[ -f "${DOTFILES_DIR}/shell/alias" ]] && source "${DOTFILES_DIR}/shell/alias"
 [[ -f "${DOTFILES_DIR}/shell/functions" ]] && source "${DOTFILES_DIR}/shell/functions"
 

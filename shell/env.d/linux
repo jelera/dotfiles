@@ -1,0 +1,19 @@
+# Linux-specific Environment Variables
+
+# GPG configuration for Linux
+# Set GPG_TTY for signing commits
+# This is required for GPG to prompt for passphrases in the terminal
+export GPG_TTY=$(tty)
+
+# Linux: Ensure gpg-agent is running
+if command -v gpgconf &>/dev/null; then
+    gpgconf --launch gpg-agent 2>/dev/null || true
+fi
+
+# Homebrew for Linux (Linuxbrew)
+if [[ -d "/home/linuxbrew/.linuxbrew" ]]; then
+    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+fi
+
+# Add local bin to PATH (common for user-installed packages)
+export PATH="/usr/local/bin:$PATH"

@@ -8,7 +8,7 @@ Modern, modular dotfiles with [mise](https://mise.jdx.dev/) version management.
 - **Zinit** for fast zsh plugin loading
 - **Homebrew** with smart fallbacks (PPA → Apt → Flathub → Source)
 - **Secure secrets** management (`.env.local` with gitignore)
-- **Cross-platform** (macOS, Ubuntu 22.04/24.04 LTS)
+- **Cross-platform** (macOS, Ubuntu/Kubuntu/Xubuntu 22.04/24.04 LTS)
 
 ## Quick Start
 
@@ -47,7 +47,7 @@ dotfiles/
 ├── shell/          # Shared (alias, functions, env)
 ├── bin/            # Utility scripts
 ├── install/        # Modular installation scripts
-└── docs/           # Additional documentation
+└── mise/           # mise version management config
 ```
 
 ## Post-Installation
@@ -83,9 +83,9 @@ zinit update --all        # Zsh plugins (in zsh)
 
 ## Documentation
 
-- `docs/SECRETS.md` - Secrets management guide
-- `AGENTS.md` - Detailed guidance for AI assistants
-- `MIGRATION_PLAN.md` - Migration details from old setup
+- `AGENTS.md` - Detailed guidance for AI assistants working in this repository
+- `CLAUDE.md` - Quick reference for Claude Code
+- Secrets template: `shell/.env.local.example` (copy to `~/.env.local`)
 
 ## Customization
 

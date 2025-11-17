@@ -3,11 +3,12 @@
 # Detects operating system and version
 
 # Get the directory of this script
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Use _INSTALL_SCRIPT_DIR to avoid overwriting parent's SCRIPT_DIR
+_INSTALL_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Source common functions
-# shellcheck source=./common.sh
-source "${SCRIPT_DIR}/common.sh"
+# shellcheck source=install/common.sh
+source "${_INSTALL_SCRIPT_DIR}/common.sh"
 
 detect_os() {
     log_step "Detecting operating system..."
@@ -37,29 +38,63 @@ detect_os() {
         # shellcheck source=/dev/null
         source /etc/os-release
 
-        if [[ "$ID" == "ubuntu" ]]; then
+        # shellcheck disable=SC2154
+        if [[ "$ID" == "ubuntu" ]] || [[ "$ID_LIKE" == *"ubuntu"* ]]; then
             OS="ubuntu"
+            # shellcheck disable=SC2154
             OS_VERSION="$VERSION_ID"
-            OS_NAME="Ubuntu"
+
+            # Detect Ubuntu variant (Ubuntu, Kubuntu, Xubuntu, etc.)
+            # shellcheck disable=SC2154
+            case "$NAME" in
+                *"Kubuntu"*)
+                    OS_NAME="Kubuntu"
+                    OS_VARIANT="kubuntu"
+                    DESKTOP_ENV="KDE"
+                    ;;
+                *"Xubuntu"*)
+                    OS_NAME="Xubuntu"
+                    OS_VARIANT="xubuntu"
+                    DESKTOP_ENV="XFCE"
+                    ;;
+                *"Lubuntu"*)
+                    OS_NAME="Lubuntu"
+                    OS_VARIANT="lubuntu"
+                    DESKTOP_ENV="LXQt"
+                    ;;
+                *"Ubuntu"*)
+                    OS_NAME="Ubuntu"
+                    OS_VARIANT="ubuntu"
+                    DESKTOP_ENV="${XDG_CURRENT_DESKTOP:-GNOME}"
+                    ;;
+                *)
+                    OS_NAME="Ubuntu"
+                    OS_VARIANT="ubuntu"
+                    DESKTOP_ENV="${XDG_CURRENT_DESKTOP:-unknown}"
+                    ;;
+            esac
 
             log_info "Detected: $OS_NAME $OS_VERSION"
+            if [[ -n "$DESKTOP_ENV" && "$DESKTOP_ENV" != "unknown" ]]; then
+                log_info "Desktop Environment: $DESKTOP_ENV"
+            fi
 
             # Check for supported Ubuntu LTS versions
             case "$OS_VERSION" in
                 "24.04")
-                    log_success "Ubuntu 24.04 LTS (Noble Numbat) - Fully supported"
+                    log_success "$OS_NAME 24.04 LTS (Noble Numbat) - Fully supported"
                     OS_CODENAME="noble"
                     ;;
                 "22.04")
-                    log_success "Ubuntu 22.04 LTS (Jammy Jellyfish) - Fully supported"
+                    log_success "$OS_NAME 22.04 LTS (Jammy Jellyfish) - Fully supported"
                     OS_CODENAME="jammy"
                     ;;
                 "20.04")
-                    log_warning "Ubuntu 20.04 LTS (Focal Fossa) - Limited support"
+                    log_warning "$OS_NAME 20.04 LTS (Focal Fossa) - Limited support"
                     OS_CODENAME="focal"
                     ;;
                 *)
-                    log_warning "Ubuntu $OS_VERSION - May not be fully supported"
+                    log_warning "$OS_NAME $OS_VERSION - May not be fully supported"
                     log_warning "Recommended: Ubuntu 22.04 LTS or 24.04 LTS"
                     OS_CODENAME="${VERSION_CODENAME:-unknown}"
                     ;;
@@ -77,7 +112,11 @@ detect_os() {
 
         else
             log_error "Unsupported Linux distribution: $ID"
-            log_error "This script supports: Ubuntu 22.04 LTS, Ubuntu 24.04 LTS, macOS"
+            log_error "This script supports:"
+            log_error "  - Ubuntu 22.04/24.04 LTS"
+            log_error "  - Kubuntu 22.04/24.04 LTS"
+            log_error "  - Xubuntu 22.04/24.04 LTS"
+            log_error "  - macOS (latest 2 versions)"
             return 1
         fi
 
@@ -109,6 +148,8 @@ detect_os() {
     export OS_VERSION
     export OS_VERSION_MAJOR
     export OS_CODENAME
+    export OS_VARIANT
+    export DESKTOP_ENV
     export ARCH
 
     # Create a summary
@@ -118,6 +159,9 @@ detect_os() {
     echo "  Version:      $OS_VERSION"
     if [[ -n "${OS_CODENAME:-}" ]]; then
         echo "  Codename:     $OS_CODENAME"
+    fi
+    if [[ -n "${DESKTOP_ENV:-}" && "${DESKTOP_ENV}" != "unknown" ]]; then
+        echo "  Desktop:      $DESKTOP_ENV"
     fi
     echo "  Architecture: $ARCH_NAME"
     echo ""

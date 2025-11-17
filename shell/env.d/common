@@ -1,0 +1,68 @@
+# Common Environment Variables
+# Loaded on all platforms (macOS, Linux, Ubuntu)
+
+# Editor
+export EDITOR='nvim'
+export VISUAL='nvim'
+
+# PATH configuration
+export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.bin:$PATH"
+
+# Support for local scripts (add your own scripts here)
+# Create ~/.local/bin for personal scripts that aren't in dotfiles
+[[ -d "$HOME/bin.local" ]] && export PATH="$HOME/bin.local:$PATH"
+
+# XDG Base Directory
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+
+# Language-specific paths (managed by mise)
+# mise will handle: Ruby, Node, Python, Go, Erlang, Elixir
+
+# PostgreSQL configuration
+export PGHOST=localhost
+export PGGSSENCMODE="disable"
+
+# FZF configuration
+export FZF_DEFAULT_COMMAND='rg --files --hidden --follow --glob "!.git/*"'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_CTRL_T_OPTS="--preview '(bat --style=numbers --color=always {} || cat {}) 2> /dev/null | head -200'"
+export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+export FZF_ALT_C_OPTS="--preview 'tree -C {} | head -200'"
+
+# Terminal configuration
+export TERMINFO=/usr/share/terminfo
+
+# For tmux: export 256color
+if [[ -n "$TMUX" ]]; then
+    export TERM=screen-256color
+else
+    export TERM=xterm-256color
+fi
+
+# Shell options
+export HISTSIZE=10000
+export HISTFILESIZE=20000
+export HISTCONTROL=ignoredups:erasedups
+
+# Less configuration
+export LESS='-R -F -X'
+export LESSOPEN='|bat --style=numbers --color=always %s 2>/dev/null'
+
+# Locale
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+
+# Disable Homebrew analytics
+export HOMEBREW_NO_ANALYTICS=1
+
+# Better history across multiple terminal sessions
+export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
+
+# Load secure environment variables (NOT committed to git)
+[[ -f ~/.env.local ]] && source ~/.env.local
+
+# Load local environment overrides
+[[ -f ~/.env.local.override ]] && source ~/.env.local.override

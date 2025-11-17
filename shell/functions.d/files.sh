@@ -70,7 +70,8 @@ backup() {
         return 1
     fi
 
-    local backup_file="${file}.backup.$(date +%Y%m%d_%H%M%S)"
+    local backup_file
+    backup_file="${file}.backup.$(date +%Y%m%d_%H%M%S)"
     cp "$file" "$backup_file"
     echo "Backup created: $backup_file"
 }

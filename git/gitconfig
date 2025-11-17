@@ -210,8 +210,20 @@
 [rerere]
 	enabled = true
 
-[credential]
-	helper = cache --timeout=3600
+# Credential helper will be set by install script based on OS:
+# - macOS: osxkeychain (built-in)
+# - Linux: libsecret (installed via install/packages.sh)
+# Configuration is written to ~/.gitconfig.local during installation
+
+# GitHub-specific credential helper (works on both macOS and Linux)
+# The gh CLI path is set during installation based on platform
+[credential "https://github.com"]
+	helper =
+	helper = gh auth git-credential
+
+[credential "https://gist.github.com"]
+	helper =
+	helper = gh auth git-credential
 
 # Include local gitconfig (for machine-specific settings)
 [include]

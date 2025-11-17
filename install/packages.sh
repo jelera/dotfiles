@@ -7,18 +7,47 @@
 # Only fall back to other package managers if mise doesn't support the tool
 
 # Get the directory of this script
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Use _INSTALL_SCRIPT_DIR to avoid overwriting parent's SCRIPT_DIR
+_INSTALL_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Source common functions
-# shellcheck source=./common.sh
-source "${SCRIPT_DIR}/common.sh"
+# shellcheck source=install/common.sh
+source "${_INSTALL_SCRIPT_DIR}/common.sh"
 
 # Source OS detection
-# shellcheck source=./detect-os.sh
-source "${SCRIPT_DIR}/detect-os.sh"
+# shellcheck source=install/detect-os.sh
+source "${_INSTALL_SCRIPT_DIR}/detect-os.sh"
 
-# Track installation methods
-declare -A PACKAGE_INSTALL_METHOD
+# Track installation methods (Bash 3.2 compatible - using newline-separated "package:method" pairs)
+PACKAGE_INSTALL_METHOD=""
+
+# Helper: Add package installation method
+add_install_method() {
+    local package="$1"
+    local method="$2"
+    PACKAGE_INSTALL_METHOD="${PACKAGE_INSTALL_METHOD}${package}:${method}"$'\n'
+}
+
+# Helper: Get all package names
+get_package_names() {
+    echo "$PACKAGE_INSTALL_METHOD" | grep -v '^$' | cut -d: -f1
+}
+
+# Helper: Get method for package
+get_package_method() {
+    local package="$1"
+    echo "$PACKAGE_INSTALL_METHOD" | grep "^${package}:" | cut -d: -f2
+}
+
+# Helper: Get all methods
+get_all_methods() {
+    echo "$PACKAGE_INSTALL_METHOD" | grep -v '^$' | cut -d: -f2
+}
+
+# Helper: Count entries
+count_install_methods() {
+    echo "$PACKAGE_INSTALL_METHOD" | grep -c -v '^$'
+}
 
 # Check if package is installed (any method)
 is_package_installed() {
@@ -65,7 +94,7 @@ install_via_mise() {
     # Check if already installed via mise
     if mise list 2>/dev/null | grep -q "^${package}"; then
         log_info "✓ $package (already installed via mise)"
-        PACKAGE_INSTALL_METHOD["$package"]="mise"
+        add_install_method "$package" "mise"
         return 0
     fi
 
@@ -75,10 +104,16 @@ install_via_mise() {
         return 1
     fi
 
+    if is_dry_run; then
+        log_dry_run "Would install $package@latest via mise"
+        add_install_method "$package" "mise"
+        return 0
+    fi
+
     # Install via mise and set globally
     if mise install "$package@latest" && mise use -g "$package@latest"; then
         log_success "✓ $package (installed via mise)"
-        PACKAGE_INSTALL_METHOD["$package"]="mise"
+        add_install_method "$package" "mise"
         return 0
     fi
 
@@ -98,13 +133,25 @@ install_via_homebrew() {
 
     if brew list "$package" &>/dev/null; then
         log_info "✓ $package (already installed via Homebrew)"
-        PACKAGE_INSTALL_METHOD["$package"]="homebrew"
+        add_install_method "$package" "homebrew"
         return 0
+    fi
+
+    if is_dry_run; then
+        # Check if package exists in homebrew
+        if brew info "$package" &>/dev/null; then
+            log_dry_run "Would install $package via Homebrew"
+            add_install_method "$package" "homebrew"
+            return 0
+        else
+            log_info "  Package not available in Homebrew"
+            return 1
+        fi
     fi
 
     if brew install "$package" 2>/dev/null; then
         log_success "✓ $package (installed via Homebrew)"
-        PACKAGE_INSTALL_METHOD["$package"]="homebrew"
+        add_install_method "$package" "homebrew"
         return 0
     fi
 
@@ -117,6 +164,7 @@ install_via_ppa() {
     local package="$1"
     local ppa_repo="${2:-}"  # Optional PPA repository
 
+    # shellcheck disable=SC2154
     if [[ "$OS" != "ubuntu" ]]; then
         return 1
     fi
@@ -141,7 +189,7 @@ install_via_ppa() {
     # Install package
     if sudo apt-get install -y "$package" 2>/dev/null; then
         log_success "✓ $package (installed via PPA)"
-        PACKAGE_INSTALL_METHOD["$package"]="ppa"
+        add_install_method "$package" "ppa"
         return 0
     fi
 
@@ -167,7 +215,7 @@ install_via_apt() {
     # Install package
     if sudo apt-get install -y "$package" 2>/dev/null; then
         log_success "✓ $package (installed via apt)"
-        PACKAGE_INSTALL_METHOD["$package"]="apt"
+        add_install_method "$package" "apt"
         return 0
     fi
 
@@ -192,14 +240,14 @@ install_via_flatpak() {
     # Check if already installed
     if flatpak list | grep -q "$flatpak_id"; then
         log_info "✓ $package (already installed via Flatpak)"
-        PACKAGE_INSTALL_METHOD["$package"]="flatpak"
+        add_install_method "$package" "flatpak"
         return 0
     fi
 
     # Install from Flathub
     if flatpak install -y flathub "$flatpak_id" 2>/dev/null; then
         log_success "✓ $package (installed via Flatpak)"
-        PACKAGE_INSTALL_METHOD["$package"]="flatpak"
+        add_install_method "$package" "flatpak"
         return 0
     fi
 
@@ -240,7 +288,7 @@ build_from_source() {
         # Use custom build script
         if eval "$build_script"; then
             log_success "✓ $package (built from source)"
-            PACKAGE_INSTALL_METHOD["$package"]="source"
+            add_install_method "$package" "source"
             cd - >/dev/null || true
             rm -rf "$build_dir"
             return 0
@@ -249,7 +297,7 @@ build_from_source() {
         # Standard build process
         if ./configure && make && sudo make install; then
             log_success "✓ $package (built from source)"
-            PACKAGE_INSTALL_METHOD["$package"]="source"
+            add_install_method "$package" "source"
             cd - >/dev/null || true
             rm -rf "$build_dir"
             return 0
@@ -362,6 +410,7 @@ setup_flatpak() {
         return 0
     fi
 
+    # shellcheck disable=SC2154
     if [[ "$OS" != "ubuntu" ]]; then
         return 0
     fi
@@ -401,9 +450,11 @@ install_essential_packages() {
         "tmux"          # Terminal multiplexer (check if in mise, fallback to brew/apt)
         "htop"          # System monitor (check if in mise, fallback to brew/apt)
         "tree"          # Directory tree viewer (small utility, either mise or system)
+        "pinentry"      # GPG passphrase entry (required for commit signing)
     )
 
     # Add OS-specific build tools (these MUST come from system package manager)
+    # shellcheck disable=SC2154
     if [[ "$OS" == "ubuntu" ]]; then
         packages+=(
             "build-essential"  # GCC, make, etc. (required for compiling)
@@ -414,7 +465,37 @@ install_essential_packages() {
             "autoconf"         # Build tool
             "automake"         # Build tool
             "libtool"          # Build tool
+            "libsecret-1-0"    # Library for secure credential storage
+            "libsecret-1-dev"  # Development headers for libsecret
         )
+
+        # Add desktop-specific packages for credential/keyring support
+        # shellcheck disable=SC2154
+        case "${DESKTOP_ENV:-}" in
+            KDE)
+                # Kubuntu - KWallet provides Secret Service API
+                packages+=("kwalletmanager")
+                log_info "Adding KDE credential storage (KWallet)"
+                ;;
+            XFCE)
+                # Xubuntu - Use GNOME Keyring for Secret Service
+                packages+=("gnome-keyring")
+                log_info "Adding XFCE credential storage (GNOME Keyring)"
+                ;;
+            LXQt|LXDE)
+                # Lubuntu - Use GNOME Keyring
+                packages+=("gnome-keyring")
+                log_info "Adding LXQt credential storage (GNOME Keyring)"
+                ;;
+            GNOME|*)
+                # Ubuntu (GNOME) or unknown - Use GNOME Keyring (usually pre-installed)
+                packages+=("gnome-keyring")
+                log_info "Adding credential storage (GNOME Keyring)"
+                ;;
+        esac
+
+        # Add clipboard utility (works for all Ubuntu variants)
+        packages+=("xclip")
     fi
 
     # Note: These are now in mise/config.toml:
@@ -434,7 +515,9 @@ install_essential_packages() {
 print_installation_summary() {
     log_step "Installation Summary"
 
-    if (( ${#PACKAGE_INSTALL_METHOD[@]} == 0 )); then
+    local count
+    count=$(count_install_methods)
+    if [[ "$count" -eq 0 ]]; then
         log_info "No packages were installed"
         return
     fi
@@ -443,9 +526,13 @@ print_installation_summary() {
     printf "%-20s %-15s\n" "Package" "Method"
     print_separator
 
-    for package in "${!PACKAGE_INSTALL_METHOD[@]}"; do
-        printf "%-20s %-15s\n" "$package" "${PACKAGE_INSTALL_METHOD[$package]}"
-    done
+    # Iterate through all packages
+    local package method
+    while IFS=: read -r package method; do
+        if [[ -n "$package" ]]; then
+            printf "%-20s %-15s\n" "$package" "$method"
+        fi
+    done < <(echo "$PACKAGE_INSTALL_METHOD")
 
     echo ""
 
@@ -457,16 +544,19 @@ print_installation_summary() {
     local flatpak_count=0
     local source_count=0
 
-    for method in "${PACKAGE_INSTALL_METHOD[@]}"; do
-        case "$method" in
-            mise) ((mise_count++)) ;;
-            homebrew) ((homebrew_count++)) ;;
-            ppa) ((ppa_count++)) ;;
-            apt) ((apt_count++)) ;;
-            flatpak) ((flatpak_count++)) ;;
-            source) ((source_count++)) ;;
-        esac
-    done
+    while read -r method; do
+        if [[ -n "$method" ]]; then
+            case "$method" in
+                mise) ((mise_count++)) ;;
+                homebrew) ((homebrew_count++)) ;;
+                ppa) ((ppa_count++)) ;;
+                apt) ((apt_count++)) ;;
+                flatpak) ((flatpak_count++)) ;;
+                source) ((source_count++)) ;;
+                *) log_warning "Unknown installation method: $method" ;;
+            esac
+        fi
+    done < <(get_all_methods)
 
     log_info "Installation methods used:"
     [[ $mise_count -gt 0 ]] && echo "  mise: $mise_count packages"

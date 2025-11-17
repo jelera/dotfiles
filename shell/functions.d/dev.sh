@@ -168,6 +168,7 @@ pss() {
     if command -v procs &> /dev/null; then
         procs "$@"
     else
+        # shellcheck disable=SC2009
         ps aux | grep -i "${1:-.}"
     fi
 }

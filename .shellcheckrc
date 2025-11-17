@@ -1,0 +1,27 @@
+# ShellCheck configuration for dotfiles
+# https://github.com/koalaman/shellcheck/wiki/Directive
+
+# Target bash shell (compatible with bash 3.2 on macOS)
+shell=bash
+
+# Treat warnings as errors (fail on any issues)
+# Use --severity=warning to only show warnings and above
+severity=warning
+
+# Disable following sourced files (SC1091)
+# We have proper shellcheck directives in the code
+disable=SC1091
+
+# Enable all optional checks
+enable=add-default-case
+enable=avoid-nullary-conditions
+enable=check-unassigned-uppercase
+enable=deprecate-which
+enable=quote-safe-variables
+enable=require-double-brackets
+
+# macOS bash 3.2 compatibility notes:
+# - Avoid readarray/mapfile (bash 4+)
+# - Avoid associative arrays (bash 4+)
+# - Avoid &>> redirection (bash 4+)
+# - Current scripts use newline-separated strings instead of arrays where needed

@@ -3,11 +3,12 @@
 # https://mise.jdx.dev/
 
 # Get the directory of this script
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Use _INSTALL_SCRIPT_DIR to avoid overwriting parent's SCRIPT_DIR
+_INSTALL_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Source common functions
-# shellcheck source=./common.sh
-source "${SCRIPT_DIR}/common.sh"
+# shellcheck source=install/common.sh
+source "${_INSTALL_SCRIPT_DIR}/common.sh"
 
 install_mise() {
     log_step "Installing mise..."
@@ -17,10 +18,20 @@ install_mise() {
         mise_version="$(mise --version)"
         log_info "mise already installed: $mise_version"
 
-        # Update mise
-        log_info "Updating mise..."
-        mise self-update || log_warning "Failed to update mise (this is okay)"
+        if is_dry_run; then
+            log_dry_run "Would update mise"
+        else
+            # Update mise
+            log_info "Updating mise..."
+            mise self-update || log_warning "Failed to update mise (this is okay)"
+        fi
 
+        return 0
+    fi
+
+    if is_dry_run; then
+        log_dry_run "Would download and install mise from https://mise.run"
+        log_dry_run "Would add mise to PATH"
         return 0
     fi
 
@@ -61,10 +72,13 @@ install_mise() {
 configure_mise_shell_integration() {
     log_step "Configuring mise shell integration..."
 
+    # shellcheck disable=SC2016
     local mise_activate_bash='eval "$(~/.local/bin/mise activate bash)"'
+    # shellcheck disable=SC2016
     local mise_activate_zsh='eval "$(~/.local/bin/mise activate zsh)"'
 
     # Add PATH for mise
+    # shellcheck disable=SC2016
     local mise_path='export PATH="$HOME/.local/bin:$PATH"'
 
     # Configure bash
@@ -320,7 +334,7 @@ verify_mise_installation() {
 
     # Show mise info
     log_info "mise version: $(mise --version)"
-    log_info "mise location: $(which mise)"
+    log_info "mise location: $(command -v mise)"
 
     # Check activated tools
     log_info "Checking available tools..."

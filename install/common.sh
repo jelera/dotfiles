@@ -13,6 +13,50 @@ export MAGENTA='\033[0;35m'
 export CYAN='\033[0;36m'
 export NC='\033[0m' # No Color
 
+# Log file path (can be overridden)
+export LOG_FILE="${LOG_FILE:-}"
+export LOG_DIR="${HOME}/.dotfiles-install-logs"
+
+# Initialize log file on first warning/error
+init_log_file() {
+    # Only initialize once
+    if [[ -n "$LOG_FILE" ]]; then
+        return 0
+    fi
+
+    # Create log directory if it doesn't exist
+    if [[ ! -d "$LOG_DIR" ]]; then
+        mkdir -p "$LOG_DIR"
+    fi
+
+    # Create timestamped log file
+    LOG_FILE="${LOG_DIR}/install-$(date +%Y%m%d_%H%M%S).log"
+
+    # Write header to log file
+    {
+        echo "========================================"
+        echo "Dotfiles Installation Log"
+        echo "Date: $(date)"
+        echo "User: $(whoami)"
+        echo "OS: $(uname -s) $(uname -r)"
+        echo "========================================"
+        echo ""
+    } > "$LOG_FILE"
+
+    export LOG_FILE
+}
+
+# Write to log file (without color codes)
+write_to_log() {
+    # Initialize log file if needed
+    if [[ -z "$LOG_FILE" ]]; then
+        init_log_file
+    fi
+
+    # Strip ANSI color codes and write to log
+    echo "[$(date '+%H:%M:%S')] $1" | sed 's/\x1b\[[0-9;]*m//g' >> "$LOG_FILE"
+}
+
 # Logging functions
 log_info() {
     echo -e "${BLUE}[INFO]${NC} $1"
@@ -24,19 +68,30 @@ log_success() {
 
 log_warning() {
     echo -e "${YELLOW}[WARNING]${NC} $1"
+    write_to_log "[WARNING] $1"
 }
 
 log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
+    write_to_log "[ERROR] $1"
 }
 
 log_step() {
     echo -e "\n${MAGENTA}==>${NC} $1"
 }
 
+log_dry_run() {
+    echo -e "${CYAN}[DRY RUN]${NC} $1"
+}
+
 # Check if command exists
 command_exists() {
     command -v "$1" &> /dev/null
+}
+
+# Check if dry run mode is enabled
+is_dry_run() {
+    [[ "${DRY_RUN:-false}" == "true" ]]
 }
 
 # Check if running with sudo/root
@@ -68,9 +123,9 @@ confirm() {
         read -rp "$prompt" response
         response=${response:-$default}
 
-        case "${response,,}" in
-            y|yes) return 0 ;;
-            n|no) return 1 ;;
+        case "$response" in
+            [Yy]|[Yy][Ee][Ss]) return 0 ;;
+            [Nn]|[Nn][Oo]) return 1 ;;
             *) echo "Please answer yes or no." ;;
         esac
     done
@@ -80,13 +135,14 @@ confirm() {
 get_dotfiles_dir() {
     local script_dir
     script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    echo "$(dirname "$script_dir")"
+    dirname "$script_dir"
 }
 
 # Create backup of existing file/directory
 backup_if_exists() {
     local target="$1"
-    local backup_dir="${HOME}/.dotfiles.backup.$(date +%Y%m%d_%H%M%S)"
+    local backup_dir
+    backup_dir="${HOME}/.dotfiles.backup.$(date +%Y%m%d_%H%M%S)"
 
     if [[ -e "$target" ]]; then
         if [[ ! -d "$backup_dir" ]]; then
@@ -94,7 +150,8 @@ backup_if_exists() {
             log_info "Created backup directory: $backup_dir"
         fi
 
-        local backup_path="${backup_dir}/$(basename "$target")"
+        local backup_path
+        backup_path="${backup_dir}/$(basename "$target")"
         mv "$target" "$backup_path"
         log_warning "Backed up existing $(basename "$target") to $backup_path"
         return 0
@@ -110,6 +167,15 @@ create_symlink() {
     if [[ ! -e "$source" ]]; then
         log_error "Source does not exist: $source"
         return 1
+    fi
+
+    if is_dry_run; then
+        if [[ -e "$target" || -L "$target" ]]; then
+            log_dry_run "Would backup and link: $(basename "$target") -> $source"
+        else
+            log_dry_run "Would link: $(basename "$target") -> $source"
+        fi
+        return 0
     fi
 
     # Backup existing file/dir/symlink
@@ -156,6 +222,7 @@ get_os_type() {
         if [[ -f /etc/os-release ]]; then
             # shellcheck source=/dev/null
             . /etc/os-release
+            # shellcheck disable=SC2154
             echo "${ID}"
         else
             echo "linux"
@@ -172,6 +239,7 @@ get_os_version() {
     elif [[ -f /etc/os-release ]]; then
         # shellcheck source=/dev/null
         . /etc/os-release
+        # shellcheck disable=SC2154
         echo "${VERSION_ID}"
     else
         echo "unknown"
@@ -276,9 +344,13 @@ if is_sourced; then
     export -f retry
     export -f add_line_to_file
     export -f safe_source
+    export -f init_log_file
+    export -f write_to_log
     export -f log_info
     export -f log_success
     export -f log_warning
     export -f log_error
     export -f log_step
+    export -f log_dry_run
+    export -f is_dry_run
 fi

@@ -1,107 +1,68 @@
-# Environment Variables
+#!/usr/bin/env bash
+# Environment Variables Loader
+# This file detects the platform and loads the appropriate environment files
 # Loaded by both bash and zsh
 
-# Editor
-export EDITOR='nvim'
-export VISUAL='nvim'
-
-# PATH configuration
-export PATH="$HOME/.local/bin:$PATH"
-export PATH="$HOME/.bin:$PATH"
-
-# Support for local scripts (add your own scripts here)
-# Create ~/.local/bin for personal scripts that aren't in dotfiles
-[[ -d "$HOME/bin.local" ]] && export PATH="$HOME/bin.local:$PATH"
-
-# XDG Base Directory
-export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
-export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
-export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
-
-# Language-specific paths (managed by mise)
-# mise will handle: Ruby, Node, Python, Go, Erlang, Elixir
-
-# PostgreSQL configuration
-export PGHOST=localhost
-export PGGSSENCMODE="disable"
-
-# Homebrew (macOS)
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    # Homebrew paths for macOS
-    if [[ -d "/opt/homebrew" ]]; then
-        # Apple Silicon
-        eval "$(/opt/homebrew/bin/brew shellenv)"
-    elif [[ -d "/usr/local/Homebrew" ]]; then
-        # Intel Mac
-        eval "$(/usr/local/bin/brew shellenv)"
-    fi
-
-    # PostgreSQL (if installed via Homebrew)
-    if [[ -d "/opt/homebrew/opt/postgresql@16" ]]; then
-        export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
-    elif [[ -d "/Applications/Postgres.app/Contents/Versions/16" ]]; then
-        # Postgres.app
-        export PATH="/Applications/Postgres.app/Contents/Versions/16/bin:$PATH"
-    fi
-
-    # libpq (PostgreSQL client)
-    if [[ -d "/opt/homebrew/opt/libpq" ]]; then
-        export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
-    fi
-fi
-
-# Homebrew (Linux)
-if [[ "$OSTYPE" == "linux-gnu"* ]] && [[ -d "/home/linuxbrew/.linuxbrew" ]]; then
-    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-fi
-
-# FZF configuration
-export FZF_DEFAULT_COMMAND='rg --files --hidden --follow --glob "!.git/*"'
-export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
-export FZF_CTRL_T_OPTS="--preview '(bat --style=numbers --color=always {} || cat {}) 2> /dev/null | head -200'"
-export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
-export FZF_ALT_C_OPTS="--preview 'tree -C {} | head -200'"
-
-# Terminal configuration
-export TERMINFO=/usr/share/terminfo
-
-# For tmux: export 256color
-if [[ -n "$TMUX" ]]; then
-    export TERM=screen-256color
+# Get the directory where this script is located
+# Works in both bash (BASH_SOURCE) and zsh (${(%):-%x})
+if [[ -n "${BASH_SOURCE[0]}" ]]; then
+    # Bash
+    DOTFILES_SHELL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+elif [[ -n "${ZSH_VERSION}" ]]; then
+    # Zsh
+    DOTFILES_SHELL_DIR="$(cd "$(dirname "${(%):-%x}")" && pwd)"
 else
-    export TERM=xterm-256color
+    # Fallback: assume standard location
+    DOTFILES_SHELL_DIR="${HOME}/.config/dotfiles/shell"
+fi
+DOTFILES_ENV_DIR="${DOTFILES_SHELL_DIR}/env.d"
+
+# Load common environment variables (cross-platform)
+if [[ -f "${DOTFILES_ENV_DIR}/common" ]]; then
+    # shellcheck source=./env.d/common
+    source "${DOTFILES_ENV_DIR}/common"
 fi
 
-# Shell options
-export HISTSIZE=10000
-export HISTFILESIZE=20000
-export HISTCONTROL=ignoredups:erasedups
+# Detect platform and load platform-specific environment
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS
+    if [[ -f "${DOTFILES_ENV_DIR}/macos" ]]; then
+        # shellcheck source=./env.d/macos
+        source "${DOTFILES_ENV_DIR}/macos"
+    fi
+elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    # Linux - check for specific distributions
+    if [[ -f /etc/os-release ]]; then
+        # shellcheck disable=SC1091
+        source /etc/os-release
+        case "$ID" in
+            ubuntu|kubuntu|xubuntu|lubuntu|ubuntu-*|pop)
+                # Ubuntu and derivatives
+                if [[ -f "${DOTFILES_ENV_DIR}/ubuntu" ]]; then
+                    # shellcheck source=./env.d/ubuntu
+                    source "${DOTFILES_ENV_DIR}/ubuntu"
+                fi
+                ;;
+            *)
+                # Generic Linux
+                if [[ -f "${DOTFILES_ENV_DIR}/linux" ]]; then
+                    # shellcheck source=./env.d/linux
+                    source "${DOTFILES_ENV_DIR}/linux"
+                fi
+                ;;
+        esac
+    else
+        # No /etc/os-release, fall back to generic Linux
+        if [[ -f "${DOTFILES_ENV_DIR}/linux" ]]; then
+            # shellcheck source=./env.d/linux
+            source "${DOTFILES_ENV_DIR}/linux"
+        fi
+    fi
+else
+    # Unknown OS - just load common
+    echo "Warning: Unknown OS type: $OSTYPE" >&2
+fi
 
-# Less configuration
-export LESS='-R -F -X'
-export LESSOPEN='|bat --style=numbers --color=always %s 2>/dev/null'
-
-# GPG configuration
-export GPG_TTY=$(tty)
-
-# mise activation (already handled in shell rc files, but keep for reference)
-# eval "$(mise activate bash)"  # or zsh
-
-# Disable macOS fork safety for Python multiprocessing
-export OBJC_DISABLE_INITIALIZE_FORK_SAFETY="YES"
-
-# Locale
-export LC_ALL=en_US.UTF-8
-export LANG=en_US.UTF-8
-
-# Disable Homebrew analytics
-export HOMEBREW_NO_ANALYTICS=1
-
-# Better history across multiple terminal sessions
-export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
-
-# Load secure environment variables (NOT committed to git)
-[[ -f ~/.env.local ]] && source ~/.env.local
-
-# Load local environment overrides
-[[ -f ~/.env.local.override ]] && source ~/.env.local.override
+# Cleanup
+unset DOTFILES_SHELL_DIR
+unset DOTFILES_ENV_DIR

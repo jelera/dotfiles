@@ -18,3 +18,9 @@ export PATH="$HOME/.local/bin:$HOME/.bin:$PATH"
 # Ensure locale is set
 export LANG="${LANG:-en_US.UTF-8}"
 export LC_ALL="${LC_ALL:-en_US.UTF-8}"
+
+# Load platform-specific environment variables
+# This must be in zshenv (not zshrc) to work for non-interactive shells (e.g., git hooks)
+DOTFILES_DIR="${HOME}/.config/dotfiles"
+[[ -f "${DOTFILES_DIR}/shell/env" ]] && source "${DOTFILES_DIR}/shell/env"
+unset DOTFILES_DIR

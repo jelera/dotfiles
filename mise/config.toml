@@ -9,49 +9,51 @@
 [tools]
 # ===== Language Runtimes =====
 ruby = "latest"
-node = "lts"        # Use LTS for stability
+node = "lts"
 python = "latest"
 go = "latest"
 erlang = "latest"
 elixir = "latest"
+rust = "latest"     # Provides cargo backend for cargo:* tools
+uv = "latest"       # Modern Python package installer (replaces pipx)
 
 # ===== Essential CLI Tools =====
 # These replace traditional package manager installations
-jq = "latest"                # JSON processor
-fzf = "latest"               # Fuzzy finder
-ripgrep = "latest"           # Better grep (rg command)
-bat = "latest"               # Better cat with syntax highlighting
-neovim = "latest"            # Modern vim
-shellcheck = "latest"        # Shell script linter
+jq = "latest"
+fzf = "latest"
+ripgrep = "latest"
+bat = "latest"
+neovim = "latest"
+shellcheck = "latest"
 
 # ===== Modern CLI Replacements =====
 # Better alternatives to standard Unix tools
-eza = "latest"               # Better ls with icons and colors
-fd = "latest"                # Better find (faster, simpler syntax)
-zoxide = "latest"            # Smart cd (z command, learns your habits)
-dust = "latest"              # Better du (disk usage visualizer)
+eza = "latest"
+fd = "latest"
+zoxide = "latest"
+dust = "latest"
 procs = "latest"             # Better ps (process viewer)
-bottom = "latest"            # Better top/htop (btm command)
-duf = "latest"               # Better df (disk usage viewer)
+bottom = "latest"
+duf = "latest"
 httpie = "latest"            # Better curl (http command)
 
 # ===== Git & Version Control =====
-gh = "latest"                # GitHub CLI
-lazygit = "latest"           # Terminal UI for git
-delta = "latest"             # Better git diff pager (git-delta)
-gitleaks = "latest"          # Scan git repos for secrets
-pre-commit = "latest"        # Git pre-commit hook framework
+gh = "latest"
+lazygit = "latest"
+delta = "latest"
+gitleaks = "latest"
+pre-commit = "latest"
 
 # ===== Development Tools =====
 # Essential dev utilities
-direnv = "latest"            # Auto-load environment variables per directory
-just = "latest"              # Command runner (modern make alternative)
-watchexec = "latest"         # Watch files and run commands on changes
-tokei = "latest"             # Count lines of code
-hyperfine = "latest"         # Command-line benchmarking tool
-grex = "latest"              # Generate regex from examples
-glow = "latest"              # Markdown previewer in terminal
-yq = "latest"                # YAML processor (like jq for YAML)
+direnv = "latest"
+just = "latest"
+watchexec = "latest"
+tokei = "latest"
+hyperfine = "latest"
+grex = "latest"
+glow = "latest"
+yq = "latest"
 
 # Infrastructure & Cloud (uncomment as needed)
 # terraform = "latest"       # Infrastructure as Code
@@ -117,15 +119,15 @@ tealdeer = "latest"          # Community man pages (tldr)
 "gem:rails" = "latest"                                                # Rails framework
 # "gem:bundler" = "latest"                                            # Dependency manager
 
-# Python tools
-"pipx:black" = "latest"                                               # Python formatter
-"pipx:ruff" = "latest"                                                # Fast Python linter & formatter
-"pipx:mypy" = "latest"                                                # Type checker
-"pipx:poetry" = "latest"                                              # Dependency management
-"pipx:pipenv" = "latest"                                              # Virtual env & dependency manager
-"pipx:ipython" = "latest"                                             # Better Python REPL
-# "pipx:pytest" = "latest"                                            # Testing framework
-# "pipx:pylint" = "latest"                                            # Python linter
+# Python tools (using uv backend)
+"uv:black" = "latest"                                                 # Python formatter
+"uv:ruff" = "latest"                                                  # Fast Python linter & formatter
+"uv:mypy" = "latest"                                                  # Type checker
+"uv:poetry" = "latest"                                                # Dependency management
+"uv:pipenv" = "latest"                                                # Virtual env & dependency manager
+"uv:ipython" = "latest"                                               # Better Python REPL
+# "uv:pytest" = "latest"                                              # Testing framework
+# "uv:pylint" = "latest"                                              # Python linter
 
 # Rust tools (via cargo)
 "cargo:stylua" = "latest"                                             # Lua formatter

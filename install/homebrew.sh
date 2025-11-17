@@ -3,15 +3,16 @@
 # Installs on both macOS and Linux
 
 # Get the directory of this script
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Use _INSTALL_SCRIPT_DIR to avoid overwriting parent's SCRIPT_DIR
+_INSTALL_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Source common functions
-# shellcheck source=./common.sh
-source "${SCRIPT_DIR}/common.sh"
+# shellcheck source=install/common.sh
+source "${_INSTALL_SCRIPT_DIR}/common.sh"
 
 # Source OS detection
-# shellcheck source=./detect-os.sh
-source "${SCRIPT_DIR}/detect-os.sh"
+# shellcheck source=install/detect-os.sh
+source "${_INSTALL_SCRIPT_DIR}/detect-os.sh"
 
 install_homebrew() {
     log_step "Installing Homebrew..."
@@ -22,10 +23,20 @@ install_homebrew() {
         brew_version="$(brew --version | head -n1)"
         log_info "$brew_version"
 
-        # Update Homebrew
-        log_info "Updating Homebrew..."
-        brew update
+        if is_dry_run; then
+            log_dry_run "Would update Homebrew"
+        else
+            # Update Homebrew
+            log_info "Updating Homebrew..."
+            brew update
+        fi
 
+        return 0
+    fi
+
+    if is_dry_run; then
+        log_dry_run "Would download and install Homebrew"
+        log_dry_run "Would configure Homebrew in PATH"
         return 0
     fi
 
@@ -75,7 +86,7 @@ configure_homebrew_path() {
 
         # Try to find it
         if command_exists brew; then
-            log_info "Found brew in PATH: $(which brew)"
+            log_info "Found brew in PATH: $(command -v brew)"
             return 0
         else
             log_error "Cannot configure Homebrew - brew command not found"

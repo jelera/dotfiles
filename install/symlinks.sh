@@ -3,11 +3,12 @@
 # Creates symlinks from home directory to dotfiles repository
 
 # Get the directory of this script
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Use _INSTALL_SCRIPT_DIR to avoid overwriting parent's SCRIPT_DIR
+_INSTALL_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Source common functions
-# shellcheck source=./common.sh
-source "${SCRIPT_DIR}/common.sh"
+# shellcheck source=install/common.sh
+source "${_INSTALL_SCRIPT_DIR}/common.sh"
 
 # Get dotfiles directory
 DOTFILES_DIR="$(get_dotfiles_dir)"
@@ -44,6 +45,15 @@ create_dotfile_symlink() {
     if [[ ! -e "$source" ]]; then
         log_error "Source file does not exist: $source"
         return 1
+    fi
+
+    if is_dry_run; then
+        if [[ -e "$target" || -L "$target" ]]; then
+            log_dry_run "Would backup and link: $(basename "$target") -> $source"
+        else
+            log_dry_run "Would link: $(basename "$target") -> $source"
+        fi
+        return 0
     fi
 
     # Backup if exists
@@ -109,6 +119,54 @@ symlink_git_configs() {
     return 0
 }
 
+symlink_gpg_config() {
+    log_step "Linking GPG configuration..."
+
+    if [[ -f "${DOTFILES_DIR}/gnupg/gpg-agent.conf" ]]; then
+        # Ensure ~/.gnupg directory exists with correct permissions
+        mkdir -p "${HOME}/.gnupg"
+        chmod 700 "${HOME}/.gnupg"
+
+        # Detect platform and update pinentry path
+        local pinentry_path=""
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS - check Homebrew locations
+            if [[ -f "/opt/homebrew/bin/pinentry-tty" ]]; then
+                pinentry_path="/opt/homebrew/bin/pinentry-tty"
+            elif [[ -f "/usr/local/bin/pinentry-tty" ]]; then
+                pinentry_path="/usr/local/bin/pinentry-tty"
+            fi
+        elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+            # Linux - check common locations
+            if [[ -f "/usr/bin/pinentry-tty" ]]; then
+                pinentry_path="/usr/bin/pinentry-tty"
+            elif [[ -f "/usr/bin/pinentry-curses" ]]; then
+                pinentry_path="/usr/bin/pinentry-curses"
+            fi
+        fi
+
+        if [[ -n "$pinentry_path" ]]; then
+            # Create a temporary file with the correct pinentry path
+            local temp_conf="${HOME}/.gnupg/gpg-agent.conf.tmp"
+            sed "s|pinentry-program.*|pinentry-program $pinentry_path|" \
+                "${DOTFILES_DIR}/gnupg/gpg-agent.conf" > "$temp_conf"
+
+            # Replace the target file
+            mv "$temp_conf" "${HOME}/.gnupg/gpg-agent.conf"
+            chmod 600 "${HOME}/.gnupg/gpg-agent.conf"
+
+            log_success "GPG agent config created with pinentry: $pinentry_path"
+            log_info "Restarting GPG agent..."
+            gpgconf --kill gpg-agent 2>/dev/null || true
+        else
+            log_warning "pinentry-tty not found - GPG signing may not work"
+            log_info "Install pinentry: brew install pinentry (macOS) or apt install pinentry-tty (Linux)"
+        fi
+    fi
+
+    return 0
+}
+
 symlink_tmux_config() {
     log_step "Linking tmux configuration..."
 
@@ -159,6 +217,7 @@ create_all_symlinks() {
     symlink_bash_configs
     symlink_zsh_configs
     symlink_git_configs
+    symlink_gpg_config
     symlink_tmux_config
     symlink_bin_scripts
     symlink_config_dirs
@@ -188,6 +247,7 @@ remove_symlinks() {
         "${HOME}/.gitconfig"
         "${HOME}/.gitignore_global"
         "${HOME}/.gitmessage"
+        "${HOME}/.gnupg/gpg-agent.conf"
         "${HOME}/.tmux.conf"
         "${HOME}/.bin"
         "${HOME}/.config/mise"
@@ -234,6 +294,7 @@ verify_symlinks() {
         "${HOME}/.bashrc"
         "${HOME}/.zshrc"
         "${HOME}/.gitconfig"
+        "${HOME}/.gnupg/gpg-agent.conf"
         "${HOME}/.tmux.conf"
         "${HOME}/.bin"
     )
