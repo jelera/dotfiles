@@ -1,9 +1,9 @@
-# Manifest-Based Installation Refactor - Status
+# Manifest-Based Installation System - Status
 
 **Last Updated**: 2026-01-04
-**Current Phase**: Integration Complete ✅ - READY FOR PRODUCTION!
+**Current Phase**: PRODUCTION - Manifest is the default and only system! ✅
 
-## Quick Start for Next Session
+## Quick Start
 
 ```bash
 # Run all tests
@@ -12,9 +12,13 @@ make -f test.mk test
 # View test coverage
 make -f test.mk test-coverage
 
-# Use manifest-based installation (opt-in)
-./install.sh --use-manifest --minimal --dry-run
-./install.sh --use-manifest --dry-run
+# Install packages (manifest is now the default)
+./install.sh --minimal --dry-run    # Preview minimal profile (6 packages)
+./install.sh --dry-run              # Preview dev profile (59 packages)
+
+# Direct manifest usage
+bash install/packages-manifest.sh minimal --dry-run
+bash install/packages-manifest.sh dev
 
 # Test manifest queries
 source install/lib/manifest-parser.sh
@@ -213,43 +217,45 @@ bash install/packages-manifest.sh dev
 bash install/packages-manifest.sh --manifest=custom.yaml full
 ```
 
-### Install.sh Integration ✅ COMPLETE
+### Install.sh Integration ✅ COMPLETE - MANIFEST IS NOW DEFAULT
 
-**What was built**:
-Integrated manifest-based installation system into the main `install.sh` script as an opt-in feature.
+**What was done**:
+Fully integrated manifest-based installation as the default and only package installation system.
 
 **Implementation Changes** in `install.sh`:
-- Added `USE_MANIFEST=false` flag (defaults to legacy system)
-- Added `--use-manifest` command-line option
-- Integrated manifest installation in Step 2 (package installation)
+- Removed legacy `install/packages.sh` (683 lines removed)
+- Removed `USE_MANIFEST` flag and `--use-manifest` option
+- Manifest installation is now always used in Step 2
 - Profile mapping: `--minimal` or `--no-languages` → "minimal" profile, default → "dev" profile
 
 **Usage**:
 ```bash
-# Use manifest-based installation (opt-in)
-./install.sh --use-manifest --dry-run           # Dev profile (59 packages)
-./install.sh --use-manifest --minimal --dry-run  # Minimal profile (6 packages)
+# Install packages (manifest is the only way)
+./install.sh --dry-run           # Dev profile (59 packages)
+./install.sh --minimal --dry-run  # Minimal profile (6 packages)
+./install.sh --minimal            # Install minimal profile
 
-# Legacy installation (default)
-./install.sh --dry-run  # Uses install/packages.sh
+# Direct manifest CLI
+bash install/packages-manifest.sh dev --dry-run
+bash install/packages-manifest.sh minimal
 ```
 
 **Profile Mapping**:
-- `INSTALL_LANGUAGES=false` → "minimal" profile (6 core CLI tools)
-- `INSTALL_LANGUAGES=true` (default) → "dev" profile (all tools except GUI apps)
+- `--minimal` or `--no-languages` → "minimal" profile (6 core CLI tools)
+- Default → "dev" profile (59 packages - all tools except GUI apps)
 - Future: Could add `--full` flag for "full" profile (including GUI apps)
 
 **Benefits**:
-- Side-by-side operation: Legacy and manifest systems coexist
-- Gradual migration: Users can opt-in when ready
-- Full backwards compatibility: Default behavior unchanged
-- Testing: Easy to compare both systems with `--dry-run`
+- ✅ Simplified codebase: No legacy code to maintain
+- ✅ Declarative: All packages defined in YAML
+- ✅ Testable: 173 passing tests
+- ✅ Maintainable: Easy to add/remove packages
+- ✅ Consistent: One installation path for all users
 
-**Next Steps** (future work):
-1. Gather user feedback on manifest system
-2. Side-by-side validation with legacy system
-3. Eventually make manifest the default (add `--no-manifest` to opt-out)
-4. Deprecate and remove legacy `install/packages.sh`
+**Migration Complete**:
+- Legacy `install/packages.sh` removed
+- Manifest system is production-ready
+- No backwards compatibility needed
 
 ## Current Manifest Schema
 

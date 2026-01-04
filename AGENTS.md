@@ -34,9 +34,9 @@ cd ~/.config/dotfiles
 # Options available
 ./install.sh --help
 
-# Use manifest-based installation (opt-in, experimental)
-./install.sh --use-manifest --dry-run       # Preview with dev profile
-./install.sh --use-manifest --minimal        # Minimal CLI tools only
+# Preview installation
+./install.sh --dry-run       # Preview with dev profile (59 packages)
+./install.sh --minimal --dry-run  # Preview minimal profile (6 packages)
 ```
 
 ### Safety Features
@@ -57,14 +57,13 @@ All scripts in `install/`:
 - `detect-os.sh` - OS detection and validation
 - `homebrew.sh` - Homebrew installation
 - `mise.sh` - mise installation and language runtimes
-- `packages.sh` - Package installation with fallback hierarchy (legacy, still default)
-- `packages-manifest.sh` - Manifest-based package orchestration (opt-in with --use-manifest)
+- `packages-manifest.sh` - Manifest-based package orchestration (default)
 - `symlinks.sh` - Dotfile symlink management
-- `lib/manifest-parser.sh` - YAML manifest parser (Phase 1 ✅)
-- `lib/backend-*.sh` - Package manager backends: apt, homebrew, ppa, mise (Phase 2 ✅)
+- `lib/manifest-parser.sh` - YAML manifest parser
+- `lib/backend-*.sh` - Package manager backends: apt, homebrew, ppa, mise
 - `manifests/packages.yaml` - Declarative package definitions
 
-**Note**: A manifest-based installation system is now available as an opt-in feature with `--use-manifest`. This system provides declarative, testable package management with 173 passing tests. It will eventually become the default. See [Manifest-Based Installation Refactor](#manifest-based-installation-refactor) for details.
+**Note**: This dotfiles installation uses a manifest-based system with declarative package management and 173 passing tests. Packages are defined in `install/manifests/packages.yaml` and installed based on profiles (minimal, dev, full, remote). See [Manifest-Based Installation Refactor](#manifest-based-installation-refactor) for details.
 
 ## Architecture Decisions
 

@@ -31,7 +31,6 @@ INSTALL_LANGUAGES=true
 CREATE_SYMLINKS=true
 SKIP_CONFIRMATION=false
 DRY_RUN=false
-USE_MANIFEST=false  # Use manifest-based installation system
 
 #----------------------------------------------------------------------------//
 # => PARSE ARGUMENTS
@@ -44,7 +43,6 @@ Usage: $0 [options]
 
 Options:
   --minimal              Install only core tools (no languages)
-  --use-manifest         Use manifest-based package installation (experimental)
   --no-homebrew          Skip Homebrew installation
   --no-packages          Skip package installation
   --no-mise              Skip mise installation
@@ -73,10 +71,6 @@ while [[ $# -gt 0 ]]; do
     case $1 in
         --minimal)
             INSTALL_LANGUAGES=false
-            shift
-            ;;
-        --use-manifest)
-            USE_MANIFEST=true
             shift
             ;;
         --no-homebrew)
@@ -301,36 +295,29 @@ main() {
 
     # Step 2: Install packages
     if [[ "$INSTALL_PACKAGES" == "true" ]]; then
-        if [[ "$USE_MANIFEST" == "true" ]]; then
-            # Use manifest-based installation
-            log_info "Using manifest-based package installation"
-            source "${SCRIPT_DIR}/install/packages-manifest.sh"
+        # Use manifest-based installation
+        source "${SCRIPT_DIR}/install/packages-manifest.sh"
 
-            # Determine profile based on flags
-            local profile="dev"  # Default profile
-            if [[ "$INSTALL_LANGUAGES" == "false" ]]; then
-                profile="minimal"
-            fi
+        # Determine profile based on flags
+        local profile="dev"  # Default profile
+        if [[ "$INSTALL_LANGUAGES" == "false" ]]; then
+            profile="minimal"
+        fi
 
-            log_info "Installing packages with profile: $profile"
+        log_info "Installing packages with profile: $profile"
 
-            # Use the default manifest location (set in packages-manifest.sh)
-            local manifest_path
-            # shellcheck disable=SC2153
-            manifest_path="${DEFAULT_MANIFEST:-${SCRIPT_DIR}/install/manifests/packages.yaml}"
+        # Use the default manifest location (set in packages-manifest.sh)
+        local manifest_path
+        # shellcheck disable=SC2153
+        manifest_path="${DEFAULT_MANIFEST:-${SCRIPT_DIR}/install/manifests/packages.yaml}"
 
-            # Convert DRY_RUN to dry_run argument format
-            if [[ "$DRY_RUN" == "true" ]]; then
-                install_from_manifest "$manifest_path" "$profile" "true" || \
-                    log_warning "Some packages failed to install (continuing)"
-            else
-                install_from_manifest "$manifest_path" "$profile" "false" || \
-                    log_warning "Some packages failed to install (continuing)"
-            fi
+        # Convert DRY_RUN to dry_run argument format
+        if [[ "$DRY_RUN" == "true" ]]; then
+            install_from_manifest "$manifest_path" "$profile" "true" || \
+                log_warning "Some packages failed to install (continuing)"
         else
-            # Use legacy package installation
-            source "${SCRIPT_DIR}/install/packages.sh"
-            install_essential_packages || log_warning "Some packages failed to install (continuing)"
+            install_from_manifest "$manifest_path" "$profile" "false" || \
+                log_warning "Some packages failed to install (continuing)"
         fi
     else
         log_info "Skipping package installation"
