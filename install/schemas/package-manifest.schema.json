@@ -1,0 +1,319 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/jelera/dotfiles/schemas/package-manifest.schema.json",
+  "title": "Dotfiles Package Manifest",
+  "description": "Schema for dotfiles package installation manifest",
+  "type": "object",
+  "required": ["version", "profiles", "categories", "packages"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+$"
+        },
+        {
+          "type": "number",
+          "minimum": 1.0
+        }
+      ],
+      "description": "Manifest schema version (string '1.0' or number 1.0)",
+      "examples": ["1.0", "2.0", 1.0, 2.0]
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Optional metadata about the manifest",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "last_updated": {
+          "type": "string",
+          "format": "date"
+        },
+        "author": {
+          "type": "string"
+        }
+      }
+    },
+    "profiles": {
+      "type": "object",
+      "description": "Installation profiles for different use cases",
+      "minProperties": 1,
+      "patternProperties": {
+        "^[a-z_][a-z0-9_-]*$": {
+          "type": "object",
+          "required": ["description"],
+          "additionalProperties": false,
+          "properties": {
+            "description": {
+              "type": "string",
+              "description": "Human-readable profile description",
+              "minLength": 1
+            },
+            "includes": {
+              "type": "array",
+              "description": "Categories to include in this profile",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            },
+            "excludes": {
+              "type": "array",
+              "description": "Categories to exclude from this profile",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            },
+            "packages": {
+              "type": "array",
+              "description": "Explicit list of packages (alternative to includes/excludes)",
+              "items": {
+                "type": "string"
+              },
+              "uniqueItems": true
+            }
+          },
+          "oneOf": [
+            {
+              "required": ["packages"],
+              "not": {
+                "anyOf": [
+                  { "required": ["includes"] },
+                  { "required": ["excludes"] }
+                ]
+              }
+            },
+            {
+              "anyOf": [
+                { "required": ["includes"] },
+                { "required": ["excludes"] }
+              ],
+              "not": {
+                "required": ["packages"]
+              }
+            }
+          ]
+        }
+      }
+    },
+    "categories": {
+      "type": "object",
+      "description": "Package categories with default configurations",
+      "minProperties": 1,
+      "patternProperties": {
+        "^[a-z_][a-z0-9_-]*$": {
+          "type": "object",
+          "required": ["description", "priority"],
+          "additionalProperties": false,
+          "properties": {
+            "description": {
+              "type": "string",
+              "minLength": 1
+            },
+            "priority": {
+              "type": "array",
+              "description": "Default installation priority chain",
+              "items": {
+                "type": "string",
+                "enum": ["mise", "apt", "ppa", "homebrew", "homebrew-cask", "flatpak", "source"]
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            }
+          }
+        }
+      }
+    },
+    "packages": {
+      "type": "object",
+      "description": "Individual package definitions",
+      "minProperties": 1,
+      "patternProperties": {
+        "^[a-z0-9_][a-z0-9_.-]*$": {
+          "type": "object",
+          "required": ["category", "description"],
+          "additionalProperties": false,
+          "properties": {
+            "category": {
+              "type": "string",
+              "description": "Package category (must exist in categories)"
+            },
+            "description": {
+              "type": "string",
+              "description": "Human-readable package description",
+              "minLength": 1
+            },
+            "priority": {
+              "type": "array",
+              "description": "Custom priority chain (overrides category default)",
+              "items": {
+                "type": "string",
+                "enum": ["mise", "apt", "ppa", "homebrew", "homebrew-cask", "flatpak", "source"]
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            },
+            "platforms": {
+              "type": "array",
+              "description": "Supported platforms (empty = all platforms)",
+              "items": {
+                "type": "string",
+                "enum": ["macos", "ubuntu", "kubuntu", "xubuntu"]
+              },
+              "uniqueItems": true
+            },
+            "desktop_env": {
+              "type": "array",
+              "description": "Required desktop environments",
+              "items": {
+                "type": "string",
+                "enum": ["GNOME", "KDE", "XFCE", "LXQt", "LXDE"]
+              },
+              "uniqueItems": true
+            },
+            "managed_by": {
+              "type": "string",
+              "description": "Special package manager handling",
+              "enum": ["mise"]
+            },
+            "apt": {
+              "type": "object",
+              "description": "APT package manager configuration",
+              "properties": {
+                "package": {
+                  "type": "string",
+                  "description": "APT package name"
+                },
+                "packages": {
+                  "type": "array",
+                  "description": "Multiple APT packages",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "oneOf": [
+                { "required": ["package"] },
+                { "required": ["packages"] }
+              ]
+            },
+            "homebrew": {
+              "type": "object",
+              "description": "Homebrew package manager configuration",
+              "required": ["package"],
+              "properties": {
+                "package": {
+                  "type": "string",
+                  "description": "Homebrew formula or cask name"
+                },
+                "cask": {
+                  "type": "boolean",
+                  "description": "Install as cask (GUI application)",
+                  "default": false
+                },
+                "tap": {
+                  "type": "string",
+                  "description": "Homebrew tap to add before installing"
+                }
+              }
+            },
+            "ppa": {
+              "type": "object",
+              "description": "Ubuntu PPA configuration",
+              "required": ["repository", "package"],
+              "properties": {
+                "repository": {
+                  "type": "string",
+                  "description": "PPA repository (e.g., ppa:user/repo)",
+                  "pattern": "^ppa:"
+                },
+                "package": {
+                  "type": "string",
+                  "description": "Package name from PPA"
+                },
+                "key": {
+                  "type": "string",
+                  "description": "GPG key URL or ID"
+                }
+              }
+            },
+            "flatpak": {
+              "type": "object",
+              "description": "Flatpak configuration",
+              "required": ["package"],
+              "properties": {
+                "package": {
+                  "type": "string",
+                  "description": "Flatpak package ID"
+                },
+                "remote": {
+                  "type": "string",
+                  "description": "Flatpak remote name",
+                  "default": "flathub"
+                }
+              }
+            },
+            "mise": {
+              "type": "object",
+              "description": "mise tool configuration",
+              "properties": {
+                "tool": {
+                  "type": "string",
+                  "description": "mise tool name"
+                },
+                "version": {
+                  "type": "string",
+                  "description": "Tool version",
+                  "default": "latest"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "bulk_install_groups": {
+      "type": "object",
+      "description": "Groups of packages for bulk installation optimization",
+      "patternProperties": {
+        "^[a-z_][a-z0-9_-]*$": {
+          "type": "object",
+          "required": ["enabled", "packages"],
+          "additionalProperties": false,
+          "properties": {
+            "description": {
+              "type": "string",
+              "description": "Human-readable group description"
+            },
+            "enabled": {
+              "type": "boolean",
+              "description": "Whether this group is active"
+            },
+            "platforms": {
+              "type": "array",
+              "description": "Platforms where this group applies",
+              "items": {
+                "type": "string",
+                "enum": ["macos", "ubuntu", "kubuntu", "xubuntu"]
+              },
+              "uniqueItems": true
+            },
+            "packages": {
+              "type": "array",
+              "description": "Packages in this bulk install group",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            }
+          }
+        }
+      }
+    }
+  }
+}

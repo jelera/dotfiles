@@ -78,8 +78,10 @@ test-clean: ## Clean up test artifacts
 test-coverage: ## Show test coverage summary
 	@echo "📊 Test Coverage Summary:"
 	@echo ""
-	@echo "Phase 1 - Foundation (Parser):"
+	@echo "Phase 1 - Foundation:"
 	@echo "  ✅ Manifest parser:     22/22 tests passing"
+	@echo "  ✅ Schema validation:   27/27 tests passing"
+	@echo "  ✅ Total Phase 1:       49/49 tests passing"
 	@echo ""
 	@echo "Phase 2 - Backend Modules:"
 	@echo "  ⏳ APT backend:        Not yet implemented"

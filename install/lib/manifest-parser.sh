@@ -9,6 +9,10 @@ if ! command -v yq &>/dev/null; then
     return 1
 fi
 
+# Get the directory of this script
+PARSER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCHEMA_FILE="${PARSER_DIR}/../schemas/package-manifest.schema.json"
+
 # Parse entire manifest to JSON (for processing)
 parse_manifest() {
     local manifest_file="$1"
@@ -48,6 +52,48 @@ validate_manifest() {
 
     echo "Manifest validation passed" >&2
     return 0
+}
+
+# Validate manifest against JSON Schema (strict validation)
+# Requires: check-jsonschema (install with: mise install pipx:check-jsonschema@latest)
+validate_manifest_schema() {
+    local manifest_file="$1"
+
+    # Check file exists
+    if [ ! -f "$manifest_file" ]; then
+        echo "Error: Manifest file not found: $manifest_file" >&2
+        return 1
+    fi
+
+    # Check if check-jsonschema is available
+    local validator_cmd
+    if command -v check-jsonschema &>/dev/null; then
+        validator_cmd="check-jsonschema"
+    elif command -v mise &>/dev/null && mise which check-jsonschema &>/dev/null; then
+        validator_cmd="$(mise which check-jsonschema)"
+    else
+        echo "Warning: check-jsonschema not found, skipping schema validation" >&2
+        echo "Install with: mise install pipx:check-jsonschema@latest" >&2
+        # Fall back to basic validation
+        validate_manifest "$manifest_file"
+        return $?
+    fi
+
+    # Check if schema file exists
+    if [ ! -f "$SCHEMA_FILE" ]; then
+        echo "Error: Schema file not found: $SCHEMA_FILE" >&2
+        return 1
+    fi
+
+    # Run schema validation
+    if "$validator_cmd" --schemafile "$SCHEMA_FILE" "$manifest_file" >/dev/null 2>&1; then
+        echo "Schema validation passed" >&2
+        return 0
+    else
+        echo "Error: Schema validation failed" >&2
+        "$validator_cmd" --schemafile "$SCHEMA_FILE" "$manifest_file" >&2
+        return 1
+    fi
 }
 
 # Get packages filtered by category

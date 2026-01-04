@@ -54,6 +54,7 @@ hyperfine = "latest"
 grex = "latest"
 glow = "latest"
 yq = "latest"
+"pipx:check-jsonschema" = "latest"  # JSON Schema validation for manifests
 
 # Infrastructure & Cloud (uncomment as needed)
 # terraform = "latest"       # Infrastructure as Code

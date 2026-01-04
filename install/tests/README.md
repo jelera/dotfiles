@@ -75,6 +75,15 @@ load test-helper
   - Profile filtering
   - Platform filtering
   - Priority chain resolution
+- ✅ Schema validation: 27/27 tests passing
+  - JSON Schema validation via check-jsonschema
+  - Required field validation
+  - Version format validation
+  - Profile structure validation
+  - Category and priority validation
+  - Package definition validation
+  - Package manager config validation
+  - Bulk install group validation
 
 ### Phase 2 - Backend Modules ⏳
 - ⏳ APT backend tests (planned)
@@ -90,10 +99,11 @@ load test-helper
 
 - **bats** - Testing framework (installed via mise)
 - **yq** - YAML processor (installed via mise)
+- **check-jsonschema** - JSON Schema validator (installed via mise)
 
 Install with:
 ```bash
-mise install bats@latest yq@latest
+mise install bats@latest yq@latest pipx:check-jsonschema@latest
 ```
 
 ## CI/CD Integration

@@ -53,8 +53,12 @@ All scripts in `install/`:
 - `detect-os.sh` - OS detection and validation
 - `homebrew.sh` - Homebrew installation
 - `mise.sh` - mise installation and language runtimes
-- `packages.sh` - Package installation with fallback hierarchy
+- `packages.sh` - Package installation with fallback hierarchy (legacy)
 - `symlinks.sh` - Dotfile symlink management
+- `lib/manifest-parser.sh` - YAML manifest parser (Phase 1 ✅)
+- `manifests/packages.yaml` - Package definitions (manifest-based refactor)
+
+**Note**: The installation system is being refactored to use a manifest-based architecture. See [Manifest-Based Installation Refactor](#manifest-based-installation-refactor) for details.
 
 ## Architecture Decisions
 
@@ -105,6 +109,433 @@ All scripts in `install/`:
 - Sourced automatically by shell configs
 - After installation: `cp shell/.env.local.example ~/.env.local && nvim ~/.env.local`
 
+## Manifest-Based Installation Refactor
+
+**Status**: In Progress (Phase 1 Complete ✅)
+
+### Overview
+
+The installation system is being refactored from hardcoded shell scripts to a YAML manifest-driven architecture. This provides:
+
+- **Declarative package definitions**: All packages defined in `install/manifests/packages.yaml`
+- **Installation profiles**: `remote`, `minimal`, `dev`, `full` for different use cases
+- **Granular control**: Per-package priority chains, platform filters, category-based organization
+- **Test-driven development**: Comprehensive test coverage using BATS framework
+- **Dual-mode support**: Legacy and manifest modes during migration
+
+### Architecture
+
+```
+install/
+├── lib/                           # Shared libraries
+│   ├── manifest-parser.sh         # YAML querying library (Phase 1 ✅)
+│   ├── backend-apt.sh             # APT backend (Phase 2 ⏳)
+│   ├── backend-homebrew.sh        # Homebrew backend (Phase 2 ⏳)
+│   ├── backend-ppa.sh             # PPA backend (Phase 2 ⏳)
+│   └── backend-mise.sh            # mise backend (Phase 2 ⏳)
+├── manifests/
+│   └── packages.yaml              # Package definitions
+├── tests/                         # Test suite
+│   ├── fixtures/
+│   │   └── test-packages.yaml     # Test data
+│   ├── test-helper.bash           # Test utilities
+│   └── test-manifest-parser.bats  # Parser tests (22/22 ✅)
+├── install.sh                     # Main installer
+├── packages-manifest.sh           # Manifest-based installer (Phase 3 ⏳)
+└── packages.sh                    # Legacy installer (fallback)
+```
+
+### Phase 1: Foundation ✅ COMPLETE
+
+**Implementation**: Manifest parser with full YAML querying capabilities
+
+**Files**:
+- `install/lib/manifest-parser.sh` - Parser library with schema validation
+- `install/manifests/packages.yaml` - Package definitions
+- `install/schemas/package-manifest.schema.json` - JSON Schema definition
+- `install/tests/test-manifest-parser.bats` - 22 passing tests
+- `install/tests/test-schema-validation.bats` - 27 passing tests
+
+**Functions available**:
+```bash
+parse_manifest <file>                          # Parse YAML to JSON
+validate_manifest <file>                       # Basic validation (yq-based)
+validate_manifest_schema <file>                # Full JSON Schema validation
+get_packages_by_category <file> <category>    # Filter by category
+get_package_priority <file> <package>         # Get priority chain
+get_packages_for_platform <file> <platform>   # Filter by platform
+get_packages_for_profile <file> <profile>     # Filter by profile
+is_managed_by_mise <file> <package>           # Check mise management
+get_package_manager_config <file> <pkg> <mgr> # Get manager config
+```
+
+**Test results**: All 49 tests passing (22 parser + 27 schema validation)
+```bash
+make -f test.mk test         # Run all tests
+make -f test.mk test-parser  # Run parser tests only
+```
+
+**Schema validation** (requires `check-jsonschema`):
+```bash
+# Install validator
+mise install pipx:check-jsonschema@latest
+
+# Validate manifest
+validate_manifest_schema install/manifests/packages.yaml
+
+# Or use directly
+check-jsonschema --schemafile install/schemas/package-manifest.schema.json \
+  install/manifests/packages.yaml
+```
+
+### Phase 2: Backend Modules ⏳ PLANNED
+
+**Goal**: Create manifest-aware package manager backends
+
+Each backend will:
+- Query manifest for relevant packages
+- Apply platform/profile filtering
+- Honor priority chains
+- Support dry-run mode
+- Provide status reporting
+
+**Backends to implement**:
+1. `backend-apt.sh` - APT/dpkg package installation
+2. `backend-homebrew.sh` - Homebrew (formulas and casks)
+3. `backend-ppa.sh` - Ubuntu PPA management
+4. `backend-mise.sh` - mise tool installation
+
+**TDD approach**: Write tests first in `install/tests/test-backend-*.bats`
+
+### Phase 3: Integration Layer ⏳ PLANNED
+
+**Goal**: Replace hardcoded install logic with manifest-driven orchestration
+
+**New file**: `install/packages-manifest.sh`
+- Reads selected profile from CLI args
+- Queries manifest for package list
+- Orchestrates backend modules
+- Maintains compatibility with existing flags
+
+**Migration strategy**:
+1. Dual-mode support: `--use-manifest` flag to opt-in
+2. Validation: Both modes install same packages
+3. Gradual migration: Test thoroughly before switching default
+4. Legacy support: Keep `packages.sh` as fallback during migration
+
+**TDD approach**: Write tests in `install/tests/test-integration.bats`
+
+### Manifest Schema
+
+The manifest (`install/manifests/packages.yaml`) follows a strict JSON Schema (`install/schemas/package-manifest.schema.json`) that validates:
+
+- **Required fields**: version, profiles, categories, packages
+- **Version format**: String "1.0" or number 1.0
+- **Profile constraints**: Must use either `packages` OR `includes`/`excludes`, not both
+- **Category requirements**: Must have description and priority array
+- **Package requirements**: Must have category and description
+- **Platform values**: Must be one of: macos, ubuntu, kubuntu, xubuntu
+- **Priority values**: Must be one of: mise, apt, ppa, homebrew, homebrew-cask, flatpak, source
+- **PPA repositories**: Must start with "ppa:" prefix
+- **Bulk groups**: Must have enabled and packages fields
+
+The manifest uses this structure:
+
+**Quick Reference**:
+
+| Profile | Use Case | Includes |
+|---------|----------|----------|
+| `full` | Complete dev environment | All categories |
+| `dev` | Headless dev environment | All except GUI apps |
+| `minimal` | Essential CLI only | git, curl, wget, tmux, tree, pinentry |
+| `remote` | Lightweight remote server | git, curl, wget, tmux, htop, tree, pinentry, build-essential |
+
+| Category | Purpose | Default Priority |
+|----------|---------|------------------|
+| `language_runtimes` | Ruby, Python, Node, Go, etc. | ppa → homebrew → mise |
+| `general_tools` | CLI utilities | apt → ppa → homebrew → mise |
+| `system_libraries` | Build dependencies | apt only |
+| `gui_applications` | Desktop apps | homebrew-cask → flatpak |
+
+#### Profiles
+
+Installation profiles for different use cases:
+
+```yaml
+profiles:
+  full:
+    description: "Complete development environment with all tools"
+    includes: [system_libraries, general_tools, language_runtimes, gui_applications]
+
+  dev:
+    description: "Developer tools without GUI applications"
+    includes: [system_libraries, general_tools, language_runtimes]
+    excludes: [gui_applications]
+
+  minimal:
+    description: "Essential CLI tools only"
+    packages: [git, curl, wget, tmux, tree, pinentry]
+
+  remote:
+    description: "Lightweight remote server setup"
+    packages: [git, curl, wget, tmux, htop, tree, pinentry, build-essential]
+```
+
+**Profile types**:
+- **Category-based**: Use `includes`/`excludes` (e.g., `full`, `dev`)
+- **Explicit**: Use `packages` array (e.g., `minimal`, `remote`)
+
+#### Categories
+
+Organize packages by purpose with default priority chains:
+
+```yaml
+categories:
+  language_runtimes:
+    description: "Language interpreters and compilers"
+    priority: ["ppa", "homebrew", "mise"]
+
+  general_tools:
+    description: "CLI utilities and development tools"
+    priority: ["apt", "ppa", "homebrew", "mise"]
+
+  system_libraries:
+    description: "System-level libraries and build dependencies"
+    priority: ["apt"]
+
+  gui_applications:
+    description: "Desktop applications"
+    priority: ["homebrew-cask", "flatpak"]
+```
+
+#### Packages
+
+Individual package definitions:
+
+```yaml
+packages:
+  git:
+    category: general_tools
+    description: "Version control system"
+    priority: ["apt", "homebrew"]  # Override category default
+    apt:
+      package: git
+    homebrew:
+      package: git
+
+  build-essential:
+    category: system_libraries
+    description: "GCC, make, and essential build tools"
+    platforms: ["ubuntu"]  # Only install on Ubuntu
+    apt:
+      package: build-essential
+
+  ruby:
+    category: language_runtimes
+    description: "Ruby language runtime"
+    managed_by: mise  # Installed via mise, not package managers
+
+  ghostty:
+    category: gui_applications
+    description: "Modern terminal emulator"
+    platforms: ["macos"]
+    homebrew:
+      cask: true  # Install as cask
+      package: ghostty
+```
+
+**Package fields**:
+- `category` (required): Package category
+- `description`: Human-readable description
+- `priority`: Custom priority chain (overrides category default)
+- `platforms`: Array of platforms (`ubuntu`, `macos`)
+- `desktop_env`: Array of desktop environments (`GNOME`, `KDE`, `XFCE`)
+- `managed_by`: Special handler (`mise` for mise-managed tools)
+- `apt`, `homebrew`, `ppa`: Package manager specific config
+
+#### Bulk Install Groups
+
+Optimize installation by grouping packages:
+
+```yaml
+bulk_install_groups:
+  system_essentials:
+    description: "Core system tools"
+    enabled: true
+    packages: [git, curl, wget, tree]
+
+  ubuntu_build_tools:
+    description: "Build dependencies for Ubuntu"
+    enabled: true
+    platforms: ["ubuntu"]
+    packages: [build-essential, pkg-config, libssl-dev]
+```
+
+### Testing
+
+**Framework**: BATS (Bash Automated Testing System)
+
+**Running tests**:
+```bash
+# Show available test commands
+make -f test.mk help
+
+# Run all tests
+make -f test.mk test
+
+# Run specific test suites
+make -f test.mk test-parser        # Manifest parser tests (22/22 ✅)
+make -f test.mk test-backends      # Backend tests (Phase 2 ⏳)
+make -f test.mk test-integration   # Integration tests (Phase 3 ⏳)
+
+# Watch mode (re-run on changes)
+make -f test.mk test-watch
+
+# Verbose output
+make -f test.mk test-verbose
+
+# Coverage summary
+make -f test.mk test-coverage
+```
+
+**Test structure**:
+```
+install/tests/
+├── fixtures/              # Test data
+│   └── test-packages.yaml # Sample manifest
+├── test-helper.bash       # Common utilities, setup/teardown
+└── test-*.bats           # Test files (BATS format)
+```
+
+**TDD workflow**:
+1. **Red**: Write a failing test first
+2. **Green**: Implement code to make the test pass
+3. **Refactor**: Improve code while keeping tests passing
+
+**Current coverage**:
+- ✅ Phase 1 - Foundation:
+  - Manifest parser: 22/22 tests passing
+  - Schema validation: 27/27 tests passing
+  - **Total: 49/49 tests passing**
+- ⏳ Phase 2 - Backend modules: Not yet implemented
+- ⏳ Phase 3 - Integration: Not yet implemented
+
+### Adding New Packages
+
+**Method 1: Add to manifest** (preferred for Phase 2+)
+
+1. Edit `install/manifests/packages.yaml`
+2. Add package definition:
+   ```yaml
+   packages:
+     mypackage:
+       category: general_tools
+       description: "My awesome tool"
+       priority: ["apt", "homebrew"]  # Optional, uses category default if omitted
+       apt:
+         package: mypackage
+       homebrew:
+         package: mypackage
+   ```
+3. Optionally add to a profile:
+   ```yaml
+   profiles:
+     dev:
+       includes: [general_tools]  # mypackage will be included
+   ```
+4. Run tests to verify: `make -f test.mk test`
+
+**Method 2: Add to mise** (for CLI tools and runtimes)
+
+1. Check availability: `mise ls-remote <tool>`
+2. Add to `mise/config.toml`:
+   ```toml
+   [tools]
+   mypackage = "latest"
+   ```
+3. Add to manifest with `managed_by: mise`:
+   ```yaml
+   packages:
+     mypackage:
+       category: general_tools
+       description: "My CLI tool"
+       managed_by: mise
+   ```
+4. Install: `mise install mypackage@latest`
+
+**Method 3: Legacy mode** (temporary, until Phase 3)
+
+1. Edit `install/packages.sh`
+2. Add to appropriate function
+3. Follow existing patterns in the file
+
+### Adding New Profiles
+
+Edit `install/manifests/packages.yaml`:
+
+**Category-based profile**:
+```yaml
+profiles:
+  myprofile:
+    description: "My custom setup"
+    includes: [general_tools, system_libraries]
+    excludes: [gui_applications]
+```
+
+**Explicit package list**:
+```yaml
+profiles:
+  myprofile:
+    description: "My minimal setup"
+    packages: [git, curl, tmux, neovim]
+```
+
+**Test the profile**:
+```bash
+# Query packages in profile
+source install/lib/manifest-parser.sh
+get_packages_for_profile install/manifests/packages.yaml myprofile
+```
+
+### Migration Notes
+
+**Current state**: Phase 1 complete, using legacy install scripts
+
+**Testing manifest queries**:
+```bash
+# Source the parser
+source install/lib/manifest-parser.sh
+
+# Test queries
+get_packages_for_profile install/manifests/packages.yaml minimal
+get_packages_for_platform install/manifests/packages.yaml ubuntu
+get_package_priority install/manifests/packages.yaml git
+```
+
+**When Phase 2 completes**:
+- Backend modules will be available for testing
+- Can test individual package installations via manifest
+
+**When Phase 3 completes**:
+- Full manifest-driven installation available
+- Use `--use-manifest` flag to opt-in
+- Default remains legacy mode until validated
+
+**Final migration**:
+- Switch default to manifest mode
+- Keep legacy mode with `--use-legacy` flag
+- Eventually deprecate legacy scripts
+
+### Related Files
+
+- `install/manifests/packages.yaml` - Main package manifest
+- `install/schemas/package-manifest.schema.json` - JSON Schema definition
+- `install/lib/manifest-parser.sh` - Parser library with validation
+- `install/tests/test-manifest-parser.bats` - Parser tests (22 tests)
+- `install/tests/test-schema-validation.bats` - Schema tests (27 tests)
+- `test.mk` - Test runner
+- `mise/config.toml` - mise-managed tools (referenced by manifest)
+
 ## Common Tasks
 
 ### Adding New Utility Script
@@ -127,6 +558,10 @@ Note: Most utilities are shell functions (faster than scripts)
 3. Verify symlinks: `./install/symlinks.sh verify`
 
 ### Adding Language Runtime or CLI Tool
+
+**Note**: See [Manifest-Based Installation Refactor > Adding New Packages](#adding-new-packages) for the preferred manifest-based approach (Phase 2+).
+
+**Current method (legacy)**:
 1. **First, check if mise supports it**: `mise ls-remote <tool>`
 2. Add to `mise/config.toml` under `[tools]` (for global availability)
 3. Install: `mise install <tool>@latest`
@@ -136,6 +571,8 @@ Note: Most utilities are shell functions (faster than scripts)
 **For tools NOT in mise:**
 1. Add to `install/packages.sh` in `install_essential_packages()`
 2. Will automatically try: mise → Homebrew → apt → Flatpak → source
+
+**Recommended**: Also add to `install/manifests/packages.yaml` to prepare for manifest-based installation
 
 ### GitHub Authentication
 
