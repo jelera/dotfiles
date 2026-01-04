@@ -306,6 +306,70 @@ nvim ~/.config/dotfiles/config/ghostty/config
 
 See `config/ghostty/README.md` for detailed documentation, customization options, and troubleshooting.
 
+### Keyboard Remapping (Linux)
+
+**keyd** is a system-level keyboard remapping daemon for Linux that works with both X11 and Wayland.
+
+**Installation:**
+
+keyd must be installed separately before the dotfiles can configure it:
+
+```bash
+# Ubuntu 25.04+ (official repositories)
+sudo apt update
+sudo apt install keyd
+
+# Ubuntu 24.04 and earlier (via PPA)
+sudo add-apt-repository ppa:keyd-team/ppa
+sudo apt update
+sudo apt install keyd
+
+# After installing keyd, run dotfiles installation to create symlinks
+cd ~/.config/dotfiles
+./install.sh
+```
+
+The install script automatically detects your Ubuntu version and provides the appropriate installation instructions if keyd is not found.
+
+**Automatic Configuration**: The install script automatically configures keyd if it's installed:
+- Configuration file: `config/keyd/default.conf`
+- Symlinked to: `/etc/keyd/default.conf`
+- Service is automatically restarted if running
+
+**Current Remapping** (configured in `config/keyd/default.conf`):
+- **Caps Lock (tap)**: Acts as ESC
+- **Caps Lock (hold)**: Acts as Left Control
+
+**Manual Setup** (if needed):
+```bash
+# Create symlink
+sudo mkdir -p /etc/keyd
+sudo ln -sf ~/.config/dotfiles/config/keyd/default.conf /etc/keyd/default.conf
+
+# Enable and start service
+sudo systemctl enable keyd
+sudo systemctl start keyd
+
+# Reload after config changes
+sudo systemctl reload keyd
+```
+
+**Verify Configuration:**
+```bash
+# Check service status
+sudo systemctl status keyd
+
+# View logs
+sudo journalctl -u keyd -n 20
+
+# Verify symlink
+readlink /etc/keyd/default.conf
+```
+
+**Note**: The install script recognizes both `keyd` (official packages) and `keyd.rvaiya` (PPA version).
+
+See `config/keyd/README.md` for detailed documentation, advanced configuration examples, and troubleshooting.
+
 ### GPG Commit Signing
 
 **Automatic Configuration**: GPG agent is automatically configured during installation:

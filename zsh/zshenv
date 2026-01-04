@@ -1,6 +1,19 @@
 # ~/.zshenv
 # Executed for all zsh instances (login, interactive, scripts)
-# Keep this file minimal - put most config in .zshrc
+# IMPORTANT: Keep this file MINIMAL - only essential environment variables
+# Heavy operations and interactive setup belong in .zshrc
+
+# Skip heavy initialization during KDE session startup to prevent ksplashqml crashes
+# KDE startup sets these environment variables before launching shells
+if [[ -n "$KWIN_RUNNING" ]] || [[ -n "$KDE_FULL_SESSION" ]] && [[ ! -t 0 ]]; then
+    # Minimal setup for KDE startup - just XDG and basic PATH
+    export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+    export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+    export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+    export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+    export PATH="$HOME/.local/bin:$HOME/.bin:$PATH"
+    return
+fi
 
 # XDG Base Directory Specification
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
@@ -12,15 +25,17 @@ export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 export EDITOR='nvim'
 export VISUAL='nvim'
 
-# PATH - Basic setup (detailed PATH in shell/env)
+# PATH - Basic setup (detailed PATH in shell/env for interactive shells)
 export PATH="$HOME/.local/bin:$HOME/.bin:$PATH"
 
 # Ensure locale is set
 export LANG="${LANG:-en_US.UTF-8}"
 export LC_ALL="${LC_ALL:-en_US.UTF-8}"
 
-# Load platform-specific environment variables
-# This must be in zshenv (not zshrc) to work for non-interactive shells (e.g., git hooks)
-DOTFILES_DIR="${HOME}/.config/dotfiles"
-[[ -f "${DOTFILES_DIR}/shell/env" ]] && source "${DOTFILES_DIR}/shell/env"
-unset DOTFILES_DIR
+# Load platform-specific environment variables ONLY for interactive shells or git hooks
+# For interactive shells, this will run here. For non-interactive, skip to avoid blocking KDE
+if [[ -t 0 ]] || [[ -n "$GIT_DIR" ]] || [[ -n "$GIT_EXEC_PATH" ]]; then
+    DOTFILES_DIR="${HOME}/.config/dotfiles"
+    [[ -f "${DOTFILES_DIR}/shell/env" ]] && source "${DOTFILES_DIR}/shell/env"
+    unset DOTFILES_DIR
+fi

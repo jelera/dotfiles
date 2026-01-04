@@ -267,10 +267,26 @@ symlink_keyd_config() {
         return 0
     fi
 
-    # Check if keyd is installed
-    if ! command -v keyd &> /dev/null; then
+    # Check if keyd is installed (supports both 'keyd' and 'keyd.rvaiya' from PPA)
+    if ! command -v keyd &> /dev/null && ! command -v keyd.rvaiya &> /dev/null; then
         log_info "keyd not installed, skipping config link"
-        log_info "Install with: sudo apt install keyd"
+
+        # Provide version-specific installation instructions for Ubuntu
+        if [[ "${OS:-}" == "ubuntu" ]] && [[ -n "${OS_VERSION:-}" ]]; then
+            # Extract major version (e.g., "24" from "24.04")
+            local ubuntu_major_version="${OS_VERSION%%.*}"
+
+            # Ubuntu 25.04+ has keyd in official repos, older versions need PPA
+            if [[ "$ubuntu_major_version" -ge 25 ]]; then
+                log_info "Install with: sudo apt update && sudo apt install keyd"
+            else
+                log_info "Install with: sudo add-apt-repository ppa:keyd-team/ppa && sudo apt update && sudo apt install keyd"
+            fi
+        else
+            # Fallback for non-Ubuntu or when OS_VERSION is not available
+            log_info "Install keyd from your distribution's package manager or https://github.com/rvaiya/keyd"
+        fi
+
         return 0
     fi
 
