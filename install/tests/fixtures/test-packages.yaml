@@ -1,0 +1,134 @@
+version: 1.0
+
+# Test installation profiles
+profiles:
+  full:
+    description: "Complete development environment"
+    includes: [system_libraries, general_tools, language_runtimes, gui_applications]
+
+  dev:
+    description: "Developer tools without GUI"
+    includes: [system_libraries, general_tools, language_runtimes]
+    excludes: [gui_applications]
+
+  minimal:
+    description: "Essential CLI only"
+    packages: [git, curl, wget, tmux, tree]
+
+  remote:
+    description: "Lightweight remote server"
+    packages: [git, curl, wget, tmux, htop, build-essential]
+
+# Package categories with default priority chains
+categories:
+  language_runtimes:
+    description: "Language interpreters and compilers"
+    priority: ["ppa", "homebrew", "mise"]
+
+  general_tools:
+    description: "CLI utilities and development tools"
+    priority: ["apt", "ppa", "homebrew", "mise"]
+
+  system_libraries:
+    description: "System-level libraries and build dependencies"
+    priority: ["apt"]
+
+  gui_applications:
+    description: "Desktop applications"
+    priority: ["homebrew-cask", "flatpak"]
+
+# Package definitions for testing
+packages:
+  # General tools
+  git:
+    category: general_tools
+    description: "Version control system"
+    priority: ["apt", "homebrew"]
+    apt:
+      package: git
+    homebrew:
+      package: git
+
+  curl:
+    category: general_tools
+    description: "HTTP client"
+    apt:
+      package: curl
+    homebrew:
+      package: curl
+
+  wget:
+    category: general_tools
+    description: "Download utility"
+    apt:
+      package: wget
+    homebrew:
+      package: wget
+
+  tmux:
+    category: general_tools
+    description: "Terminal multiplexer"
+    apt:
+      package: tmux
+    homebrew:
+      package: tmux
+
+  tree:
+    category: general_tools
+    description: "Directory tree viewer"
+    apt:
+      package: tree
+    homebrew:
+      package: tree
+
+  htop:
+    category: general_tools
+    description: "Process viewer"
+    apt:
+      package: htop
+    homebrew:
+      package: htop
+
+  # System libraries - Ubuntu only
+  build-essential:
+    category: system_libraries
+    description: "GCC, make, and build tools"
+    platforms: ["ubuntu"]
+    apt:
+      package: build-essential
+
+  # Language runtimes - managed by mise
+  ruby:
+    category: language_runtimes
+    description: "Ruby language runtime"
+    managed_by: mise
+
+  python:
+    category: language_runtimes
+    description: "Python language runtime"
+    managed_by: mise
+
+  node:
+    category: language_runtimes
+    description: "Node.js runtime"
+    managed_by: mise
+
+  # GUI applications - macOS only
+  ghostty:
+    category: gui_applications
+    description: "Modern terminal emulator"
+    platforms: ["macos"]
+    homebrew:
+      cask: true
+      package: ghostty
+
+# Bulk installation groups
+bulk_install_groups:
+  system_essentials:
+    enabled: true
+    packages: [git, curl, wget, tree]
+
+  ubuntu_build_tools:
+    enabled: true
+    platforms: ["ubuntu"]
+    packages: [build-essential]

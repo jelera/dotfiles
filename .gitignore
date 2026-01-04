@@ -42,3 +42,5 @@ tmp/
 .fseventsd
 .VolumeIcon.icns
 .com.apple.timemachine.donotpresent
+
+.claude/settings.local.json
