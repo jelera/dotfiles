@@ -33,6 +33,10 @@ cd ~/.config/dotfiles
 
 # Options available
 ./install.sh --help
+
+# Use manifest-based installation (opt-in, experimental)
+./install.sh --use-manifest --dry-run       # Preview with dev profile
+./install.sh --use-manifest --minimal        # Minimal CLI tools only
 ```
 
 ### Safety Features
@@ -53,12 +57,14 @@ All scripts in `install/`:
 - `detect-os.sh` - OS detection and validation
 - `homebrew.sh` - Homebrew installation
 - `mise.sh` - mise installation and language runtimes
-- `packages.sh` - Package installation with fallback hierarchy (legacy)
+- `packages.sh` - Package installation with fallback hierarchy (legacy, still default)
+- `packages-manifest.sh` - Manifest-based package orchestration (opt-in with --use-manifest)
 - `symlinks.sh` - Dotfile symlink management
 - `lib/manifest-parser.sh` - YAML manifest parser (Phase 1 ✅)
-- `manifests/packages.yaml` - Package definitions (manifest-based refactor)
+- `lib/backend-*.sh` - Package manager backends: apt, homebrew, ppa, mise (Phase 2 ✅)
+- `manifests/packages.yaml` - Declarative package definitions
 
-**Note**: The installation system is being refactored to use a manifest-based architecture. See [Manifest-Based Installation Refactor](#manifest-based-installation-refactor) for details.
+**Note**: A manifest-based installation system is now available as an opt-in feature with `--use-manifest`. This system provides declarative, testable package management with 173 passing tests. It will eventually become the default. See [Manifest-Based Installation Refactor](#manifest-based-installation-refactor) for details.
 
 ## Architecture Decisions
 

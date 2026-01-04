@@ -1,7 +1,7 @@
 # Manifest-Based Installation Refactor - Status
 
 **Last Updated**: 2026-01-04
-**Current Phase**: Phase 3 Complete ✅ - REFACTOR COMPLETE!
+**Current Phase**: Integration Complete ✅ - READY FOR PRODUCTION!
 
 ## Quick Start for Next Session
 
@@ -11,6 +11,10 @@ make -f test.mk test
 
 # View test coverage
 make -f test.mk test-coverage
+
+# Use manifest-based installation (opt-in)
+./install.sh --use-manifest --minimal --dry-run
+./install.sh --use-manifest --dry-run
 
 # Test manifest queries
 source install/lib/manifest-parser.sh
@@ -208,6 +212,44 @@ bash install/packages-manifest.sh dev
 # Custom manifest
 bash install/packages-manifest.sh --manifest=custom.yaml full
 ```
+
+### Install.sh Integration ✅ COMPLETE
+
+**What was built**:
+Integrated manifest-based installation system into the main `install.sh` script as an opt-in feature.
+
+**Implementation Changes** in `install.sh`:
+- Added `USE_MANIFEST=false` flag (defaults to legacy system)
+- Added `--use-manifest` command-line option
+- Integrated manifest installation in Step 2 (package installation)
+- Profile mapping: `--minimal` or `--no-languages` → "minimal" profile, default → "dev" profile
+
+**Usage**:
+```bash
+# Use manifest-based installation (opt-in)
+./install.sh --use-manifest --dry-run           # Dev profile (59 packages)
+./install.sh --use-manifest --minimal --dry-run  # Minimal profile (6 packages)
+
+# Legacy installation (default)
+./install.sh --dry-run  # Uses install/packages.sh
+```
+
+**Profile Mapping**:
+- `INSTALL_LANGUAGES=false` → "minimal" profile (6 core CLI tools)
+- `INSTALL_LANGUAGES=true` (default) → "dev" profile (all tools except GUI apps)
+- Future: Could add `--full` flag for "full" profile (including GUI apps)
+
+**Benefits**:
+- Side-by-side operation: Legacy and manifest systems coexist
+- Gradual migration: Users can opt-in when ready
+- Full backwards compatibility: Default behavior unchanged
+- Testing: Easy to compare both systems with `--dry-run`
+
+**Next Steps** (future work):
+1. Gather user feedback on manifest system
+2. Side-by-side validation with legacy system
+3. Eventually make manifest the default (add `--no-manifest` to opt-out)
+4. Deprecate and remove legacy `install/packages.sh`
 
 ## Current Manifest Schema
 
