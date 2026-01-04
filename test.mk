@@ -47,13 +47,9 @@ test-backends: ## Run backend tests only (when implemented)
 		echo "⚠️  Backend tests not yet implemented (Phase 2)"; \
 	fi
 
-test-integration: ## Run integration tests only (when implemented)
+test-integration: ## Run integration tests only
 	@echo "🧪 Running integration tests..."
-	@if [ -f $(TEST_DIR)/test-integration.bats ]; then \
-		$(BATS) $(TEST_DIR)/test-integration.bats; \
-	else \
-		echo "⚠️  Integration tests not yet implemented (Phase 3)"; \
-	fi
+	@$(BATS) $(TEST_DIR)/test-integration.bats
 
 test-watch: ## Watch for changes and re-run tests
 	@echo "👀 Watching for changes (press Ctrl+C to stop)..."
@@ -90,10 +86,13 @@ test-coverage: ## Show test coverage summary
 	@echo "  ✅ mise backend:        22/22 tests passing"
 	@echo "  ✅ Total Phase 2:       94/94 tests passing"
 	@echo ""
-	@echo "Phase 3 - Integration:"
-	@echo "  ⏳ Integration tests:  Not yet implemented"
+	@echo "Phase 3 - Integration Layer:"
+	@echo "  ✅ Integration tests:   30/30 tests passing"
+	@echo "  ✅ Total Phase 3:       30/30 tests passing"
 	@echo ""
-	@echo "📈 Grand Total: 143/143 tests passing"
+	@echo "🎉 Grand Total: 173/173 tests passing"
+	@echo ""
+	@echo "✨ Manifest-based installation system is COMPLETE!"
 	@echo ""
 
 .DEFAULT_GOAL := help

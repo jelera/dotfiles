@@ -172,6 +172,15 @@ get_packages_for_profile() {
         return 1
     fi
 
+    # Check if profile exists
+    local profile_exists
+    profile_exists=$(yq eval ".profiles | has(\"${profile}\")" "$manifest_file" 2>/dev/null)
+
+    if [ "$profile_exists" != "true" ]; then
+        echo "Error: Profile '${profile}' not found in manifest" >&2
+        return 1
+    fi
+
     # Check if profile has explicit packages list
     local explicit_packages
     explicit_packages=$(yq eval ".profiles.\"${profile}\".packages[]?" "$manifest_file" 2>/dev/null)
