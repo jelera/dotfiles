@@ -10,8 +10,12 @@
 ###############################################################################
 
 # Enable Powerlevel10k instant prompt (should stay at top)
-if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
-  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+# Disabled during KDE session startup to prevent ksplashqml crashes
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]] && [[ -z "$KONSOLE_DBUS_SESSION" ]] && [[ "$TERM" != "linux" ]]; then
+  # Only enable if we're in an actual terminal session, not during DE startup
+  if [[ -t 0 ]] && [[ -n "$DISPLAY" || -n "$WAYLAND_DISPLAY" ]]; then
+    source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+  fi
 fi
 
 #----------------------------------------------------------------------------//
@@ -72,7 +76,10 @@ zinit ice depth=1
 zinit light romkatv/powerlevel10k
 
 # Load important plugins immediately (no turbo)
-zinit light zsh-users/zsh-autosuggestions
+# Load autosuggestions only in interactive terminal sessions (not during KDE startup)
+if [[ -t 0 ]] && [[ -n "$DISPLAY" || -n "$WAYLAND_DISPLAY" ]] && [[ -z "$KONSOLE_DBUS_SESSION" ]]; then
+  zinit light zsh-users/zsh-autosuggestions
+fi
 zinit light zsh-users/zsh-completions
 
 # Syntax highlighting (must be loaded last among immediate plugins)

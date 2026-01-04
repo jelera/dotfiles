@@ -3,10 +3,17 @@
 # GPG configuration for Linux
 # Set GPG_TTY for signing commits
 # This is required for GPG to prompt for passphrases in the terminal
-export GPG_TTY=$(tty)
+# Only set if we're in an interactive shell with a tty
+if [[ -t 0 ]] && command -v tty &>/dev/null; then
+    GPG_TTY_VALUE=$(tty 2>/dev/null)
+    if [[ -n "$GPG_TTY_VALUE" ]]; then
+        export GPG_TTY="$GPG_TTY_VALUE"
+    fi
+    unset GPG_TTY_VALUE
+fi
 
-# Linux: Ensure gpg-agent is running
-if command -v gpgconf &>/dev/null; then
+# Linux: Ensure gpg-agent is running (only in interactive shells)
+if [[ -t 0 ]] && command -v gpgconf &>/dev/null; then
     gpgconf --launch gpg-agent 2>/dev/null || true
 fi
 

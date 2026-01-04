@@ -254,6 +254,57 @@ symlink_config_dirs() {
     return 0
 }
 
+symlink_keyd_config() {
+    log_step "Linking keyd configuration..."
+
+    if [[ "$OSTYPE" != "linux-gnu"* ]]; then
+        log_info "Skipping keyd config (Linux only)"
+        return 0
+    fi
+
+    if [[ ! -f "${DOTFILES_DIR}/config/keyd/default.conf" ]]; then
+        log_info "keyd config not found, skipping"
+        return 0
+    fi
+
+    # Check if keyd is installed
+    if ! command -v keyd &> /dev/null; then
+        log_info "keyd not installed, skipping config link"
+        log_info "Install with: sudo apt install keyd"
+        return 0
+    fi
+
+    if is_dry_run; then
+        log_dry_run "Would link keyd config to /etc/keyd/default.conf (requires sudo)"
+        return 0
+    fi
+
+    # keyd config requires sudo to link to /etc/keyd/
+    log_info "Linking keyd config requires sudo..."
+
+    if sudo -n true 2>/dev/null; then
+        # Can sudo without password
+        sudo mkdir -p /etc/keyd
+        sudo ln -sf "${DOTFILES_DIR}/config/keyd/default.conf" /etc/keyd/default.conf
+        log_success "Linked keyd config to /etc/keyd/default.conf"
+
+        # Reload keyd if it's running
+        if systemctl is-active --quiet keyd; then
+            sudo systemctl restart keyd
+            log_success "Restarted keyd service"
+        fi
+    else
+        # Need password for sudo
+        log_warning "Skipping keyd config link (requires sudo password)"
+        log_info "To link manually, run:"
+        log_info "  sudo mkdir -p /etc/keyd"
+        log_info "  sudo ln -sf ${DOTFILES_DIR}/config/keyd/default.conf /etc/keyd/default.conf"
+        log_info "  sudo systemctl restart keyd"
+    fi
+
+    return 0
+}
+
 create_all_symlinks() {
     log_step "Creating all dotfile symlinks..."
 
@@ -266,6 +317,7 @@ create_all_symlinks() {
     symlink_bin_scripts
     symlink_config_dirs
     symlink_iterm2_config
+    symlink_keyd_config
 
     log_success "All symlinks created"
 
@@ -299,6 +351,14 @@ remove_symlinks() {
         "${HOME}/.config/mise"
         "${HOME}/.config/ghostty"
     )
+
+    # Also remove keyd config if it exists and points to our dotfiles
+    if [[ -L "/etc/keyd/default.conf" ]] && sudo -n true 2>/dev/null; then
+        if readlink "/etc/keyd/default.conf" | grep -q "$DOTFILES_DIR"; then
+            sudo rm "/etc/keyd/default.conf"
+            log_info "Removed symlink: /etc/keyd/default.conf"
+        fi
+    fi
 
     for symlink in "${symlinks[@]}"; do
         if [[ -L "$symlink" ]]; then
@@ -365,6 +425,18 @@ verify_symlinks() {
             log_warning "  $(basename "$symlink") (not a symlink)"
         fi
     done
+
+    # Check keyd config if on Linux
+    if [[ "$OSTYPE" == "linux-gnu"* ]] && [[ -L "/etc/keyd/default.conf" ]]; then
+        local target
+        target="$(readlink /etc/keyd/default.conf)"
+        if [[ -e "$target" ]]; then
+            log_success "✓ /etc/keyd/default.conf -> $target"
+        else
+            log_error "✗ /etc/keyd/default.conf -> $target (broken link)"
+            all_valid=false
+        fi
+    fi
 
     if $all_valid; then
         log_success "All symlinks are valid"
