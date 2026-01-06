@@ -177,3 +177,126 @@ load test-helper
     [ "$status" -eq 0 ]
     [ -z "$output" ] || [[ "$output" == "" ]]
 }
+
+# ============================================================================
+# Multi-Manifest Loading Tests (NEW)
+# ============================================================================
+
+@test "load_manifests_for_platform: loads common.yaml for ubuntu" {
+    run load_manifests_for_platform "${MANIFEST_DIR}" "ubuntu"
+    [ "$status" -eq 0 ]
+    assert_contains "$output" "common.yaml"
+    assert_contains "$output" "ubuntu.yaml"
+}
+
+@test "load_manifests_for_platform: loads common.yaml for macos" {
+    run load_manifests_for_platform "${MANIFEST_DIR}" "macos"
+    [ "$status" -eq 0 ]
+    assert_contains "$output" "common.yaml"
+    assert_contains "$output" "macos.yaml"
+}
+
+@test "load_manifests_for_platform: only loads common.yaml for unsupported platform" {
+    run load_manifests_for_platform "${MANIFEST_DIR}" "fedora"
+    [ "$status" -eq 0 ]
+    assert_contains "$output" "common.yaml"
+    # fedora.yaml doesn't exist yet, so shouldn't be in output
+}
+
+@test "merge_manifests: merges two manifest files" {
+    # Test that merge_manifests can combine common and platform-specific
+    local manifests=("${MANIFEST_DIR}/common.yaml" "${MANIFEST_DIR}/ubuntu.yaml")
+    run merge_manifests "${manifests[@]}"
+    [ "$status" -eq 0 ]
+    # Should contain packages from both files
+    assert_contains "$output" "git"  # from common
+    assert_contains "$output" "build-essential"  # from ubuntu
+}
+
+@test "merge_manifests: platform manifest overrides common" {
+    # Later manifests should override earlier ones
+    # (if same package defined in both)
+    local manifests=("${MANIFEST_DIR}/common.yaml" "${MANIFEST_DIR}/ubuntu.yaml")
+    run merge_manifests "${manifests[@]}"
+    [ "$status" -eq 0 ]
+    # Should have merged successfully
+}
+
+# ============================================================================
+# Mise Tools Expansion Tests (NEW)
+# ============================================================================
+
+@test "expand_mise_tools: converts mise_tools to package format" {
+    run expand_mise_tools "${MANIFEST_DIR}/common.yaml"
+    [ "$status" -eq 0 ]
+    # Should contain expanded mise packages
+    assert_contains "$output" "fzf"
+    assert_contains "$output" "managed_by: mise"
+    assert_contains "$output" "category:"
+}
+
+@test "expand_mise_tools: sets global_install from mise_tools.global" {
+    run expand_mise_tools "${MANIFEST_DIR}/common.yaml"
+    [ "$status" -eq 0 ]
+    assert_contains "$output" "global_install: true"
+}
+
+@test "expand_mise_tools: includes all categories" {
+    run expand_mise_tools "${MANIFEST_DIR}/common.yaml"
+    [ "$status" -eq 0 ]
+    # Check tools from different categories
+    assert_contains "$output" "fzf"  # shell_tools
+    assert_contains "$output" "jq"  # dev_tools
+    assert_contains "$output" "gh"  # git_tools
+    assert_contains "$output" "ripgrep"  # file_tools
+    assert_contains "$output" "ruby"  # language_runtimes
+}
+
+@test "get_mise_tools_by_category: returns tools in a category" {
+    run get_mise_tools_by_category "${MANIFEST_DIR}/common.yaml" "shell_tools"
+    [ "$status" -eq 0 ]
+    assert_contains "$output" "fzf"
+    assert_contains "$output" "zoxide"
+    assert_not_contains "$output" "jq"  # jq is in dev_tools
+}
+
+@test "is_in_mise_tools: returns true for mise tools" {
+    run is_in_mise_tools "${MANIFEST_DIR}/common.yaml" "fzf"
+    [ "$status" -eq 0 ]
+}
+
+@test "is_in_mise_tools: returns false for non-mise tools" {
+    run is_in_mise_tools "${MANIFEST_DIR}/common.yaml" "git"
+    [ "$status" -eq 1 ]
+}
+
+@test "get_mise_tool_description: returns tool description" {
+    run get_mise_tool_description "${MANIFEST_DIR}/common.yaml" "fzf"
+    [ "$status" -eq 0 ]
+    assert_contains "$output" "Fuzzy finder"
+}
+
+# ============================================================================
+# Integration Tests - Multi-Manifest with Mise Tools
+# ============================================================================
+
+@test "get_packages_for_profile: works with multi-manifest structure" {
+    # This tests the full integration: load manifests, merge, expand mise_tools
+    run get_packages_for_profile_multi "${MANIFEST_DIR}" "minimal" "ubuntu"
+    [ "$status" -eq 0 ]
+    assert_contains "$output" "git"
+    assert_contains "$output" "curl"
+    assert_contains "$output" "wget"
+}
+
+@test "get_all_packages_merged: combines packages and mise_tools" {
+    run get_all_packages_merged "${MANIFEST_DIR}/common.yaml"
+    [ "$status" -eq 0 ]
+    # Should contain traditional packages
+    assert_contains "$output" "git"
+    assert_contains "$output" "curl"
+    # Should contain mise tools
+    assert_contains "$output" "fzf"
+    assert_contains "$output" "jq"
+    assert_contains "$output" "ruby"
+}

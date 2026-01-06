@@ -7,7 +7,11 @@ load test-helper
 setup() {
     # Call parent setup
     export TEST_TEMP_DIR="$(mktemp -d)"
-    export TEST_MANIFEST="${TEST_TEMP_DIR}/test-packages.yaml"
+    export TEST_MANIFEST_DIR="${TEST_TEMP_DIR}/manifests"
+    export TEST_MANIFEST="${TEST_MANIFEST_DIR}/common.yaml"
+
+    # Create manifest directory
+    mkdir -p "$TEST_MANIFEST_DIR"
 
     # Source the manifest parser
     if [ -f "${LIB_DIR}/manifest-parser.sh" ]; then
@@ -143,19 +147,19 @@ EOF
 # Tests for install_from_manifest
 #
 
-@test "install_from_manifest: accepts manifest file and profile" {
-    run install_from_manifest "$TEST_MANIFEST" "minimal" "true"
+@test "install_from_manifest: accepts manifest directory and profile" {
+    run install_from_manifest "$TEST_MANIFEST_DIR" "minimal" "true"
     [ "$status" -eq 0 ]
 }
 
 @test "install_from_manifest: dry-run mode processes packages" {
-    run install_from_manifest "$TEST_MANIFEST" "minimal" "true"
+    run install_from_manifest "$TEST_MANIFEST_DIR" "minimal" "true"
     [ "$status" -eq 0 ]
     assert_contains "$output" "DRY RUN"
 }
 
 @test "install_from_manifest: processes all packages in profile" {
-    run install_from_manifest "$TEST_MANIFEST" "minimal" "true"
+    run install_from_manifest "$TEST_MANIFEST_DIR" "minimal" "true"
     [ "$status" -eq 0 ]
     # Should process git, curl, wget
     assert_contains "$output" "git"
@@ -164,22 +168,22 @@ EOF
 }
 
 @test "install_from_manifest: returns error for invalid profile" {
-    run install_from_manifest "$TEST_MANIFEST" "nonexistent" "true"
+    run install_from_manifest "$TEST_MANIFEST_DIR" "nonexistent" "true"
     [ "$status" -ne 0 ]
 }
 
-@test "install_from_manifest: returns error for missing manifest" {
-    run install_from_manifest "/nonexistent/manifest.yaml" "minimal" "true"
+@test "install_from_manifest: returns error for missing manifest directory" {
+    run install_from_manifest "/nonexistent/manifests" "minimal" "true"
     [ "$status" -ne 0 ]
 }
 
 @test "install_from_manifest: validates parameters" {
-    # Missing manifest
+    # Missing manifest directory
     run install_from_manifest "" "minimal" "true"
     [ "$status" -ne 0 ]
 
     # Missing profile
-    run install_from_manifest "$TEST_MANIFEST" "" "true"
+    run install_from_manifest "$TEST_MANIFEST_DIR" "" "true"
     [ "$status" -ne 0 ]
 }
 
@@ -304,20 +308,20 @@ EOF
 #
 
 @test "install_from_manifest: provides installation summary" {
-    run install_from_manifest "$TEST_MANIFEST" "minimal" "true"
+    run install_from_manifest "$TEST_MANIFEST_DIR" "minimal" "true"
     [ "$status" -eq 0 ]
     # Should provide summary with counts
     [[ "$output" =~ "summary" ]] || [[ "$output" =~ "Total" ]] || [[ "$output" =~ "Succeeded" ]]
 }
 
 @test "install_from_manifest: reports skipped packages" {
-    run install_from_manifest "$TEST_MANIFEST" "minimal" "true"
+    run install_from_manifest "$TEST_MANIFEST_DIR" "minimal" "true"
     [ "$status" -eq 0 ]
     # Should report if any packages were skipped
 }
 
 @test "install_from_manifest: handles mixed backends in one profile" {
-    run install_from_manifest "$TEST_MANIFEST" "full" "true"
+    run install_from_manifest "$TEST_MANIFEST_DIR" "full" "true"
     [ "$status" -eq 0 ]
     # Should successfully orchestrate apt, ppa, homebrew, and mise
 }
@@ -334,7 +338,7 @@ EOF
 }
 
 @test "integration: filters packages by detected platform" {
-    run install_from_manifest "$TEST_MANIFEST" "full" "true"
+    run install_from_manifest "$TEST_MANIFEST_DIR" "full" "true"
     [ "$status" -eq 0 ]
     # Should only process packages for current platform
 }
@@ -345,20 +349,20 @@ EOF
 
 @test "install_from_manifest: continues on package failure in non-strict mode" {
     # Should continue installing other packages even if one fails
-    run install_from_manifest "$TEST_MANIFEST" "minimal" "true"
+    run install_from_manifest "$TEST_MANIFEST_DIR" "minimal" "true"
     [ "$status" -eq 0 ]
 }
 
 @test "install_from_manifest: handles corrupted manifest gracefully" {
     echo "invalid: yaml: [[[" > "$TEST_MANIFEST"
-    run install_from_manifest "$TEST_MANIFEST" "minimal" "true"
+    run install_from_manifest "$TEST_MANIFEST_DIR" "minimal" "true"
     [ "$status" -ne 0 ]
     # Should contain error message (case-insensitive)
     [[ "$output" =~ [Ee]rror ]] || [[ "$output" =~ [Ii]nvalid ]]
 }
 
 @test "install_from_manifest: validates manifest schema before installation" {
-    run install_from_manifest "$TEST_MANIFEST" "minimal" "true"
+    run install_from_manifest "$TEST_MANIFEST_DIR" "minimal" "true"
     [ "$status" -eq 0 ]
     # Should validate manifest before proceeding
 }

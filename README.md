@@ -81,6 +81,27 @@ mise upgrade              # Language runtimes
 zinit update --all        # Zsh plugins (in zsh)
 ```
 
+## Uninstall
+
+```bash
+# Remove symlinks only (safest, keeps all tools)
+./uninstall.sh --symlinks
+
+# Remove symlinks and configs
+./uninstall.sh --symlinks --configs
+
+# Remove everything (symlinks, configs, mise, all tools)
+./uninstall.sh --all
+
+# Dry run to see what would be removed
+./uninstall.sh --all --dry-run
+
+# See all options
+./uninstall.sh --help
+```
+
+**Note**: Uninstall creates backups in `~/.dotfiles.backup.uninstall.*` for safety.
+
 ## Documentation
 
 - `AGENTS.md` - Detailed guidance for AI assistants working in this repository

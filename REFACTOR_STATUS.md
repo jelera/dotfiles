@@ -1,29 +1,42 @@
 # Manifest-Based Installation System - Status
 
 **Last Updated**: 2026-01-04
-**Current Phase**: PRODUCTION - Manifest is the default and only system! ✅
+**Current Phase**: PRODUCTION - Multi-manifest architecture with mise tools consolidation! ✅
+
+## Recent Updates - Phase 4 Complete! 🎉
+
+**Multi-Manifest Architecture** - Completed 2026-01-04
+- Split monolithic 438-line `packages.yaml` into 3 organized files
+- Created `common.yaml` (cross-platform packages + consolidated mise tools)
+- Created `ubuntu.yaml` (Ubuntu-specific packages)
+- Created `macos.yaml` (macOS-specific packages)
+- Consolidated 35 mise packages from 140 lines → 50 lines (64% reduction)
+- Reorganized from 4 categories → 9 specific categories
+- Removed unused bulk_install_groups feature (191 lines of dead code)
+- All 184 tests passing ✅
 
 ## Quick Start
 
 ```bash
-# Run all tests
+# Run all tests (184 tests)
 make -f test.mk test
 
 # View test coverage
 make -f test.mk test-coverage
 
 # Install packages (manifest is now the default)
-./install.sh --minimal --dry-run    # Preview minimal profile (6 packages)
-./install.sh --dry-run              # Preview dev profile (59 packages)
+./install.sh --minimal --dry-run    # Preview minimal profile
+./install.sh --dry-run              # Preview dev profile
 
-# Direct manifest usage
+# Direct manifest usage (now uses directory)
 bash install/packages-manifest.sh minimal --dry-run
 bash install/packages-manifest.sh dev
 
-# Test manifest queries
+# Test manifest queries (multi-manifest aware)
 source install/lib/manifest-parser.sh
-get_packages_for_profile install/manifests/packages.yaml minimal
-validate_manifest_schema install/manifests/packages.yaml
+# Queries now work with merged manifests automatically
+get_packages_for_profile_multi install/manifests minimal ubuntu
+validate_manifest_schema install/manifests/common.yaml
 ```
 
 ## Completed Work
@@ -257,25 +270,116 @@ bash install/packages-manifest.sh minimal
 - Manifest system is production-ready
 - No backwards compatibility needed
 
+### Phase 4: Multi-Manifest Reorganization ✅ COMPLETE
+
+**What was built**:
+Complete reorganization of package manifests into logical, platform-specific files with consolidated mise tools.
+
+**Key Changes**:
+1. **File Structure Reorganization**:
+   - Replaced single `packages.yaml` (438 lines) with 3 focused files
+   - `common.yaml` (~200 lines) - Cross-platform packages and mise tools
+   - `ubuntu.yaml` (~120 lines) - Ubuntu-specific packages
+   - `macos.yaml` (~80 lines) - macOS-specific packages
+
+2. **Consolidated mise Tools Format**:
+   - New `mise_tools` section with compressed inline format
+   - Reduced 35 mise packages from 140 lines → 50 lines (64% reduction)
+   - Explicit `global: true` flag for mise installations
+   - Example format: `{ name: fzf, desc: "Fuzzy finder" }`
+
+3. **Category Reorganization**:
+   - Split overly-broad `general_tools` (39 packages) into 9 specific categories:
+     - `core_utils` - Essential POSIX utilities (7 packages)
+     - `shell_tools` - Shell enhancements (6 packages)
+     - `dev_tools` - Development utilities (8 packages)
+     - `git_tools` - Git ecosystem (6 packages)
+     - `file_tools` - File management (6 packages)
+     - `monitoring_tools` - System monitoring (5 packages)
+     - `language_runtimes` - Programming languages (8 packages)
+     - `system_libraries` - Build dependencies (12 packages)
+     - `gui_applications` - Desktop apps (1 package)
+
+4. **Multi-Manifest Loading**:
+   - New functions in `manifest-parser.sh`:
+     - `load_manifests_for_platform()` - Loads common + platform-specific
+     - `merge_manifests()` - Merges YAML files (later overrides earlier)
+     - `expand_mise_tools()` - Converts mise_tools to package format
+   - Automatic platform detection (ubuntu/macos/linux)
+   - Orchestration layer updated to use manifest directories
+
+5. **Schema Updates**:
+   - Added `mise_tools` section support
+   - Made profiles/categories/packages optional (for platform-specific files)
+   - Added new platforms: fedora, debian, arch, amazonlinux
+
+**Test Results**: 184/184 tests passing ✅
+- 14 new parser tests for multi-manifest functionality
+- Updated 30 integration tests for directory-based loading
+- Removed 3 schema validation tests for unused bulk_install_groups feature
+
+**Benefits**:
+- ✅ Multi-distro ready: Easy to add Fedora, Arch, Debian support
+- ✅ Reduced duplication: 64% reduction in mise package definitions
+- ✅ Logical organization: 9 specific categories vs 4 overly-broad
+- ✅ Platform separation: Ubuntu/macOS packages cleanly separated
+- ✅ Scalable: Each distro gets its own file, common packages shared
+- ✅ Explicit mise global install: `mise_tools.global: true`
+
+**Files Modified**:
+- `install/lib/manifest-parser.sh` - Added multi-manifest support (lines 306-528)
+- `install/packages-manifest.sh` - Updated to use manifest directories
+- `install.sh` - Updated to pass manifest directory
+- `install/schemas/package-manifest.schema.json` - Added mise_tools section
+- `install/tests/test-manifest-parser.bats` - Added 14 new tests
+- `install/tests/test-integration.bats` - Updated for directory structure
+- `install/tests/test-schema-validation.bats` - Updated for optional sections
+
+**Files Created**:
+- `install/manifests/common.yaml` - Cross-platform packages
+- `install/manifests/ubuntu.yaml` - Ubuntu-specific packages
+- `install/manifests/macos.yaml` - macOS-specific packages
+
+**Files Removed**:
+- `install/manifests/packages.yaml` - Replaced by multi-manifest structure
+
 ## Current Manifest Schema
 
-### Profiles
+### File Structure
+```
+install/manifests/
+├── common.yaml    # Cross-platform packages + mise tools
+├── ubuntu.yaml    # Ubuntu-specific packages
+├── macos.yaml     # macOS-specific packages
+└── schemas/
+    └── package-manifest.schema.json
+```
+
+**Loading**: Platform automatically detected, merges common.yaml + {platform}.yaml
+
+### Profiles (defined in common.yaml)
 - **full**: Complete dev environment (all categories)
 - **dev**: Headless dev (all except GUI apps)
 - **minimal**: Essential CLI only (git, curl, wget, tmux, tree, pinentry)
 - **remote**: Lightweight server (minimal + htop + build-essential)
 
-### Categories
-- **language_runtimes**: Ruby, Python, Node, Go, etc. (priority: ppa → homebrew → mise)
-- **general_tools**: CLI utilities (priority: apt → ppa → homebrew → mise)
+### Categories (9 specific categories)
+- **core_utils**: Essential POSIX utilities (priority: apt → homebrew)
+- **shell_tools**: Shell enhancements (priority: mise → homebrew → apt)
+- **dev_tools**: Development utilities (priority: mise → homebrew)
+- **git_tools**: Git ecosystem tools (priority: mise → homebrew → apt)
+- **file_tools**: File search/management (priority: mise → homebrew)
+- **monitoring_tools**: System monitoring (priority: mise → homebrew → apt)
+- **language_runtimes**: Programming languages (priority: mise)
 - **system_libraries**: Build dependencies (priority: apt only)
 - **gui_applications**: Desktop apps (priority: homebrew-cask → flatpak)
 
-### Package Definition Example
+### Package Definition Example (Traditional)
 ```yaml
+# In common.yaml or platform-specific file
 packages:
   git:
-    category: general_tools
+    category: core_utils
     description: "Version control system"
     priority: ["apt", "homebrew"]  # Override category default
     platforms: ["ubuntu", "macos"]  # Optional
@@ -284,6 +388,30 @@ packages:
     homebrew:
       package: git
 ```
+
+### Mise Tools Definition Example (Consolidated Format)
+```yaml
+# In common.yaml
+mise_tools:
+  global: true  # Install globally (mise use -g)
+
+  categories:
+    shell_tools:
+      description: "Shell enhancement tools"
+      tools:
+        - { name: fzf, desc: "Fuzzy finder" }
+        - { name: zoxide, desc: "Smarter cd command" }
+        - { name: bat, desc: "Cat with syntax highlighting" }
+
+    dev_tools:
+      description: "Development utilities"
+      tools:
+        - { name: jq, desc: "JSON processor" }
+        - { name: yq, desc: "YAML processor" }
+        - { name: shellcheck, desc: "Shell script linter" }
+```
+
+**Note**: mise_tools are automatically expanded into package format during manifest loading.
 
 ## Testing Strategy
 
@@ -301,40 +429,52 @@ make -f test.mk test-coverage  # Coverage summary
 ```
 install/tests/
 ├── fixtures/
-│   └── test-packages.yaml     # Test data
-├── test-helper.bash           # Common utilities
-├── test-manifest-parser.bats  # Parser tests (22)
-└── test-schema-validation.bats # Schema tests (27)
+│   └── test-packages.yaml           # Test data
+├── test-helper.bash                 # Common utilities
+├── test-manifest-parser.bats        # Parser tests (36 - includes multi-manifest)
+├── test-schema-validation.bats      # Schema tests (27)
+├── test-integration.bats            # Integration tests (30)
+├── test-backend-apt.bats            # APT backend tests (22)
+├── test-backend-homebrew.bats       # Homebrew backend tests (27)
+├── test-backend-ppa.bats            # PPA backend tests (23)
+└── test-backend-mise.bats           # mise backend tests (22)
 ```
+
+**Total**: 184 tests passing ✅
 
 ## Important Commands
 
-### Validate Manifest
+### Validate Manifests
 ```bash
-# Using function
+# Using function (validates individual files)
 source install/lib/manifest-parser.sh
-validate_manifest_schema install/manifests/packages.yaml
+validate_manifest_schema install/manifests/common.yaml
+validate_manifest_schema install/manifests/ubuntu.yaml
+validate_manifest_schema install/manifests/macos.yaml
 
 # Direct command
 check-jsonschema --schemafile install/schemas/package-manifest.schema.json \
-  install/manifests/packages.yaml
+  install/manifests/common.yaml
 ```
 
-### Query Manifest
+### Query Manifests
 ```bash
 source install/lib/manifest-parser.sh
 
-# Get packages for profile
-get_packages_for_profile install/manifests/packages.yaml minimal
+# Multi-manifest queries (recommended - auto-merges)
+get_packages_for_profile_multi install/manifests minimal ubuntu
+get_packages_for_profile_multi install/manifests dev macos
 
-# Get packages for platform
-get_packages_for_platform install/manifests/packages.yaml ubuntu
+# Single-file queries (for testing individual manifests)
+get_packages_for_profile install/manifests/common.yaml minimal
+get_packages_for_platform install/manifests/common.yaml ubuntu
+get_package_priority install/manifests/common.yaml git
+is_managed_by_mise install/manifests/common.yaml ruby
 
-# Get package priority chain
-get_package_priority install/manifests/packages.yaml git
-
-# Check if managed by mise
-is_managed_by_mise install/manifests/packages.yaml ruby
+# Load and merge manifests manually
+manifests=($(load_manifests_for_platform install/manifests ubuntu))
+merged=$(merge_manifests "${manifests[@]}")
+echo "$merged" > /tmp/merged.yaml
 ```
 
 ## Documentation
@@ -355,49 +495,83 @@ All documentation is in `AGENTS.md`:
 4. **Priority Chain**: Per-package overrides category defaults
 5. **NO snap**: Explicitly excluded from valid package managers
 6. **Graceful Degradation**: Schema validation falls back to basic yq validation if check-jsonschema unavailable
+7. **Multi-Manifest Architecture**: Common + platform-specific files for scalability (Phase 4)
+8. **Consolidated mise Format**: Inline `{ name, desc }` format for 64% space reduction
+9. **Optional Schema Sections**: Profiles/categories/packages optional to support platform-specific files
+10. **9 Categories**: Replaced overly-broad general_tools with 9 specific categories
 
 ## Known Issues / TODOs
 
-- [ ] None currently - Phase 1 complete and tested
+- [ ] None currently - All phases complete, 184/184 tests passing ✅
 
 ## Git Status
 
 ```
-M mise/config.toml  # Added check-jsonschema
-
-New files (need to commit):
-- install/schemas/package-manifest.schema.json
-- install/tests/test-schema-validation.bats
-- REFACTOR_STATUS.md (this file)
+New files (ready to commit):
+- install/manifests/common.yaml
+- install/manifests/ubuntu.yaml
+- install/manifests/macos.yaml
+- REFACTOR_STATUS.md (this file - updated)
 
 Modified:
-- install/lib/manifest-parser.sh
-- install/tests/README.md
-- test.mk
-- AGENTS.md
+- install/lib/manifest-parser.sh (added multi-manifest support)
+- install/packages-manifest.sh (updated for manifest directories)
+- install.sh (updated to pass manifest directory)
+- install/schemas/package-manifest.schema.json (added mise_tools section)
+- install/tests/test-manifest-parser.bats (added 14 tests)
+- install/tests/test-integration.bats (updated for directory structure)
+- install/tests/test-schema-validation.bats (updated for optional sections)
+- test.mk (updated coverage count)
+
+Removed:
+- install/manifests/packages.yaml (replaced by multi-manifest)
 ```
 
 ## Context for AI Assistants
 
-When resuming this refactor:
+**Current Status**:
+- ✅ **All 4 Phases Complete** - 184/184 tests passing
+- ✅ **Multi-manifest architecture** implemented and tested
+- ✅ **Manifest is the only installation system** (no legacy code)
+- ✅ **Production-ready** with comprehensive test coverage
+- ✅ **Dead code removed** - 191 lines of unused code eliminated
 
-1. **Phase 1 is complete** - 49/49 tests passing
-2. **Next task**: Implement Phase 2 backend modules using TDD
-3. **Start with**: APT backend (most common on Ubuntu)
-4. **Test first**: Write failing tests, then implement
-5. **Reference**: See AGENTS.md for full architecture details
-6. **Validate changes**: Run `make -f test.mk test` frequently
+**Quick Reference**:
+- Run tests: `make -f test.mk test`
+- Install packages: `./install.sh --dry-run`
+- Manifests: `install/manifests/{common,ubuntu,macos}.yaml`
+- Parser: `install/lib/manifest-parser.sh`
+- Orchestration: `install/packages-manifest.sh`
+
+**Future Enhancements**:
+- Add fedora.yaml, debian.yaml, arch.yaml for additional distro support
+- Consider adding GUI tools categories
+- Explore automatic manifest validation in CI/CD
 
 ## Session Notes
 
-**Session 2026-01-03**:
-- Added comprehensive JSON Schema validation
-- Implemented validate_manifest_schema() function
-- Wrote 27 schema validation tests (all passing)
+**Session 2026-01-04 - Phase 4 Complete + Dead Code Cleanup**:
+- Split packages.yaml into multi-manifest architecture
+- Created common.yaml, ubuntu.yaml, macos.yaml
+- Consolidated 35 mise packages (140 lines → 50 lines, 64% reduction)
+- Reorganized into 9 specific categories (was 4 overly-broad)
+- Added multi-manifest loading and merging functions
+- Updated schema to support mise_tools section
+- Removed legacy packages.yaml
+- Removed unused bulk_install_groups feature (191 lines dead code)
+- Updated all 184 tests to pass with new structure
 - Updated all documentation
-- Phase 1 now truly complete with 49/49 tests
 
-**Previous session**:
+**Session 2026-01-03 - Phases 1-3 Complete**:
+- Implemented all 4 backend modules (apt, homebrew, ppa, mise) using TDD
+- Created integration layer with CLI (`packages-manifest.sh`)
+- Removed legacy install/packages.sh (683 lines)
+- Made manifest the default and only installation system
+- Added comprehensive JSON Schema validation
+- Built test infrastructure with 173 passing tests
+- Complete migration from legacy to manifest-based system
+
+**Initial session**:
 - Implemented manifest parser with yq
 - Created package manifest with profiles
 - Built test infrastructure

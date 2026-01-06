@@ -14,3 +14,9 @@ fi
 
 # Source local bash_profile for machine-specific configuration
 [[ -f ~/.bash_profile.local ]] && source ~/.bash_profile.local
+
+# Homebrew
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
+# Homebrew
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"

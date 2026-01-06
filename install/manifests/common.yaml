@@ -1,0 +1,189 @@
+version: 1.0
+
+metadata:
+  description: "Cross-platform package manifest"
+  last_updated: "2026-01-04"
+
+# Installation profiles for different use cases
+profiles:
+  full:
+    description: "Complete development environment with all tools"
+    includes: [core_utils, shell_tools, dev_tools, git_tools, file_tools, monitoring_tools, language_runtimes, system_libraries, gui_applications]
+
+  dev:
+    description: "Developer tools without GUI applications"
+    includes: [core_utils, shell_tools, dev_tools, git_tools, file_tools, monitoring_tools, language_runtimes, system_libraries]
+    excludes: [gui_applications]
+
+  minimal:
+    description: "Essential CLI tools only"
+    packages: [git, curl, wget, tmux, tree, pinentry]
+
+  remote:
+    description: "Lightweight remote server setup"
+    packages: [git, curl, wget, tmux, htop, tree, pinentry, build-essential, pkg-config, libssl-dev]
+
+# Package categories with default priority chains
+categories:
+  core_utils:
+    description: "Essential POSIX command-line utilities"
+    priority: ["apt", "homebrew"]
+
+  shell_tools:
+    description: "Shell enhancement and navigation tools"
+    priority: ["mise", "homebrew", "apt"]
+
+  dev_tools:
+    description: "Development utilities and code quality tools"
+    priority: ["mise", "homebrew"]
+
+  git_tools:
+    description: "Git ecosystem and version control tools"
+    priority: ["mise", "homebrew", "apt"]
+
+  file_tools:
+    description: "File search, management, and analysis"
+    priority: ["mise", "homebrew"]
+
+  monitoring_tools:
+    description: "System monitoring and performance analysis"
+    priority: ["mise", "homebrew", "apt"]
+
+  language_runtimes:
+    description: "Programming language interpreters and runtimes"
+    priority: ["mise"]
+
+  system_libraries:
+    description: "Build dependencies and system libraries"
+    priority: ["apt"]
+
+  gui_applications:
+    description: "Desktop applications"
+    priority: ["homebrew-cask", "flatpak"]
+
+# Cross-platform package definitions
+packages:
+  # === Core Utilities ===
+
+  git:
+    category: core_utils
+    description: "Version control system"
+    priority: ["apt", "homebrew"]
+    apt:
+      package: git
+    homebrew:
+      package: git
+
+  curl:
+    category: core_utils
+    description: "HTTP client"
+    apt:
+      package: curl
+    homebrew:
+      package: curl
+
+  wget:
+    category: core_utils
+    description: "Download utility"
+    apt:
+      package: wget
+    homebrew:
+      package: wget
+
+  tmux:
+    category: core_utils
+    description: "Terminal multiplexer"
+    apt:
+      package: tmux
+    homebrew:
+      package: tmux
+
+  tree:
+    category: core_utils
+    description: "Directory tree viewer"
+    apt:
+      package: tree
+    homebrew:
+      package: tree
+
+  pinentry:
+    category: core_utils
+    description: "GPG passphrase entry dialog"
+    apt:
+      package: pinentry-tty
+    homebrew:
+      package: pinentry
+
+  # === Monitoring Tools ===
+
+  htop:
+    category: monitoring_tools
+    description: "Interactive process viewer"
+    apt:
+      package: htop
+    homebrew:
+      package: htop
+
+# Consolidated mise-managed tool definitions
+mise_tools:
+  global: true  # All mise tools installed globally (mise use -g)
+
+  categories:
+    shell_tools:
+      description: "Shell enhancement tools managed by mise"
+      tools:
+        - { name: fzf, desc: "Fuzzy finder" }
+        - { name: zoxide, desc: "Smarter cd command" }
+        - { name: direnv, desc: "Environment switcher" }
+        - { name: bat, desc: "Cat with syntax highlighting" }
+        - { name: eza, desc: "Modern ls replacement" }
+        - { name: glow, desc: "Markdown renderer" }
+
+    dev_tools:
+      description: "Development utilities managed by mise"
+      tools:
+        - { name: neovim, desc: "Vim-based text editor" }
+        - { name: jq, desc: "JSON processor" }
+        - { name: yq, desc: "YAML processor" }
+        - { name: shellcheck, desc: "Shell script linter" }
+        - { name: just, desc: "Command runner" }
+        - { name: watchexec, desc: "File watcher" }
+
+    git_tools:
+      description: "Git ecosystem tools managed by mise"
+      tools:
+        - { name: gh, desc: "GitHub CLI" }
+        - { name: lazygit, desc: "Terminal UI for git" }
+        - { name: delta, desc: "Git diff viewer" }
+        - { name: gitleaks, desc: "Secrets detection in git" }
+        - { name: lefthook, desc: "Git hooks manager" }
+
+    file_tools:
+      description: "File management tools managed by mise"
+      tools:
+        - { name: ripgrep, desc: "Fast grep alternative" }
+        - { name: fd, desc: "Fast find alternative" }
+        - { name: dust, desc: "du alternative" }
+        - { name: duf, desc: "df alternative" }
+        - { name: tokei, desc: "Code statistics" }
+        - { name: grex, desc: "Regex generator" }
+
+    monitoring_tools:
+      description: "System monitoring tools managed by mise"
+      tools:
+        - { name: procs, desc: "ps alternative" }
+        - { name: bottom, desc: "htop/ytop alternative" }
+        - { name: httpie, desc: "HTTP client" }
+        - { name: hyperfine, desc: "Benchmarking tool" }
+
+    language_runtimes:
+      description: "Language runtimes managed by mise"
+      tools:
+        - { name: ruby, desc: "Ruby language runtime" }
+        - { name: python, desc: "Python language runtime" }
+        - { name: node, desc: "Node.js runtime" }
+        - { name: go, desc: "Go language runtime" }
+        - { name: erlang, desc: "Erlang language runtime" }
+        - { name: elixir, desc: "Elixir language runtime" }
+        - { name: rust, desc: "Rust language runtime" }
+        - { name: uv, desc: "Python package installer" }

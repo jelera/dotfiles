@@ -31,7 +31,7 @@ backup_existing() {
     if [[ -e "$target" || -L "$target" ]]; then
         create_backup_dir
         mv "$target" "${BACKUP_DIR}/${name}"
-        log_warning "Backed up: $name"
+        log_info "Backed up: $name"
         return 0
     fi
 
@@ -127,41 +127,27 @@ symlink_gpg_config() {
         mkdir -p "${HOME}/.gnupg"
         chmod 700 "${HOME}/.gnupg"
 
-        # Detect platform and update pinentry path
-        local pinentry_path=""
-        if [[ "$OSTYPE" == "darwin"* ]]; then
-            # macOS - check Homebrew locations
-            if [[ -f "/opt/homebrew/bin/pinentry-tty" ]]; then
-                pinentry_path="/opt/homebrew/bin/pinentry-tty"
-            elif [[ -f "/usr/local/bin/pinentry-tty" ]]; then
-                pinentry_path="/usr/local/bin/pinentry-tty"
-            fi
-        elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-            # Linux - check common locations
-            if [[ -f "/usr/bin/pinentry-tty" ]]; then
-                pinentry_path="/usr/bin/pinentry-tty"
-            elif [[ -f "/usr/bin/pinentry-curses" ]]; then
-                pinentry_path="/usr/bin/pinentry-curses"
-            fi
-        fi
-
-        if [[ -n "$pinentry_path" ]]; then
-            # Create a temporary file with the correct pinentry path
-            local temp_conf="${HOME}/.gnupg/gpg-agent.conf.tmp"
-            sed "s|pinentry-program.*|pinentry-program $pinentry_path|" \
-                "${DOTFILES_DIR}/gnupg/gpg-agent.conf" > "$temp_conf"
-
-            # Replace the target file
-            mv "$temp_conf" "${HOME}/.gnupg/gpg-agent.conf"
-            chmod 600 "${HOME}/.gnupg/gpg-agent.conf"
-
-            log_success "GPG agent config created with pinentry: $pinentry_path"
-            log_info "Restarting GPG agent..."
-            gpgconf --kill gpg-agent 2>/dev/null || true
+        # Ensure bin/pinentry-auto exists and is executable
+        if [[ -f "${DOTFILES_DIR}/bin/pinentry-auto" ]]; then
+            chmod +x "${DOTFILES_DIR}/bin/pinentry-auto"
         else
-            log_warning "pinentry-tty not found - GPG signing may not work"
-            log_info "Install pinentry: brew install pinentry (macOS) or apt install pinentry-tty (Linux)"
+            log_warning "pinentry-auto script not found - GPG signing may not work"
+            return 1
         fi
+
+        # Replace __DOTFILES_DIR__ placeholder with actual path
+        local temp_conf="${HOME}/.gnupg/gpg-agent.conf.tmp"
+        sed "s|__DOTFILES_DIR__|${DOTFILES_DIR}|g" \
+            "${DOTFILES_DIR}/gnupg/gpg-agent.conf" > "$temp_conf"
+
+        # Replace the target file
+        mv "$temp_conf" "${HOME}/.gnupg/gpg-agent.conf"
+        chmod 600 "${HOME}/.gnupg/gpg-agent.conf"
+
+        log_success "GPG agent config created with pinentry-auto wrapper"
+        log_info "Pinentry will auto-detect based on environment (GUI/terminal)"
+        log_info "Restarting GPG agent..."
+        gpgconf --kill gpg-agent 2>/dev/null || true
     fi
 
     return 0
@@ -311,7 +297,7 @@ symlink_keyd_config() {
         fi
     else
         # Need password for sudo
-        log_warning "Skipping keyd config link (requires sudo password)"
+        log_info "Skipping keyd config link (requires sudo password)"
         log_info "To link manually, run:"
         log_info "  sudo mkdir -p /etc/keyd"
         log_info "  sudo ln -sf ${DOTFILES_DIR}/config/keyd/default.conf /etc/keyd/default.conf"

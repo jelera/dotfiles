@@ -121,14 +121,3 @@ packages:
     homebrew:
       cask: true
       package: ghostty
-
-# Bulk installation groups
-bulk_install_groups:
-  system_essentials:
-    enabled: true
-    packages: [git, curl, wget, tree]
-
-  ubuntu_build_tools:
-    enabled: true
-    platforms: ["ubuntu"]
-    packages: [build-essential]

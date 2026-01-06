@@ -284,3 +284,9 @@ fi
 
 # Cleanup
 unset DOTFILES_DIR
+
+# Homebrew
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
+# Homebrew
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"

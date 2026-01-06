@@ -1,0 +1,47 @@
+version: 1.0
+
+metadata:
+  description: "macOS-specific package manifest"
+  last_updated: "2026-01-04"
+
+# macOS-specific package definitions
+packages:
+  # === Core Utilities (GNU tools) ===
+
+  coreutils:
+    category: core_utils
+    description: "GNU core utilities"
+    platforms: ["macos"]
+    homebrew:
+      package: coreutils
+
+  gnu-sed:
+    category: core_utils
+    description: "GNU sed"
+    platforms: ["macos"]
+    homebrew:
+      package: gnu-sed
+
+  gnu-tar:
+    category: core_utils
+    description: "GNU tar"
+    platforms: ["macos"]
+    homebrew:
+      package: gnu-tar
+
+  grep:
+    category: core_utils
+    description: "GNU grep"
+    platforms: ["macos"]
+    homebrew:
+      package: grep
+
+  # === GUI Applications ===
+
+  ghostty:
+    category: gui_applications
+    description: "Modern terminal emulator"
+    platforms: ["macos"]
+    homebrew:
+      cask: true
+      package: ghostty

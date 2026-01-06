@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+# Automatic pinentry selector - OS and Desktop Environment agnostic
+# Selects the best available pinentry based on environment
+
+# List of pinentry programs in order of preference
+# GUI programs first (if in graphical environment), then terminal programs
+detect_best_pinentry() {
+    local -a gui_pinentry_options=(
+        "/usr/bin/pinentry"              # System default (alternatives on Debian/Ubuntu)
+        "/usr/bin/pinentry-qt"           # Qt-based (KDE, cross-platform)
+        "/usr/bin/pinentry-gnome3"       # GNOME 3
+        "/usr/bin/pinentry-gtk-2"        # GTK 2
+        "/usr/local/bin/pinentry-mac"    # macOS GUI
+        "/opt/homebrew/bin/pinentry-mac" # macOS Homebrew (ARM)
+    )
+
+    local -a terminal_pinentry_options=(
+        "/usr/bin/pinentry-curses"       # Curses-based (terminal)
+        "/usr/bin/pinentry-tty"          # TTY-based (minimal)
+        "/usr/local/bin/pinentry-tty"    # macOS Homebrew
+        "/opt/homebrew/bin/pinentry-tty" # macOS Homebrew (ARM)
+    )
+
+    # Check if we're in a graphical environment
+    # shellcheck disable=SC2154
+    if [[ -n "${DISPLAY:-}" ]] || [[ -n "${WAYLAND_DISPLAY:-}" ]] || [[ "${TERM_PROGRAM:-}" == "vscode" ]]; then
+        # GUI environment - try GUI pinentry first
+        for pinentry in "${gui_pinentry_options[@]}"; do
+            if [[ -x "$pinentry" ]]; then
+                echo "$pinentry"
+                return 0
+            fi
+        done
+        # Fallback to terminal pinentry if no GUI available
+        for pinentry in "${terminal_pinentry_options[@]}"; do
+            if [[ -x "$pinentry" ]]; then
+                echo "$pinentry"
+                return 0
+            fi
+        done
+    else
+        # Terminal environment - try terminal pinentry first
+        for pinentry in "${terminal_pinentry_options[@]}"; do
+            if [[ -x "$pinentry" ]]; then
+                echo "$pinentry"
+                return 0
+            fi
+        done
+        # Fallback to GUI pinentry if no terminal available
+        for pinentry in "${gui_pinentry_options[@]}"; do
+            if [[ -x "$pinentry" ]]; then
+                echo "$pinentry"
+                return 0
+            fi
+        done
+    fi
+
+    # Last resort: check PATH for any pinentry
+    if command -v pinentry &>/dev/null; then
+        command -v pinentry
+        return 0
+    fi
+
+    # Nothing found
+    echo "Error: No pinentry program found" >&2
+    return 1
+}
+
+# Detect and execute the best pinentry
+PINENTRY_PROGRAM="$(detect_best_pinentry)"
+if [[ -n "$PINENTRY_PROGRAM" ]]; then
+    exec "$PINENTRY_PROGRAM" "$@"
+else
+    exit 1
+fi

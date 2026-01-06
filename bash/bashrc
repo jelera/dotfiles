@@ -166,3 +166,9 @@ fi
 #----------------------------------------------------------------------------//
 # Source local bashrc for machine-specific configuration
 [[ -f ~/.bashrc.local ]] && source ~/.bashrc.local
+
+# Homebrew
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+
+# Homebrew
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"

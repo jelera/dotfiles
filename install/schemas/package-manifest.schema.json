@@ -4,7 +4,7 @@
   "title": "Dotfiles Package Manifest",
   "description": "Schema for dotfiles package installation manifest",
   "type": "object",
-  "required": ["version", "profiles", "categories", "packages"],
+  "required": ["version"],
   "additionalProperties": false,
   "properties": {
     "version": {
@@ -162,7 +162,7 @@
               "description": "Supported platforms (empty = all platforms)",
               "items": {
                 "type": "string",
-                "enum": ["macos", "ubuntu", "kubuntu", "xubuntu"]
+                "enum": ["macos", "ubuntu", "kubuntu", "xubuntu", "fedora", "debian", "arch", "amazonlinux", "linux"]
               },
               "uniqueItems": true
             },
@@ -276,40 +276,60 @@
         }
       }
     },
-    "bulk_install_groups": {
+    "mise_tools": {
       "type": "object",
-      "description": "Groups of packages for bulk installation optimization",
-      "patternProperties": {
-        "^[a-z_][a-z0-9_-]*$": {
+      "description": "Consolidated mise-managed tool definitions",
+      "additionalProperties": false,
+      "properties": {
+        "global": {
+          "type": "boolean",
+          "description": "Install all mise tools globally (mise use -g)",
+          "default": true
+        },
+        "categories": {
           "type": "object",
-          "required": ["enabled", "packages"],
-          "additionalProperties": false,
-          "properties": {
-            "description": {
-              "type": "string",
-              "description": "Human-readable group description"
-            },
-            "enabled": {
-              "type": "boolean",
-              "description": "Whether this group is active"
-            },
-            "platforms": {
-              "type": "array",
-              "description": "Platforms where this group applies",
-              "items": {
-                "type": "string",
-                "enum": ["macos", "ubuntu", "kubuntu", "xubuntu"]
-              },
-              "uniqueItems": true
-            },
-            "packages": {
-              "type": "array",
-              "description": "Packages in this bulk install group",
-              "items": {
-                "type": "string"
-              },
-              "minItems": 1,
-              "uniqueItems": true
+          "description": "Tool categories with consolidated definitions",
+          "minProperties": 1,
+          "patternProperties": {
+            "^[a-z_][a-z0-9_-]*$": {
+              "type": "object",
+              "required": ["tools"],
+              "additionalProperties": false,
+              "properties": {
+                "description": {
+                  "type": "string",
+                  "description": "Category description",
+                  "minLength": 1
+                },
+                "tools": {
+                  "type": "array",
+                  "description": "Tools in this category",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "required": ["name", "desc"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "Tool name (as used in mise)",
+                        "pattern": "^[a-z0-9_][a-z0-9_.-]*$",
+                        "minLength": 1
+                      },
+                      "desc": {
+                        "type": "string",
+                        "description": "Short tool description",
+                        "minLength": 1
+                      },
+                      "version": {
+                        "type": "string",
+                        "description": "Tool version (defaults to latest)",
+                        "default": "latest"
+                      }
+                    }
+                  }
+                }
+              }
             }
           }
         }

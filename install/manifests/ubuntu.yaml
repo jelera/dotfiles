@@ -1,0 +1,105 @@
+version: 1.0
+
+metadata:
+  description: "Ubuntu-specific package manifest"
+  last_updated: "2026-01-04"
+
+# Ubuntu-specific package definitions
+packages:
+  # === Core Utilities ===
+
+  xclip:
+    category: core_utils
+    description: "X11 clipboard utility"
+    platforms: ["ubuntu"]
+    apt:
+      package: xclip
+
+  # === System Libraries ===
+
+  build-essential:
+    category: system_libraries
+    description: "GCC, make, and essential build tools"
+    platforms: ["ubuntu"]
+    apt:
+      package: build-essential
+
+  pkg-config:
+    category: system_libraries
+    description: "Build system helper"
+    platforms: ["ubuntu"]
+    apt:
+      package: pkg-config
+
+  libssl-dev:
+    category: system_libraries
+    description: "SSL library development headers"
+    platforms: ["ubuntu"]
+    apt:
+      package: libssl-dev
+
+  libreadline-dev:
+    category: system_libraries
+    description: "Readline library development headers"
+    platforms: ["ubuntu"]
+    apt:
+      package: libreadline-dev
+
+  zlib1g-dev:
+    category: system_libraries
+    description: "Compression library development headers"
+    platforms: ["ubuntu"]
+    apt:
+      package: zlib1g-dev
+
+  autoconf:
+    category: system_libraries
+    description: "Automatic configure script builder"
+    platforms: ["ubuntu"]
+    apt:
+      package: autoconf
+
+  automake:
+    category: system_libraries
+    description: "Tool for generating Makefiles"
+    platforms: ["ubuntu"]
+    apt:
+      package: automake
+
+  libtool:
+    category: system_libraries
+    description: "Generic library support script"
+    platforms: ["ubuntu"]
+    apt:
+      package: libtool
+
+  libsecret-1-0:
+    category: system_libraries
+    description: "Library for secure credential storage"
+    platforms: ["ubuntu"]
+    apt:
+      package: libsecret-1-0
+
+  libsecret-1-dev:
+    category: system_libraries
+    description: "Development headers for libsecret"
+    platforms: ["ubuntu"]
+    apt:
+      package: libsecret-1-dev
+
+  # Desktop environment specific packages
+  gnome-keyring:
+    category: system_libraries
+    description: "GNOME keyring for credential storage"
+    platforms: ["ubuntu"]
+    desktop_env: ["GNOME", "XFCE", "LXQt", "LXDE"]
+    apt:
+      package: gnome-keyring
+
+  kwalletmanager:
+    category: system_libraries
+    description: "KDE Wallet for credential storage"
+    platforms: ["ubuntu"]
+    desktop_env: ["KDE"]
+    apt:
+      package: kwalletmanager

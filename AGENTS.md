@@ -61,9 +61,9 @@ All scripts in `install/`:
 - `symlinks.sh` - Dotfile symlink management
 - `lib/manifest-parser.sh` - YAML manifest parser
 - `lib/backend-*.sh` - Package manager backends: apt, homebrew, ppa, mise
-- `manifests/packages.yaml` - Declarative package definitions
+- `manifests/{common,ubuntu,macos}.yaml` - Multi-manifest package definitions
 
-**Note**: This dotfiles installation uses a manifest-based system with declarative package management and 173 passing tests. Packages are defined in `install/manifests/packages.yaml` and installed based on profiles (minimal, dev, full, remote). See [Manifest-Based Installation Refactor](#manifest-based-installation-refactor) for details.
+**Note**: This dotfiles installation uses a manifest-based system with declarative package management and 184 passing tests. Packages are defined in `install/manifests/{common,ubuntu,macos}.yaml` and installed based on profiles (minimal, dev, full, remote). See [Manifest-Based Installation Refactor](#manifest-based-installation-refactor) for details.
 
 ## Architecture Decisions
 
@@ -122,7 +122,7 @@ All scripts in `install/`:
 
 The installation system is being refactored from hardcoded shell scripts to a YAML manifest-driven architecture. This provides:
 
-- **Declarative package definitions**: All packages defined in `install/manifests/packages.yaml`
+- **Declarative package definitions**: All packages defined in multi-manifest structure (`install/manifests/{common,ubuntu,macos}.yaml`)
 - **Installation profiles**: `remote`, `minimal`, `dev`, `full` for different use cases
 - **Granular control**: Per-package priority chains, platform filters, category-based organization
 - **Test-driven development**: Comprehensive test coverage using BATS framework
@@ -139,15 +139,18 @@ install/
 │   ├── backend-ppa.sh             # PPA backend (Phase 2 ⏳)
 │   └── backend-mise.sh            # mise backend (Phase 2 ⏳)
 ├── manifests/
-│   └── packages.yaml              # Package definitions
-├── tests/                         # Test suite
+│   ├── common.yaml                # Cross-platform packages
+│   ├── ubuntu.yaml                # Ubuntu-specific packages
+│   └── macos.yaml                 # macOS-specific packages
+├── schemas/
+│   └── package-manifest.schema.json
+├── tests/                         # Test suite (184 tests ✅)
 │   ├── fixtures/
 │   │   └── test-packages.yaml     # Test data
 │   ├── test-helper.bash           # Test utilities
-│   └── test-manifest-parser.bats  # Parser tests (22/22 ✅)
+│   └── test-*.bats                # Parser, backend, integration tests
 ├── install.sh                     # Main installer
-├── packages-manifest.sh           # Manifest-based installer (Phase 3 ⏳)
-└── packages.sh                    # Legacy installer (fallback)
+└── packages-manifest.sh           # Manifest-based installer ✅
 ```
 
 ### Phase 1: Foundation ✅ COMPLETE
@@ -156,10 +159,10 @@ install/
 
 **Files**:
 - `install/lib/manifest-parser.sh` - Parser library with schema validation
-- `install/manifests/packages.yaml` - Package definitions
+- `install/manifests/{common,ubuntu,macos}.yaml` - Multi-manifest package definitions
 - `install/schemas/package-manifest.schema.json` - JSON Schema definition
-- `install/tests/test-manifest-parser.bats` - 22 passing tests
-- `install/tests/test-schema-validation.bats` - 27 passing tests
+- `install/tests/test-manifest-parser.bats` - 36 passing tests
+- `install/tests/test-schema-validation.bats` - 24 passing tests
 
 **Functions available**:
 ```bash
@@ -584,6 +587,52 @@ Note: Most utilities are shell functions (faster than scripts)
 1. Edit appropriate module in `install/`
 2. Test changes: `./install.sh --no-languages -y`
 3. Verify symlinks: `./install/symlinks.sh verify`
+
+### Uninstalling
+
+The `uninstall.sh` script provides safe, granular removal of dotfiles:
+
+```bash
+# Remove symlinks only (safest - keeps all tools)
+./uninstall.sh --symlinks
+
+# Remove symlinks and config directories
+./uninstall.sh --symlinks --configs
+
+# Remove mise-managed tools (50+ packages)
+./uninstall.sh --mise-tools
+
+# Remove mise binary and data directories
+./uninstall.sh --mise
+
+# Remove everything (nuclear option)
+./uninstall.sh --all
+
+# Dry run to see what would be removed (recommended first!)
+./uninstall.sh --all --dry-run
+
+# Skip confirmation prompts
+./uninstall.sh --symlinks --yes
+```
+
+**What gets removed:**
+- `--symlinks`: Dotfile symlinks (.bashrc, .zshrc, .gitconfig, etc.)
+- `--configs`: Config directories (~/.config/mise, ~/.config/ghostty)
+- `--mise-tools`: All mise-installed tools (languages, CLI utilities)
+- `--mise`: mise binary, ~/.local/share/mise, ~/.local/state/mise, ~/.cache/mise
+- `--all`: Everything above
+
+**Safety features:**
+- Creates timestamped backup: `~/.dotfiles.backup.uninstall.YYYYMMDD_HHMMSS/`
+- Restores original shell configs when removing symlinks
+- Interactive confirmations (skip with `--yes`)
+- Dry-run mode to preview changes
+
+**Implementation:**
+- Script: `uninstall.sh`
+- Uses existing `remove_symlinks()` from `install/symlinks.sh`
+- Queries mise for installed tools before removal
+- Backs up files before deletion
 
 ### Adding Language Runtime or CLI Tool
 

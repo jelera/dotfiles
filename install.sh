@@ -176,7 +176,9 @@ configure_git_credentials() {
     # Fetch user info from GitHub CLI
     if fetch_git_user_from_gh; then
         # Set user name and email from GitHub
+        # shellcheck disable=SC2154
         git config --file="$gitconfig_local" user.name "$GH_USER_NAME"
+        # shellcheck disable=SC2154
         git config --file="$gitconfig_local" user.email "$GH_USER_EMAIL"
         log_success "Configured git user from GitHub: ${GH_USER_NAME} <${GH_USER_EMAIL}>"
     else
@@ -239,6 +241,66 @@ configure_git_credentials() {
     log_info "Git configuration written to ${gitconfig_local}"
 }
 
+# Bootstrap yq if needed (required for manifest parsing)
+bootstrap_yq() {
+    log_step "Checking for yq (required for manifest parsing)..."
+
+    if command_exists yq; then
+        log_info "yq already installed: $(yq --version 2>&1 | head -n1)"
+        return 0
+    fi
+
+    if is_dry_run; then
+        log_dry_run "Would bootstrap yq for manifest parsing"
+        return 0
+    fi
+
+    log_info "yq not found, bootstrapping..."
+
+    # Try mise first (if available)
+    if command_exists mise; then
+        log_info "Installing yq via mise..."
+        if mise install yq@latest && mise reshim; then
+            log_success "yq installed via mise"
+            return 0
+        else
+            log_warning "Failed to install yq via mise, trying other methods..."
+        fi
+    fi
+
+    # Try Homebrew (macOS or Linux with Homebrew)
+    if command_exists brew; then
+        log_info "Installing yq via Homebrew..."
+        if brew install yq; then
+            log_success "yq installed via Homebrew"
+            return 0
+        else
+            log_warning "Failed to install yq via Homebrew, trying other methods..."
+        fi
+    fi
+
+    # Try apt (Ubuntu/Debian)
+    if command_exists apt-get; then
+        log_info "Installing yq via apt..."
+        # Use the official yq PPA for Ubuntu
+        if sudo add-apt-repository -y ppa:rmescandon/yq 2>/dev/null && \
+           sudo apt-get update && \
+           sudo apt-get install -y yq; then
+            log_success "yq installed via apt"
+            return 0
+        else
+            log_warning "Failed to install yq via apt"
+        fi
+    fi
+
+    log_error "Cannot bootstrap yq - no package manager available"
+    log_error "Please install yq manually:"
+    log_error "  - macOS: brew install yq"
+    log_error "  - Ubuntu: sudo add-apt-repository ppa:rmescandon/yq && sudo apt install yq"
+    log_error "  - Or download from: https://github.com/mikefarah/yq/releases"
+    return 1
+}
+
 #----------------------------------------------------------------------------//
 # => PRE-FLIGHT CHECKS
 #----------------------------------------------------------------------------//
@@ -293,6 +355,15 @@ main() {
         log_info "Skipping Homebrew installation"
     fi
 
+    # Step 1.5: Bootstrap yq (required for manifest parsing)
+    if [[ "$INSTALL_PACKAGES" == "true" ]]; then
+        bootstrap_yq || {
+            log_error "Failed to bootstrap yq - cannot proceed with package installation"
+            log_error "Please install yq manually and re-run the installer"
+            exit 1
+        }
+    fi
+
     # Step 2: Install packages
     if [[ "$INSTALL_PACKAGES" == "true" ]]; then
         # Use manifest-based installation
@@ -306,17 +377,17 @@ main() {
 
         log_info "Installing packages with profile: $profile"
 
-        # Use the default manifest location (set in packages-manifest.sh)
-        local manifest_path
+        # Use the default manifest directory (set in packages-manifest.sh)
+        local manifest_dir
         # shellcheck disable=SC2153
-        manifest_path="${DEFAULT_MANIFEST:-${SCRIPT_DIR}/install/manifests/packages.yaml}"
+        manifest_dir="${DEFAULT_MANIFEST_DIR:-${SCRIPT_DIR}/install/manifests}"
 
         # Convert DRY_RUN to dry_run argument format
         if [[ "$DRY_RUN" == "true" ]]; then
-            install_from_manifest "$manifest_path" "$profile" "true" || \
+            install_from_manifest "$manifest_dir" "$profile" "true" || \
                 log_warning "Some packages failed to install (continuing)"
         else
-            install_from_manifest "$manifest_path" "$profile" "false" || \
+            install_from_manifest "$manifest_dir" "$profile" "false" || \
                 log_warning "Some packages failed to install (continuing)"
         fi
     else
@@ -381,10 +452,13 @@ main() {
 
     # Show log file location if warnings/errors occurred
     if [[ -n "$LOG_FILE" && -f "$LOG_FILE" ]]; then
-        echo ""
-        log_warning "Some warnings or errors occurred during installation"
-        log_info "Check the log file for details: $LOG_FILE"
-        echo ""
+        # Only show warning if log file contains actual warnings or errors
+        if grep -q '\[WARNING\]\|\[ERROR\]' "$LOG_FILE" 2>/dev/null; then
+            echo ""
+            log_warning "Some warnings or errors occurred during installation"
+            log_info "Check the log file for details: $LOG_FILE"
+            echo ""
+        fi
     fi
 
     # Print next steps

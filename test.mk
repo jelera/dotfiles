@@ -90,7 +90,7 @@ test-coverage: ## Show test coverage summary
 	@echo "  ✅ Integration tests:   30/30 tests passing"
 	@echo "  ✅ Total Phase 3:       30/30 tests passing"
 	@echo ""
-	@echo "🎉 Grand Total: 173/173 tests passing"
+	@echo "🎉 Grand Total: 184/184 tests passing"
 	@echo ""
 	@echo "✨ Manifest-based installation system is COMPLETE!"
 	@echo ""

@@ -164,7 +164,7 @@ install_mise_tools() {
     fi
 
     log_info "Installing tools defined in global config (mise/config.toml)..."
-    log_warning "This may take 10-30 minutes depending on your system..."
+    log_info "This may take 10-30 minutes depending on your system..."
     log_info ""
     log_info "Categories of tools to be installed:"
     log_info "  • Languages: Ruby, Node, Python, Go, Erlang, Elixir"
@@ -436,7 +436,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
 
     # Ask to install language runtimes
     if confirm "Install language runtimes now? (Ruby, Node, Python, Go, Erlang, Elixir)" "y"; then
-        log_warning "This will take 10-30 minutes depending on your system"
+        log_info "This will take 10-30 minutes depending on your system"
 
         if ! install_mise_tools; then
             log_info "Trying fallback installation method..."

@@ -10,8 +10,19 @@ load test-helper
     assert_contains "$output" "validation passed"
 }
 
-@test "schema validation: accepts actual production manifest" {
-    run validate_manifest_schema "${MANIFEST_DIR}/packages.yaml"
+@test "schema validation: accepts actual production manifests" {
+    # Test common.yaml
+    run validate_manifest_schema "${MANIFEST_DIR}/common.yaml"
+    [ "$status" -eq 0 ]
+    assert_contains "$output" "validation passed"
+
+    # Test ubuntu.yaml
+    run validate_manifest_schema "${MANIFEST_DIR}/ubuntu.yaml"
+    [ "$status" -eq 0 ]
+    assert_contains "$output" "validation passed"
+
+    # Test macos.yaml
+    run validate_manifest_schema "${MANIFEST_DIR}/macos.yaml"
     [ "$status" -eq 0 ]
     assert_contains "$output" "validation passed"
 }
@@ -37,7 +48,8 @@ EOF
     [ "$status" -ne 0 ]
 }
 
-@test "schema validation: rejects manifest without profiles" {
+@test "schema validation: accepts platform manifest without profiles" {
+    # Platform-specific manifests (ubuntu.yaml, macos.yaml) can have just packages
     cat > "$TEST_MANIFEST" <<'EOF'
 version: 1.0
 categories:
@@ -51,10 +63,11 @@ packages:
 EOF
 
     run validate_manifest_schema "$TEST_MANIFEST"
-    [ "$status" -ne 0 ]
+    [ "$status" -eq 0 ]
 }
 
-@test "schema validation: rejects manifest without categories" {
+@test "schema validation: accepts platform manifest without categories" {
+    # Platform-specific manifests can omit categories if using common ones
     cat > "$TEST_MANIFEST" <<'EOF'
 version: 1.0
 profiles:
@@ -68,10 +81,11 @@ packages:
 EOF
 
     run validate_manifest_schema "$TEST_MANIFEST"
-    [ "$status" -ne 0 ]
+    [ "$status" -eq 0 ]
 }
 
-@test "schema validation: rejects manifest without packages" {
+@test "schema validation: accepts manifest without packages" {
+    # Manifests can have just profiles/categories (will be merged with platform-specific)
     cat > "$TEST_MANIFEST" <<'EOF'
 version: 1.0
 profiles:
@@ -85,7 +99,7 @@ categories:
 EOF
 
     run validate_manifest_schema "$TEST_MANIFEST"
-    [ "$status" -ne 0 ]
+    [ "$status" -eq 0 ]
 }
 
 # Test: Version field accepts both string and number
@@ -483,79 +497,3 @@ EOF
     [ "$status" -ne 0 ]
 }
 
-# Test: Bulk install groups
-@test "schema validation: accepts valid bulk install group" {
-    cat > "$TEST_MANIFEST" <<'EOF'
-version: 1.0
-profiles:
-  minimal:
-    description: "Test"
-    packages: [git]
-categories:
-  general_tools:
-    description: "Tools"
-    priority: ["apt"]
-packages:
-  git:
-    category: general_tools
-    description: "VCS"
-bulk_install_groups:
-  essentials:
-    description: "Essential tools"
-    enabled: true
-    packages: [git]
-EOF
-
-    run validate_manifest_schema "$TEST_MANIFEST"
-    [ "$status" -eq 0 ]
-}
-
-@test "schema validation: rejects bulk group without enabled field" {
-    cat > "$TEST_MANIFEST" <<'EOF'
-version: 1.0
-profiles:
-  minimal:
-    description: "Test"
-    packages: [git]
-categories:
-  general_tools:
-    description: "Tools"
-    priority: ["apt"]
-packages:
-  git:
-    category: general_tools
-    description: "VCS"
-bulk_install_groups:
-  essentials:
-    description: "Essential tools"
-    packages: [git]
-EOF
-
-    run validate_manifest_schema "$TEST_MANIFEST"
-    [ "$status" -ne 0 ]
-}
-
-@test "schema validation: rejects bulk group without packages" {
-    cat > "$TEST_MANIFEST" <<'EOF'
-version: 1.0
-profiles:
-  minimal:
-    description: "Test"
-    packages: [git]
-categories:
-  general_tools:
-    description: "Tools"
-    priority: ["apt"]
-packages:
-  git:
-    category: general_tools
-    description: "VCS"
-bulk_install_groups:
-  essentials:
-    description: "Essential tools"
-    enabled: true
-EOF
-
-    run validate_manifest_schema "$TEST_MANIFEST"
-    [ "$status" -ne 0 ]
-}
