@@ -169,7 +169,7 @@ install_mise_tools() {
     log_info "Categories of tools to be installed:"
     log_info "  • Languages: Ruby, Node, Python, Go, Erlang, Elixir"
     log_info "  • Essential CLI: jq, fzf, ripgrep, bat, neovim, shellcheck"
-    log_info "  • Modern Tools: eza, fd, zoxide, dust, procs, bottom, duf, httpie"
+    log_info "  • Modern Tools: eza, fd, dust, procs, bottom, duf, httpie"
     log_info "  • Git Tools: gh, lazygit, delta, gitleaks, lefthook"
     log_info "  • Dev Utils: direnv, just, watchexec, tokei, hyperfine, grex, glow, yq"
     log_info "  • Go Tools: gopls, golangci-lint"
@@ -194,7 +194,7 @@ install_mise_tools() {
         # Essential CLI tools (check if enabled in config)
         local cli_tools=(
             "jq@latest" "fzf@latest" "ripgrep@latest" "bat@latest" "neovim@latest" "shellcheck@latest"
-            "eza@latest" "fd@latest" "zoxide@latest" "dust@latest" "procs@latest" "bottom@latest" "duf@latest" "httpie@latest"
+            "eza@latest" "fd@latest" "dust@latest" "procs@latest" "bottom@latest" "duf@latest" "httpie@latest"
             "gh@latest" "lazygit@latest" "delta@latest" "gitleaks@latest" "lefthook@latest"
             "direnv@latest" "just@latest" "watchexec@latest" "tokei@latest" "hyperfine@latest" "grex@latest" "glow@latest" "yq@latest"
         )
@@ -376,7 +376,7 @@ verify_mise_installation() {
     done
 
     # Modern tools
-    local modern_tools=("eza" "fd" "zoxide" "delta" "gh" "lazygit")
+    local modern_tools=("eza" "fd" "delta" "gh" "lazygit")
     log_info "Modern tools:"
     for tool in "${modern_tools[@]}"; do
         if mise current "$tool" &>/dev/null; then

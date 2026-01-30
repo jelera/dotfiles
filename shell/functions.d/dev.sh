@@ -219,7 +219,7 @@ mise-tools() {
         mise current jq fzf ripgrep bat neovim shellcheck 2>/dev/null | grep -v "not installed"
         echo ""
         echo "=== Modern Tools ==="
-        mise current eza fd zoxide delta gh lazygit 2>/dev/null | grep -v "not installed"
+        mise current eza fd delta gh lazygit 2>/dev/null | grep -v "not installed"
         echo ""
         echo "Total tools: $(mise list | wc -l)"
     else

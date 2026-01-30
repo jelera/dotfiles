@@ -30,7 +30,6 @@ shellcheck = "latest"
 # Better alternatives to standard Unix tools
 eza = "latest"
 fd = "latest"
-zoxide = "latest"
 dust = "latest"
 "cargo:procs" = "latest"     # Better ps (process viewer)
 bottom = "latest"
@@ -177,7 +176,6 @@ verbose = false
 always_keep_download = false
 # Use all CPU cores for compilation
 jobs = 4
-# Enable idiomatic version files (.ruby-version, .node-version, etc.)
 legacy_version_file = true
 # Shorten version output
 yes = false

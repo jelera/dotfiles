@@ -24,6 +24,7 @@ alias midoc='mise doctor'
 
 # Neovim
 alias nv='nvim'
+alias vim='nvim'
 alias nvif='nvim $(fzf --height 40%)'
 alias nvrc='nvim ~/.config/nvim/init.lua'
 
@@ -78,10 +79,6 @@ fi
 
 if command -v lazygit &> /dev/null; then
     alias lg='lazygit'
-fi
-
-if command -v zoxide &> /dev/null; then
-    alias cd='z'
 fi
 
 # Docker shortcuts
