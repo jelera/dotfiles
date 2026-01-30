@@ -277,8 +277,10 @@ fi
 # Cleanup
 unset DOTFILES_DIR
 
-# Homebrew
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-
-# Homebrew
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+# Homebrew (macOS)
+if [[ -f "/opt/homebrew/bin/brew" ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [[ -f "/usr/local/bin/brew" ]]; then
+    # Linuxbrew / Intel Mac
+    eval "$(/usr/local/bin/brew shellenv)"
+fi
