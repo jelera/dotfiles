@@ -147,6 +147,13 @@ setup_mise_config() {
         # Create symlink
         ln -sf "$mise_config" "${mise_config_dir}/config.toml"
         log_success "Linked global mise config to ~/.config/mise/config.toml"
+
+        # Trust mise config files to avoid "not trusted" errors
+        mise trust "${mise_config_dir}/config.toml" 2>/dev/null || true
+        if [[ -f "${dotfiles_dir}/.mise.toml" ]]; then
+            mise trust "${dotfiles_dir}/.mise.toml" 2>/dev/null || true
+        fi
+        log_success "Trusted mise config files"
     else
         log_warning "Global mise config not found at: $mise_config"
         return 1

@@ -168,8 +168,8 @@ RIPGREP_CONFIG_PATH = "{{env.HOME}}/.ripgreprc"
 PROJECTS = "~/projects"
 
 [settings]
-# Enable experimental features
-experimental = true
+env_shell_expand = true
+
 # Verbose output for debugging
 verbose = false
 # Automatically install missing tools

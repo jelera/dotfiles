@@ -477,12 +477,15 @@ main() {
     echo "   tmux source ~/.tmux.conf"
     echo "   Press: Ctrl-a + I  (capital I)"
     echo ""
-    echo "5. Git hooks are installed (shellcheck + gitleaks)"
+    echo "5. Set zsh as your default shell (if not already):"
+    echo "   chsh -s \$(which zsh)"
+    echo ""
+    echo "6. Git hooks are installed (shellcheck + gitleaks)"
     echo "   Run on demand: lefthook run pre-commit"
     echo ""
 
     if [[ "$INSTALL_LANGUAGES" == "true" ]] && command_exists mise; then
-        echo "5. Verify installed tools:"
+        echo "7. Verify installed tools:"
         echo "   mise list"
         echo "   ruby --version"
         echo "   node --version"

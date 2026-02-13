@@ -17,11 +17,11 @@ profiles:
 
   minimal:
     description: "Essential CLI tools only"
-    packages: [git, curl, wget, tmux, tree, pinentry]
+    packages: [git, curl, wget, zsh, tmux, tree, pinentry]
 
   remote:
     description: "Lightweight remote server setup"
-    packages: [git, curl, wget, tmux, htop, tree, pinentry, build-essential, pkg-config, libssl-dev]
+    packages: [git, curl, wget, zsh, tmux, htop, tree, pinentry, build-essential, pkg-config, libssl-dev]
 
 # Package categories with default priority chains
 categories:
@@ -113,6 +113,15 @@ packages:
       package: pinentry-tty
     homebrew:
       package: pinentry
+
+  zsh:
+    category: core_utils
+    description: "Z shell - primary shell for this dotfiles setup"
+    priority: ["apt", "homebrew"]
+    apt:
+      package: zsh
+    homebrew:
+      package: zsh
 
   # === Monitoring Tools ===
 
