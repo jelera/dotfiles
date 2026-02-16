@@ -11,7 +11,7 @@ fi
 # Source manifest parser if not already loaded
 if ! command -v parse_manifest >/dev/null 2>&1; then
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    if [ -f "${SCRIPT_DIR}/manifest-parser.sh" ]; then
+    if [[ -f "${SCRIPT_DIR}/manifest-parser.sh" ]]; then
         # shellcheck source=./manifest-parser.sh
         source "${SCRIPT_DIR}/manifest-parser.sh"
     else
@@ -29,14 +29,14 @@ apt_get_package_name() {
     local package_name="$2"
 
     # Validate parameters
-    if [ -z "$manifest_file" ] || [ -z "$package_name" ]; then
+    if [[ -z "$manifest_file" ]] || [[ -z "$package_name" ]]; then
         echo "Error: Missing required parameters" >&2
         echo "Usage: apt_get_package_name <manifest_file> <package_name>" >&2
         return 1
     fi
 
     # Check if manifest file exists
-    if [ ! -f "$manifest_file" ]; then
+    if [[ ! -f "$manifest_file" ]]; then
         echo "Error: Manifest file not found: $manifest_file" >&2
         return 1
     fi
@@ -47,7 +47,7 @@ apt_get_package_name() {
     apt_config=$(get_package_manager_config "$manifest_file" "$package_name" "apt" 2>&1)
     exit_code=$?
 
-    if [ "$exit_code" -ne 0 ]; then
+    if [[ "$exit_code" -ne 0 ]]; then
         echo "Error: Package '$package_name' not found in manifest or has no APT config" >&2
         return 1
     fi
@@ -56,7 +56,7 @@ apt_get_package_name() {
     local packages
     packages=$(echo "$apt_config" | yq eval '.packages // ""' - 2>/dev/null)
 
-    if [ -n "$packages" ] && [ "$packages" != "null" ]; then
+    if [[ -n "$packages" ]] && [[ "$packages" != "null" ]]; then
         # Multiple packages - return each on a new line
         echo "$packages"
     else
@@ -64,7 +64,7 @@ apt_get_package_name() {
         local single_package
         single_package=$(echo "$apt_config" | yq eval '.package // ""' - 2>/dev/null)
 
-        if [ -z "$single_package" ] || [ "$single_package" = "null" ]; then
+        if [[ -z "$single_package" ]] || [[ "$single_package" = "null" ]]; then
             echo "Error: No package or packages field in APT config for '$package_name'" >&2
             return 1
         fi
@@ -80,7 +80,7 @@ apt_check_installed() {
     local package_name="$1"
 
     # Validate parameter
-    if [ -z "$package_name" ]; then
+    if [[ -z "$package_name" ]]; then
         return 1
     fi
 
@@ -102,12 +102,12 @@ apt_install_package() {
     local dry_run="${3:-false}"
 
     # Validate parameters
-    if [ -z "$manifest_file" ]; then
+    if [[ -z "$manifest_file" ]]; then
         echo "Error: Missing manifest file parameter" >&2
         return 1
     fi
 
-    if [ -z "$package_name" ]; then
+    if [[ -z "$package_name" ]]; then
         echo "Error: Missing package name parameter" >&2
         return 1
     fi
@@ -118,49 +118,43 @@ apt_install_package() {
     apt_packages=$(apt_get_package_name "$manifest_file" "$package_name" 2>&1)
     exit_code=$?
 
-    if [ "$exit_code" -ne 0 ]; then
+    if [[ "$exit_code" -ne 0 ]]; then
         echo "$apt_packages" >&2
         return "$exit_code"
     fi
 
-    # Convert to array (handle multiple packages)
-    local packages_array=()
-    while IFS= read -r pkg; do
-        [ -n "$pkg" ] && packages_array+=("$pkg")
-    done <<< "$apt_packages"
+    # Convert to array (handle multiple packages) - bash 3.2 compatible
+    local packages_array
+    local old_ifs="$IFS"
+    IFS=$'\n'
+    set -f
+    # shellcheck disable=SC2206
+    packages_array=($apt_packages)
+    set +f
+    IFS="$old_ifs"
+
+    # Filter out empty entries
+    local filtered_array=()
+    local pkg
+    for pkg in "${packages_array[@]}"; do
+        [[ -n "$pkg" ]] && filtered_array+=("$pkg")
+    done
+    packages_array=("${filtered_array[@]}")
 
     # Check if we have any packages to install
-    if [ ${#packages_array[@]} -eq 0 ]; then
+    if [[ ${#packages_array[@]} -eq 0 ]]; then
         echo "Error: No packages to install" >&2
         return 1
     fi
 
-    # Process each package
-    local all_installed=true
-    local packages_to_install=()
-
-    for pkg in "${packages_array[@]}"; do
-        if apt_check_installed "$pkg"; then
-            echo "Package '$pkg' is already installed"
-        else
-            all_installed=false
-            packages_to_install+=("$pkg")
-        fi
-    done
-
-    # If all packages are already installed, we're done
-    if [ ${#packages_to_install[@]} -eq 0 ]; then
-        return 0
-    fi
-
-    # Install packages
-    if [ "$dry_run" = "true" ]; then
-        echo "[DRY RUN] Would install APT packages: ${packages_to_install[*]}"
-        echo "[DRY RUN] Command: sudo apt-get install -y ${packages_to_install[*]}"
+    # Install packages (apt is idempotent - skips already installed packages)
+    if [[ "$dry_run" = "true" ]]; then
+        echo "[DRY RUN] Would install APT packages: ${packages_array[*]}"
+        echo "[DRY RUN] Command: sudo apt install -y ${packages_array[*]}"
         return 0
     else
-        echo "Installing APT packages: ${packages_to_install[*]}"
-        sudo apt-get install -y "${packages_to_install[@]}"
+        echo "Installing APT packages: ${packages_array[*]}"
+        sudo apt install -y "${packages_array[@]}"
         return $?
     fi
 }
@@ -178,14 +172,15 @@ apt_install_bulk() {
     local dry_run="${3:-false}"
 
     # Handle empty package list
-    if [ -z "$package_list" ]; then
+    if [[ -z "$package_list" ]]; then
         echo "No packages to install"
         return 0
     fi
 
-    # Convert space-separated list to array
+    # Convert space-separated list to array - bash 3.2 compatible
     local packages_array
-    read -ra packages_array <<< "$package_list"
+    # shellcheck disable=SC2206
+    packages_array=($package_list)
 
     # Track statistics
     local total=0
@@ -196,7 +191,7 @@ apt_install_bulk() {
     # Process each package
     for package_name in "${packages_array[@]}"; do
         # Skip empty entries
-        [ -z "$package_name" ] && continue
+        [[ -z "$package_name" ]] && continue
 
         ((total++))
 
@@ -224,5 +219,5 @@ apt_install_bulk() {
     echo "  Failed: $failed"
 
     # Return success if no failures
-    [ $failed -eq 0 ]
+    [[ "$failed" -eq 0 ]]
 }

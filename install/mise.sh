@@ -180,38 +180,22 @@ install_mise_tools() {
     log_info ""
 
     # Install all tools from global config
-    if mise install; then
+    # Tools defined in ~/.config/mise/config.toml are automatically available globally
+    # No need for explicit `mise use -g` calls - the global config handles this
+    # Use --global flag to explicitly install from global config only
+    if mise install --global; then
         log_success "All mise tools installed successfully"
-
-        # Set all installed tools globally to ensure they're available system-wide
-        log_info "Setting tools globally..."
-
-        # Core language runtimes
-        local core_tools=("ruby@latest" "node@lts" "python@latest" "go@latest" "erlang@latest" "elixir@latest")
-
-        # Essential CLI tools (check if enabled in config)
-        local cli_tools=(
-            "jq@latest" "fzf@latest" "ripgrep@latest" "bat@latest" "neovim@latest" "shellcheck@latest"
-            "eza@latest" "fd@latest" "dust@latest" "procs@latest" "bottom@latest" "duf@latest" "httpie@latest"
-            "gh@latest" "lazygit@latest" "delta@latest" "gitleaks@latest" "lefthook@latest"
-            "direnv@latest" "just@latest" "watchexec@latest" "tokei@latest" "hyperfine@latest" "grex@latest" "glow@latest" "yq@latest"
-        )
-
-        # Combine all tools
-        local all_tools=("${core_tools[@]}" "${cli_tools[@]}")
-
-        for tool in "${all_tools[@]}"; do
-            if mise use -g "$tool" 2>/dev/null; then
-                log_success "✓ Set $tool globally"
-            else
-                log_info "  $tool not configured or already set"
-            fi
-        done
+        log_info "Tools are configured globally via ~/.config/mise/config.toml"
+        log_info "They will be available after shell restart"
     else
         log_warning "Some mise tools failed to install"
-        log_info "You can install them individually later with:"
+        log_info "Check the output above for errors. Common issues:"
+        log_info "  • Network timeouts - retry with: mise install"
+        log_info "  • Compilation errors - check system dependencies"
+        log_info "  • Missing compilers - install build tools for your platform"
+        log_info ""
+        log_info "You can install tools individually later with:"
         log_info "  mise install <tool>@<version>"
-        log_info "  mise use -g <tool>@<version>"
         return 1
     fi
 
@@ -347,43 +331,41 @@ verify_mise_installation() {
     # Check activated tools
     log_info "Checking available tools..."
 
-    # Language runtimes
-    local lang_tools=("ruby" "node" "python" "go" "erlang" "elixir")
-    log_info "Language runtimes:"
-    for tool in "${lang_tools[@]}"; do
-        if mise current "$tool" &>/dev/null; then
-            local version
-            version="$(mise current "$tool" 2>/dev/null)"
+    # Get all current tools at once to avoid N+1 queries
+    local all_tools
+    all_tools=$(mise current 2>/dev/null || echo "")
+
+    # Helper function to check and display tool
+    check_tool() {
+        local tool=$1
+        local version
+        version=$(echo "$all_tools" | grep "^${tool} " | awk '{print $2}')
+        if [[ -n "$version" ]]; then
             log_success "  ✓ $tool: $version"
         else
             log_info "    $tool: not installed"
         fi
+    }
+
+    # Language runtimes
+    local lang_tools=("ruby" "node" "python" "go" "erlang" "elixir")
+    log_info "Language runtimes:"
+    for tool in "${lang_tools[@]}"; do
+        check_tool "$tool"
     done
 
     # Essential CLI tools
     local essential_tools=("jq" "fzf" "ripgrep" "bat" "neovim" "shellcheck")
     log_info "Essential CLI tools:"
     for tool in "${essential_tools[@]}"; do
-        if mise current "$tool" &>/dev/null; then
-            local version
-            version="$(mise current "$tool" 2>/dev/null)"
-            log_success "  ✓ $tool: $version"
-        else
-            log_info "    $tool: not installed"
-        fi
+        check_tool "$tool"
     done
 
     # Modern tools
     local modern_tools=("eza" "fd" "delta" "gh" "lazygit")
     log_info "Modern tools:"
     for tool in "${modern_tools[@]}"; do
-        if mise current "$tool" &>/dev/null; then
-            local version
-            version="$(mise current "$tool" 2>/dev/null)"
-            log_success "  ✓ $tool: $version"
-        else
-            log_info "    $tool: not installed"
-        fi
+        check_tool "$tool"
     done
 
     # Show count of installed tools

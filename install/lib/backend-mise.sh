@@ -11,7 +11,7 @@ fi
 # Source manifest parser if not already loaded
 if ! command -v parse_manifest >/dev/null 2>&1; then
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    if [ -f "${SCRIPT_DIR}/manifest-parser.sh" ]; then
+    if [[ -f "${SCRIPT_DIR}/manifest-parser.sh" ]]; then
         # shellcheck source=./manifest-parser.sh
         source "${SCRIPT_DIR}/manifest-parser.sh"
     else
@@ -28,12 +28,12 @@ mise_is_managed() {
     local package_name="$2"
 
     # Validate parameters
-    if [ -z "$manifest_file" ] || [ -z "$package_name" ]; then
+    if [[ -z "$manifest_file" ]] || [[ -z "$package_name" ]]; then
         return 1
     fi
 
     # Check if manifest file exists
-    if [ ! -f "$manifest_file" ]; then
+    if [[ ! -f "$manifest_file" ]]; then
         return 1
     fi
 
@@ -54,7 +54,7 @@ mise_check_available() {
 mise_check_tool_available() {
     local tool_name="$1"
 
-    if [ -z "$tool_name" ]; then
+    if [[ -z "$tool_name" ]]; then
         return 1
     fi
 
@@ -73,7 +73,7 @@ mise_check_tool_available() {
 mise_check_installed() {
     local tool_name="$1"
 
-    if [ -z "$tool_name" ]; then
+    if [[ -z "$tool_name" ]]; then
         return 1
     fi
 
@@ -110,7 +110,7 @@ mise_get_version() {
     local version
     version=$(yq eval ".packages.${package_name}.mise_version // \"latest\"" "$manifest_file" 2>/dev/null)
 
-    if [ -z "$version" ] || [ "$version" = "null" ]; then
+    if [[ -z "$version" ]] || [[ "$version" = "null" ]]; then
         echo "latest"
     else
         echo "$version"
@@ -130,12 +130,12 @@ mise_install_tool() {
     local dry_run="${3:-false}"
 
     # Validate parameters
-    if [ -z "$manifest_file" ]; then
+    if [[ -z "$manifest_file" ]]; then
         echo "Error: Missing manifest file parameter" >&2
         return 1
     fi
 
-    if [ -z "$package_name" ]; then
+    if [[ -z "$package_name" ]]; then
         echo "Error: Missing package name parameter" >&2
         return 1
     fi
@@ -163,7 +163,7 @@ mise_install_tool() {
     fi
 
     # Install tool
-    if [ "$dry_run" = "true" ]; then
+    if [[ "$dry_run" = "true" ]]; then
         echo "[DRY RUN] Would install mise tool: $package_name@$version"
         echo "[DRY RUN] Command: mise install $package_name@$version"
         return 0
@@ -190,7 +190,7 @@ mise_sync_with_manifest() {
     local packages
     packages=$(get_packages_by_category "$manifest_file" "$category" 2>/dev/null)
 
-    if [ -z "$packages" ]; then
+    if [[ -z "$packages" ]]; then
         echo "No packages found in category '$category'"
         return 0
     fi
@@ -198,12 +198,11 @@ mise_sync_with_manifest() {
     # Track statistics
     local total=0
     local succeeded=0
-    local skipped=0
     local failed=0
 
     # Process each package
     while IFS= read -r package_name; do
-        [ -z "$package_name" ] && continue
+        [[ -z "$package_name" ]] && continue
 
         # Skip if not managed by mise
         if ! mise_is_managed "$manifest_file" "$package_name"; then
@@ -213,7 +212,7 @@ mise_sync_with_manifest() {
         ((total++))
 
         # Try to install the tool
-        if [ "$dry_run" = "true" ]; then
+        if [[ "$dry_run" = "true" ]]; then
             echo "[DRY RUN] Would sync mise tool: $package_name"
             ((succeeded++))
         else
@@ -227,7 +226,7 @@ mise_sync_with_manifest() {
     done <<< "$packages"
 
     # Print summary if we processed any packages
-    if [ $total -gt 0 ]; then
+    if [[ "$total" -gt 0 ]]; then
         echo ""
         echo "Mise sync summary for '$category':"
         echo "  Total tools: $total"

@@ -11,7 +11,7 @@ fi
 # Source manifest parser if not already loaded
 if ! command -v parse_manifest >/dev/null 2>&1; then
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    if [ -f "${SCRIPT_DIR}/manifest-parser.sh" ]; then
+    if [[ -f "${SCRIPT_DIR}/manifest-parser.sh" ]]; then
         # shellcheck source=./manifest-parser.sh
         source "${SCRIPT_DIR}/manifest-parser.sh"
     else
@@ -29,14 +29,14 @@ brew_get_package_name() {
     local package_name="$2"
 
     # Validate parameters
-    if [ -z "$manifest_file" ] || [ -z "$package_name" ]; then
+    if [[ -z "$manifest_file" ]] || [[ -z "$package_name" ]]; then
         echo "Error: Missing required parameters" >&2
         echo "Usage: brew_get_package_name <manifest_file> <package_name>" >&2
         return 1
     fi
 
     # Check if manifest file exists
-    if [ ! -f "$manifest_file" ]; then
+    if [[ ! -f "$manifest_file" ]]; then
         echo "Error: Manifest file not found: $manifest_file" >&2
         return 1
     fi
@@ -47,7 +47,7 @@ brew_get_package_name() {
     brew_config=$(get_package_manager_config "$manifest_file" "$package_name" "homebrew" 2>&1)
     exit_code=$?
 
-    if [ "$exit_code" -ne 0 ]; then
+    if [[ "$exit_code" -ne 0 ]]; then
         echo "Error: Package '$package_name' not found in manifest or has no Homebrew config" >&2
         return 1
     fi
@@ -56,7 +56,7 @@ brew_get_package_name() {
     local pkg_name
     pkg_name=$(echo "$brew_config" | yq eval '.package // ""' - 2>/dev/null)
 
-    if [ -z "$pkg_name" ] || [ "$pkg_name" = "null" ]; then
+    if [[ -z "$pkg_name" ]] || [[ "$pkg_name" = "null" ]]; then
         echo "Error: No package field in Homebrew config for '$package_name'" >&2
         return 1
     fi
@@ -73,9 +73,7 @@ brew_is_cask() {
 
     # Get Homebrew config for the package
     local brew_config
-    brew_config=$(get_package_manager_config "$manifest_file" "$package_name" "homebrew" 2>/dev/null)
-
-    if [ $? -ne 0 ]; then
+    if ! brew_config=$(get_package_manager_config "$manifest_file" "$package_name" "homebrew" 2>/dev/null); then
         return 1
     fi
 
@@ -83,7 +81,7 @@ brew_is_cask() {
     local is_cask
     is_cask=$(echo "$brew_config" | yq eval '.cask // false' - 2>/dev/null)
 
-    if [ "$is_cask" = "true" ]; then
+    if [[ "$is_cask" = "true" ]]; then
         return 0
     else
         return 1
@@ -101,7 +99,7 @@ brew_check_installed() {
     local is_cask="${2:-false}"
 
     # Validate parameter
-    if [ -z "$package_name" ]; then
+    if [[ -z "$package_name" ]]; then
         return 1
     fi
 
@@ -111,7 +109,7 @@ brew_check_installed() {
     fi
 
     # Check if package is installed
-    if [ "$is_cask" = "true" ]; then
+    if [[ "$is_cask" = "true" ]]; then
         brew list --cask "$package_name" >/dev/null 2>&1
     else
         brew list "$package_name" >/dev/null 2>&1
@@ -133,12 +131,12 @@ brew_install_package() {
     local dry_run="${3:-false}"
 
     # Validate parameters
-    if [ -z "$manifest_file" ]; then
+    if [[ -z "$manifest_file" ]]; then
         echo "Error: Missing manifest file parameter" >&2
         return 1
     fi
 
-    if [ -z "$package_name" ]; then
+    if [[ -z "$package_name" ]]; then
         echo "Error: Missing package name parameter" >&2
         return 1
     fi
@@ -149,7 +147,7 @@ brew_install_package() {
     brew_package=$(brew_get_package_name "$manifest_file" "$package_name" 2>&1)
     exit_code=$?
 
-    if [ "$exit_code" -ne 0 ]; then
+    if [[ "$exit_code" -ne 0 ]]; then
         echo "$brew_package" >&2
         return "$exit_code"
     fi
@@ -167,8 +165,8 @@ brew_install_package() {
     fi
 
     # Install package
-    if [ "$dry_run" = "true" ]; then
-        if [ "$is_cask" = "true" ]; then
+    if [[ "$dry_run" = "true" ]]; then
+        if [[ "$is_cask" = "true" ]]; then
             echo "[DRY RUN] Would install Homebrew cask: $brew_package"
             echo "[DRY RUN] Command: brew install --cask $brew_package"
         else
@@ -178,7 +176,7 @@ brew_install_package() {
         return 0
     else
         echo "Installing Homebrew package: $brew_package"
-        if [ "$is_cask" = "true" ]; then
+        if [[ "$is_cask" = "true" ]]; then
             brew install --cask "$brew_package"
         else
             brew install "$brew_package"
@@ -198,7 +196,7 @@ brew_add_tap() {
     local dry_run="${2:-false}"
 
     # Validate parameter
-    if [ -z "$tap_name" ]; then
+    if [[ -z "$tap_name" ]]; then
         echo "Error: Missing tap name parameter" >&2
         return 1
     fi
@@ -210,7 +208,7 @@ brew_add_tap() {
     fi
 
     # Add tap
-    if [ "$dry_run" = "true" ]; then
+    if [[ "$dry_run" = "true" ]]; then
         echo "[DRY RUN] Would add Homebrew tap: $tap_name"
         echo "[DRY RUN] Command: brew tap $tap_name"
         return 0
@@ -234,14 +232,15 @@ brew_install_bulk() {
     local dry_run="${3:-false}"
 
     # Handle empty package list
-    if [ -z "$package_list" ]; then
+    if [[ -z "$package_list" ]]; then
         echo "No packages to install"
         return 0
     fi
 
-    # Convert space-separated list to array
+    # Convert space-separated list to array - bash 3.2 compatible
     local packages_array
-    read -ra packages_array <<< "$package_list"
+    # shellcheck disable=SC2206
+    packages_array=($package_list)
 
     # Track statistics
     local total=0
@@ -249,27 +248,62 @@ brew_install_bulk() {
     local skipped=0
     local failed=0
 
-    # Process each package
+    # Collect packages to install (brew install is idempotent)
+    local formulas_to_install=()
+    local casks_to_install=()
+
+    # Process each package and categorize
     for package_name in "${packages_array[@]}"; do
         # Skip empty entries
-        [ -z "$package_name" ] && continue
+        [[ -z "$package_name" ]] && continue
 
         ((total++))
 
-        # Try to install the package
-        if brew_install_package "$manifest_file" "$package_name" "$dry_run" 2>&1; then
-            ((succeeded++))
+        # Get package name from manifest
+        local brew_package
+        if ! brew_package=$(brew_get_package_name "$manifest_file" "$package_name" 2>&1); then
+            echo "Skipping '$package_name' (no Homebrew configuration)"
+            ((skipped++))
+            continue
+        fi
+
+        # Check if it's a cask
+        if brew_is_cask "$manifest_file" "$package_name"; then
+            casks_to_install+=("$brew_package")
         else
-            # Check if it's because the package doesn't have Homebrew config (not an error)
-            if ! brew_get_package_name "$manifest_file" "$package_name" >/dev/null 2>&1; then
-                echo "Skipping '$package_name' (no Homebrew configuration)"
-                ((skipped++))
-            else
-                echo "Failed to install package: $package_name" >&2
-                ((failed++))
-            fi
+            formulas_to_install+=("$brew_package")
         fi
     done
+
+    # Install formulas in batch
+    if [[ ${#formulas_to_install[@]} -gt 0 ]]; then
+        if [[ "$dry_run" = "true" ]]; then
+            echo "[DRY RUN] Would install Homebrew formulas: ${formulas_to_install[*]}"
+            succeeded=$((succeeded + ${#formulas_to_install[@]}))
+        else
+            echo "Installing Homebrew formulas: ${formulas_to_install[*]}"
+            if brew install "${formulas_to_install[@]}"; then
+                succeeded=$((succeeded + ${#formulas_to_install[@]}))
+            else
+                failed=$((failed + ${#formulas_to_install[@]}))
+            fi
+        fi
+    fi
+
+    # Install casks in batch
+    if [[ ${#casks_to_install[@]} -gt 0 ]]; then
+        if [[ "$dry_run" = "true" ]]; then
+            echo "[DRY RUN] Would install Homebrew casks: ${casks_to_install[*]}"
+            succeeded=$((succeeded + ${#casks_to_install[@]}))
+        else
+            echo "Installing Homebrew casks: ${casks_to_install[*]}"
+            if brew install --cask "${casks_to_install[@]}"; then
+                succeeded=$((succeeded + ${#casks_to_install[@]}))
+            else
+                failed=$((failed + ${#casks_to_install[@]}))
+            fi
+        fi
+    fi
 
     # Print summary
     echo ""
@@ -280,5 +314,5 @@ brew_install_bulk() {
     echo "  Failed: $failed"
 
     # Return success if no failures
-    [ $failed -eq 0 ]
+    [[ "$failed" -eq 0 ]]
 }

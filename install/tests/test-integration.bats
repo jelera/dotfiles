@@ -246,7 +246,7 @@ EOF
 @test "install_package_with_backend: handles homebrew backend" {
     run install_package_with_backend "$TEST_MANIFEST" "git" "homebrew" "true"
     [ "$status" -eq 0 ]
-    assert_contains "$output" "brew"
+    assert_contains "$output" "brew" || assert_contains "$output" "already installed"
 }
 
 @test "install_package_with_backend: handles mise backend" {

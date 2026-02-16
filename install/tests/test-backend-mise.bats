@@ -172,22 +172,31 @@ EOF
 #
 
 @test "mise_install_tool: dry-run mode does not install" {
+    # Use a unique fake tool to ensure it's not installed
+    # Note: mise might complain about unknown plugin, but for dry-run it might just print
+    # We'll use a real tool name but force a clean environment
+    
     # Use a tool unlikely to be installed
     cat > "$TEST_MANIFEST" <<'EOF'
 version: 1.0
 profiles:
   minimal:
-    packages: [elixir]
+    packages: [kotlin]
 categories:
   language_runtimes:
     priority: ["mise"]
 packages:
-  elixir:
+  kotlin:
     category: language_runtimes
     managed_by: mise
 EOF
 
-    run mise_install_tool "$TEST_MANIFEST" "elixir" "true"
+    # Mock mise_check_installed to always return failure (not installed)
+    # This is tricky because it's a function in the sourced file.
+    # We can override it!
+    mise_check_installed() { return 1; }
+
+    run mise_install_tool "$TEST_MANIFEST" "kotlin" "true"
     [ "$status" -eq 0 ]
     assert_contains "$output" "DRY RUN"
 }

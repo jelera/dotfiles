@@ -11,7 +11,7 @@ fi
 # Source manifest parser if not already loaded
 if ! command -v parse_manifest >/dev/null 2>&1; then
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    if [ -f "${SCRIPT_DIR}/manifest-parser.sh" ]; then
+    if [[ -f "${SCRIPT_DIR}/manifest-parser.sh" ]]; then
         # shellcheck source=./manifest-parser.sh
         source "${SCRIPT_DIR}/manifest-parser.sh"
     else
@@ -29,14 +29,14 @@ ppa_get_repository() {
     local package_name="$2"
 
     # Validate parameters
-    if [ -z "$manifest_file" ] || [ -z "$package_name" ]; then
+    if [[ -z "$manifest_file" ]] || [[ -z "$package_name" ]]; then
         echo "Error: Missing required parameters" >&2
         echo "Usage: ppa_get_repository <manifest_file> <package_name>" >&2
         return 1
     fi
 
     # Check if manifest file exists
-    if [ ! -f "$manifest_file" ]; then
+    if [[ ! -f "$manifest_file" ]]; then
         echo "Error: Manifest file not found: $manifest_file" >&2
         return 1
     fi
@@ -47,7 +47,7 @@ ppa_get_repository() {
     ppa_config=$(get_package_manager_config "$manifest_file" "$package_name" "ppa" 2>&1)
     exit_code=$?
 
-    if [ "$exit_code" -ne 0 ]; then
+    if [[ "$exit_code" -ne 0 ]]; then
         echo "Error: Package '$package_name' not found in manifest or has no PPA config" >&2
         return 1
     fi
@@ -56,7 +56,7 @@ ppa_get_repository() {
     local repository
     repository=$(echo "$ppa_config" | yq eval '.repository // ""' - 2>/dev/null)
 
-    if [ -z "$repository" ] || [ "$repository" = "null" ]; then
+    if [[ -z "$repository" ]] || [[ "$repository" = "null" ]]; then
         echo "Error: No repository field in PPA config for '$package_name'" >&2
         return 1
     fi
@@ -79,14 +79,14 @@ ppa_get_package_name() {
     local package_name="$2"
 
     # Validate parameters
-    if [ -z "$manifest_file" ] || [ -z "$package_name" ]; then
+    if [[ -z "$manifest_file" ]] || [[ -z "$package_name" ]]; then
         echo "Error: Missing required parameters" >&2
         echo "Usage: ppa_get_package_name <manifest_file> <package_name>" >&2
         return 1
     fi
 
     # Check if manifest file exists
-    if [ ! -f "$manifest_file" ]; then
+    if [[ ! -f "$manifest_file" ]]; then
         echo "Error: Manifest file not found: $manifest_file" >&2
         return 1
     fi
@@ -97,7 +97,7 @@ ppa_get_package_name() {
     ppa_config=$(get_package_manager_config "$manifest_file" "$package_name" "ppa" 2>&1)
     exit_code=$?
 
-    if [ "$exit_code" -ne 0 ]; then
+    if [[ "$exit_code" -ne 0 ]]; then
         echo "Error: Package '$package_name' not found in manifest or has no PPA config" >&2
         return 1
     fi
@@ -106,7 +106,7 @@ ppa_get_package_name() {
     local packages
     packages=$(echo "$ppa_config" | yq eval '.packages // ""' - 2>/dev/null)
 
-    if [ -n "$packages" ] && [ "$packages" != "null" ]; then
+    if [[ -n "$packages" ]] && [[ "$packages" != "null" ]]; then
         # Multiple packages - return each on a new line
         echo "$packages"
     else
@@ -114,7 +114,7 @@ ppa_get_package_name() {
         local single_package
         single_package=$(echo "$ppa_config" | yq eval '.package // ""' - 2>/dev/null)
 
-        if [ -z "$single_package" ] || [ "$single_package" = "null" ]; then
+        if [[ -z "$single_package" ]] || [[ "$single_package" = "null" ]]; then
             echo "Error: No package or packages field in PPA config for '$package_name'" >&2
             return 1
         fi
@@ -133,9 +133,7 @@ ppa_get_gpg_key() {
 
     # Get PPA config for the package
     local ppa_config
-    ppa_config=$(get_package_manager_config "$manifest_file" "$package_name" "ppa" 2>/dev/null)
-
-    if [ $? -ne 0 ]; then
+    if ! ppa_config=$(get_package_manager_config "$manifest_file" "$package_name" "ppa" 2>/dev/null); then
         return 0  # Not an error, just no GPG key
     fi
 
@@ -143,7 +141,7 @@ ppa_get_gpg_key() {
     local gpg_key
     gpg_key=$(echo "$ppa_config" | yq eval '.gpg_key // ""' - 2>/dev/null)
 
-    if [ -n "$gpg_key" ] && [ "$gpg_key" != "null" ]; then
+    if [[ -n "$gpg_key" ]] && [[ "$gpg_key" != "null" ]]; then
         echo "$gpg_key"
     fi
 
@@ -160,7 +158,7 @@ ppa_check_added() {
     local ppa_name="${repository#ppa:}"
 
     # Check if the PPA is in sources.list or sources.list.d
-    if [ -d /etc/apt/sources.list.d ]; then
+    if [[ -d /etc/apt/sources.list.d ]]; then
         grep -rq "$ppa_name" /etc/apt/sources.list.d/ 2>/dev/null && return 0
     fi
 
@@ -180,12 +178,12 @@ ppa_add_repository() {
     local dry_run="${3:-false}"
 
     # Validate parameters
-    if [ -z "$manifest_file" ]; then
+    if [[ -z "$manifest_file" ]]; then
         echo "Error: Missing manifest file parameter" >&2
         return 1
     fi
 
-    if [ -z "$package_name" ]; then
+    if [[ -z "$package_name" ]]; then
         echo "Error: Missing package name parameter" >&2
         return 1
     fi
@@ -196,7 +194,7 @@ ppa_add_repository() {
     repository=$(ppa_get_repository "$manifest_file" "$package_name" 2>&1)
     exit_code=$?
 
-    if [ "$exit_code" -ne 0 ]; then
+    if [[ "$exit_code" -ne 0 ]]; then
         echo "$repository" >&2
         return "$exit_code"
     fi
@@ -212,10 +210,10 @@ ppa_add_repository() {
     gpg_key=$(ppa_get_gpg_key "$manifest_file" "$package_name")
 
     # Add PPA
-    if [ "$dry_run" = "true" ]; then
+    if [[ "$dry_run" = "true" ]]; then
         echo "[DRY RUN] Would add PPA repository: $repository"
         echo "[DRY RUN] Command: sudo add-apt-repository -y $repository"
-        if [ -n "$gpg_key" ]; then
+        if [[ -n "$gpg_key" ]]; then
             echo "[DRY RUN] Would add GPG key: $gpg_key"
             echo "[DRY RUN] Command: wget -qO - $gpg_key | sudo apt-key add -"
         fi
@@ -224,7 +222,7 @@ ppa_add_repository() {
         echo "Adding PPA repository: $repository"
 
         # Add GPG key first if present
-        if [ -n "$gpg_key" ]; then
+        if [[ -n "$gpg_key" ]]; then
             echo "Adding GPG key: $gpg_key"
             wget -qO - "$gpg_key" | sudo apt-key add -
         fi
@@ -248,12 +246,12 @@ ppa_install_package() {
     local dry_run="${3:-false}"
 
     # Validate parameters
-    if [ -z "$manifest_file" ]; then
+    if [[ -z "$manifest_file" ]]; then
         echo "Error: Missing manifest file parameter" >&2
         return 1
     fi
 
-    if [ -z "$package_name" ]; then
+    if [[ -z "$package_name" ]]; then
         echo "Error: Missing package name parameter" >&2
         return 1
     fi
@@ -270,7 +268,7 @@ ppa_install_package() {
     ppa_packages=$(ppa_get_package_name "$manifest_file" "$package_name" 2>&1)
     exit_code=$?
 
-    if [ "$exit_code" -ne 0 ]; then
+    if [[ "$exit_code" -ne 0 ]]; then
         echo "$ppa_packages" >&2
         return "$exit_code"
     fi
@@ -278,17 +276,17 @@ ppa_install_package() {
     # Convert to array (handle multiple packages)
     local packages_array=()
     while IFS= read -r pkg; do
-        [ -n "$pkg" ] && packages_array+=("$pkg")
+        [[ -n "$pkg" ]] && packages_array+=("$pkg")
     done <<< "$ppa_packages"
 
     # Check if we have any packages to install
-    if [ ${#packages_array[@]} -eq 0 ]; then
+    if [[ ${#packages_array[@]} -eq 0 ]]; then
         echo "Error: No packages to install" >&2
         return 1
     fi
 
     # Install packages
-    if [ "$dry_run" = "true" ]; then
+    if [[ "$dry_run" = "true" ]]; then
         echo "[DRY RUN] Would update APT cache: sudo apt-get update"
         echo "[DRY RUN] Would install PPA packages: ${packages_array[*]}"
         echo "[DRY RUN] Command: sudo apt-get install -y ${packages_array[*]}"

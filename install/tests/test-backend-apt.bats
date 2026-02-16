@@ -88,18 +88,33 @@ EOF
 #
 
 @test "apt_check_installed: returns 0 for installed package" {
+    # Skip if not on Linux (apt not available)
+    if [[ "$(uname -s)" != "Linux" ]]; then
+        skip "Test only runs on Linux"
+    fi
+
     # bash is always installed in test environment
     run apt_check_installed "bash"
     [ "$status" -eq 0 ]
 }
 
 @test "apt_check_installed: returns 1 for non-installed package" {
+    # Skip if not on Linux (apt not available)
+    if [[ "$(uname -s)" != "Linux" ]]; then
+        skip "Test only runs on Linux"
+    fi
+
     # Use a package that's unlikely to be installed
     run apt_check_installed "nonexistent-package-xyz-123"
     [ "$status" -eq 1 ]
 }
 
 @test "apt_check_installed: handles dpkg-query errors gracefully" {
+    # Skip if not on Linux (apt not available)
+    if [[ "$(uname -s)" != "Linux" ]]; then
+        skip "Test only runs on Linux"
+    fi
+
     # Test with invalid package name that dpkg would reject
     run apt_check_installed ""
     [ "$status" -eq 1 ]
@@ -132,6 +147,11 @@ EOF
 }
 
 @test "apt_install_package: reports already installed packages" {
+    # Skip if not on Linux (apt not available)
+    if [[ "$(uname -s)" != "Linux" ]]; then
+        skip "Test only runs on Linux"
+    fi
+
     # bash is always installed
     # First, create a simple manifest with bash
     cat > "$TEST_MANIFEST" <<'EOF'

@@ -61,7 +61,9 @@ configure_homebrew_path() {
 
     local brew_path=""
 
+    # shellcheck disable=SC2154
     if [[ "$OS" == "macos" ]]; then
+        # shellcheck disable=SC2154
         if [[ "$ARCH" == "arm64" ]]; then
             # Apple Silicon
             brew_path="/opt/homebrew/bin/brew"
@@ -185,19 +187,14 @@ install_homebrew_packages() {
     fi
 
     log_info "Installing ${#packages[@]} packages..."
+    log_info "Installing: ${packages[*]}"
 
-    for package in "${packages[@]}"; do
-        if brew list "$package" &>/dev/null; then
-            log_info "✓ $package (already installed)"
-        else
-            log_info "Installing $package..."
-            if brew install "$package" 2>/dev/null; then
-                log_success "✓ $package"
-            else
-                log_warning "✗ $package (failed to install)"
-            fi
-        fi
-    done
+    # brew install is idempotent - it skips already installed packages
+    if brew install "${packages[@]}" 2>/dev/null; then
+        log_success "Homebrew packages installed successfully"
+    else
+        log_warning "Some packages may have failed to install"
+    fi
 
     log_success "Homebrew packages installation complete"
     return 0
