@@ -590,7 +590,15 @@ Note: Most utilities are shell functions (faster than scripts)
 
 ### Uninstalling
 
-The `uninstall.sh` script provides safe, granular removal of dotfiles:
+The `uninstall.sh` script provides safe, granular removal of dotfiles with multiple safety levels:
+
+**Safety Levels:**
+- **Safe**: `--symlinks`, `--logs`
+- **Moderate**: `--configs`, `--local-files`, `--git-hooks`
+- **Risky**: `--mise-tools`, `--mise`
+- **Dangerous**: `--homebrew` (may break other applications!)
+
+**Basic Usage:**
 
 ```bash
 # Remove symlinks only (safest - keeps all tools)
@@ -599,40 +607,73 @@ The `uninstall.sh` script provides safe, granular removal of dotfiles:
 # Remove symlinks and config directories
 ./uninstall.sh --symlinks --configs
 
-# Remove mise-managed tools (50+ packages)
-./uninstall.sh --mise-tools
+# Remove symlinks, configs, and logs (keeps mise/tools)
+./uninstall.sh --symlinks --configs --logs
 
-# Remove mise binary and data directories
-./uninstall.sh --mise
-
-# Remove everything (nuclear option)
-./uninstall.sh --all
-
-# Dry run to see what would be removed (recommended first!)
+# Dry run to see what would be removed (RECOMMENDED FIRST!)
 ./uninstall.sh --all --dry-run
 
 # Skip confirmation prompts
 ./uninstall.sh --symlinks --yes
 ```
 
-**What gets removed:**
-- `--symlinks`: Dotfile symlinks (.bashrc, .zshrc, .gitconfig, etc.)
+**Advanced Usage:**
+
+```bash
+# Remove mise-managed tools (50+ packages)
+./uninstall.sh --mise-tools
+
+# Remove mise binary and data directories
+./uninstall.sh --mise
+
+# Remove local configuration files (contains secrets!)
+./uninstall.sh --local-files
+
+# Remove git hooks
+./uninstall.sh --git-hooks
+
+# Remove installation logs
+./uninstall.sh --logs
+
+# Nuclear option - remove EVERYTHING including Homebrew
+./uninstall.sh --all
+
+# Everything except Homebrew (recommended)
+./uninstall.sh --symlinks --configs --mise-tools --mise --local-files --logs --git-hooks
+```
+
+**What each flag removes:**
+- `--symlinks`: Dotfile symlinks (.bashrc, .zshrc, .gitconfig, etc.) + resets iTerm2 preferences
 - `--configs`: Config directories (~/.config/mise, ~/.config/ghostty)
+- `--local-files`: Local config files (~/.env.local, ~/.gitconfig.local) - contains YOUR data!
+- `--logs`: Installation log directory (~/.dotfiles-install-logs)
+- `--git-hooks`: Git hooks installed by lefthook
 - `--mise-tools`: All mise-installed tools (languages, CLI utilities)
 - `--mise`: mise binary, ~/.local/share/mise, ~/.local/state/mise, ~/.cache/mise
-- `--all`: Everything above
+- `--homebrew`: **DANGEROUS** - Uninstalls Homebrew and ALL its packages (may break other apps!)
+- `--all`: Everything above (nuclear option)
 
 **Safety features:**
 - Creates timestamped backup: `~/.dotfiles.backup.uninstall.YYYYMMDD_HHMMSS/`
 - Restores original shell configs when removing symlinks
-- Interactive confirmations (skip with `--yes`)
-- Dry-run mode to preview changes
+- Interactive confirmations for destructive operations (skip with `--yes`)
+- Extra warnings for dangerous operations (Homebrew removal)
+- Dry-run mode to preview changes (`--dry-run`)
+- Backups created before deletion
+
+**Restore from backup:**
+```bash
+# After uninstall, backups are saved in timestamped directory
+cp -r ~/.dotfiles.backup.uninstall.YYYYMMDD_HHMMSS/. ~/
+```
 
 **Implementation:**
 - Script: `uninstall.sh`
 - Uses existing `remove_symlinks()` from `install/symlinks.sh`
 - Queries mise for installed tools before removal
-- Backs up files before deletion
+- Downloads official Homebrew uninstall script if requested
+- Handles iTerm2 preference reset on macOS
+- Removes keyd config via sudo if needed
 
 ### Adding Language Runtime or CLI Tool
 

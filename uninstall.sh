@@ -24,6 +24,10 @@ REMOVE_SYMLINKS=false
 REMOVE_MISE_TOOLS=false
 REMOVE_MISE=false
 REMOVE_CONFIGS=false
+REMOVE_LOCAL_FILES=false
+REMOVE_LOGS=false
+REMOVE_GIT_HOOKS=false
+REMOVE_HOMEBREW=false
 DRY_RUN=false
 INTERACTIVE=true
 
@@ -41,26 +45,42 @@ Usage: $0 [options]
 Uninstall dotfiles and optionally remove installed packages.
 
 Options:
-    --all                   Remove everything (symlinks, configs, mise)
+    --all                   Remove everything (nuclear option)
     --symlinks              Remove dotfile symlinks only (default if no options)
-    --mise-tools            Uninstall mise-managed tools
-    --mise                  Remove mise itself
-    --configs               Remove config directories (~/.config/mise, etc.)
+    --mise-tools            Uninstall mise-managed tools (50+ packages)
+    --mise                  Remove mise binary and data directories
+    --configs               Remove config directories (~/.config/mise, ~/.config/ghostty)
+    --local-files           Remove local files (~/.env.local, ~/.gitconfig.local)
+    --logs                  Remove installation log directory (~/.dotfiles-install-logs)
+    --git-hooks             Remove git hooks (lefthook)
+    --homebrew              Remove Homebrew (USE WITH CAUTION!)
     --dry-run, -n           Show what would be removed without doing it
     --yes, -y               Skip confirmation prompts
     --help, -h              Show this help message
+
+Safety Levels:
+    Safe:      --symlinks, --logs
+    Moderate:  --configs, --local-files, --git-hooks
+    Risky:     --mise-tools, --mise
+    Dangerous: --homebrew (may break other applications!)
 
 Examples:
     # Remove only symlinks (safest)
     $0 --symlinks
 
-    # Remove symlinks and configs (keeps mise and tools)
-    $0 --symlinks --configs
+    # Remove symlinks and local files
+    $0 --symlinks --local-files
 
-    # Remove everything including mise and all tools
+    # Remove symlinks, configs, and logs (keeps mise/tools)
+    $0 --symlinks --configs --logs
+
+    # Remove everything except Homebrew
+    $0 --symlinks --configs --mise-tools --mise --local-files --logs --git-hooks
+
+    # Nuclear option - remove EVERYTHING including Homebrew
     $0 --all
 
-    # Dry run to see what would be removed
+    # Dry run to see what would be removed (recommended first!)
     $0 --all --dry-run
 
 EOF
@@ -241,6 +261,145 @@ remove_config_directories() {
     done
 }
 
+remove_local_files() {
+    log_step "Removing local configuration files..."
+
+    local files=(
+        "${HOME}/.env.local"
+        "${HOME}/.gitconfig.local"
+    )
+
+    log_warning "These files may contain your personal settings and secrets!"
+
+    for file in "${files[@]}"; do
+        if [[ -f "$file" ]]; then
+            if is_dry_run; then
+                log_dry_run "Would remove: $file"
+            else
+                if confirm "Remove $file?" "n"; then
+                    create_backup "$file"
+                    rm -f "$file"
+                    log_success "Removed: $file"
+                else
+                    log_info "Keeping: $file"
+                fi
+            fi
+        fi
+    done
+}
+
+remove_install_logs() {
+    log_step "Removing installation logs..."
+
+    if [[ -d "${HOME}/.dotfiles-install-logs" ]]; then
+        if is_dry_run; then
+            log_dry_run "Would remove: ~/.dotfiles-install-logs"
+        else
+            rm -rf "${HOME}/.dotfiles-install-logs"
+            log_success "Removed: ~/.dotfiles-install-logs"
+        fi
+    else
+        log_info "No installation logs found"
+    fi
+}
+
+remove_git_hooks() {
+    log_step "Removing git hooks..."
+
+    if [[ ! -d "${SCRIPT_DIR}/.git/hooks" ]]; then
+        log_info "Not a git repository or no hooks installed"
+        return 0
+    fi
+
+    if ! command -v lefthook >/dev/null 2>&1; then
+        log_info "lefthook not installed, skipping"
+        return 0
+    fi
+
+    if is_dry_run; then
+        log_dry_run "Would run: lefthook uninstall"
+    else
+        cd "${SCRIPT_DIR}" && lefthook uninstall
+        log_success "Git hooks removed"
+    fi
+}
+
+remove_homebrew() {
+    log_step "Removing Homebrew..."
+
+    if ! command -v brew >/dev/null 2>&1; then
+        log_info "Homebrew not installed"
+        return 0
+    fi
+
+    local brew_prefix
+    brew_prefix="$(brew --prefix)"
+
+    log_warning "╔════════════════════════════════════════════════════════════╗"
+    log_warning "║  WARNING: This will uninstall Homebrew completely!        ║"
+    log_warning "║  All Homebrew packages will be removed!                   ║"
+    log_warning "║  This may break other applications on your system!        ║"
+    log_warning "╚════════════════════════════════════════════════════════════╝"
+    echo ""
+    log_info "Homebrew prefix: $brew_prefix"
+    echo ""
+
+    if ! confirm "Are you ABSOLUTELY SURE you want to uninstall Homebrew?" "n"; then
+        log_info "Keeping Homebrew"
+        return 0
+    fi
+
+    if ! confirm "Last chance! Uninstall Homebrew and all its packages?" "n"; then
+        log_info "Keeping Homebrew"
+        return 0
+    fi
+
+    if is_dry_run; then
+        log_dry_run "Would download and run Homebrew uninstall script"
+    else
+        log_info "Downloading Homebrew uninstall script..."
+        if command -v curl >/dev/null 2>&1; then
+            bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
+        else
+            log_error "curl not found, cannot download uninstall script"
+            log_info "Manual uninstall: /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)\""
+            return 1
+        fi
+        log_success "Homebrew removed"
+    fi
+}
+
+reset_iterm2_preferences() {
+    log_step "Resetting iTerm2 preferences..."
+
+    if [[ "$OSTYPE" != "darwin"* ]]; then
+        log_info "Skipping iTerm2 reset (macOS only)"
+        return 0
+    fi
+
+    # Check if iTerm2 preferences were configured
+    local prefs_folder
+    prefs_folder=$(defaults read com.googlecode.iterm2 PrefsCustomFolder 2>/dev/null || echo "")
+
+    if [[ -z "$prefs_folder" ]]; then
+        log_info "iTerm2 not configured to use custom preferences"
+        return 0
+    fi
+
+    if is_dry_run; then
+        log_dry_run "Would reset iTerm2 preferences to system default"
+    else
+        if confirm "Reset iTerm2 to use system preferences?" "n"; then
+            defaults delete com.googlecode.iterm2 PrefsCustomFolder 2>/dev/null || true
+            defaults write com.googlecode.iterm2 LoadPrefsFromCustomFolder -bool false
+            log_success "iTerm2 reset to system preferences"
+            log_info "Restart iTerm2 for changes to take effect"
+        else
+            log_info "Keeping iTerm2 custom preferences"
+        fi
+    fi
+}
+
 cleanup_shell_integration() {
     log_step "Cleaning up shell integration..."
 
@@ -272,6 +431,10 @@ main() {
                 REMOVE_MISE_TOOLS=true
                 REMOVE_MISE=true
                 REMOVE_CONFIGS=true
+                REMOVE_LOCAL_FILES=true
+                REMOVE_LOGS=true
+                REMOVE_GIT_HOOKS=true
+                REMOVE_HOMEBREW=true
                 ;;
             --symlinks)
                 REMOVE_SYMLINKS=true
@@ -284,6 +447,18 @@ main() {
                 ;;
             --configs)
                 REMOVE_CONFIGS=true
+                ;;
+            --local-files)
+                REMOVE_LOCAL_FILES=true
+                ;;
+            --logs)
+                REMOVE_LOGS=true
+                ;;
+            --git-hooks)
+                REMOVE_GIT_HOOKS=true
+                ;;
+            --homebrew)
+                REMOVE_HOMEBREW=true
                 ;;
             --dry-run|-n)
                 # shellcheck disable=SC2034
@@ -316,14 +491,20 @@ main() {
     log_step "Uninstall Summary"
     echo ""
     echo "The following will be removed:"
-    [[ "$REMOVE_SYMLINKS" == "true" ]] && echo "  ✓ Dotfile symlinks"
+    [[ "$REMOVE_SYMLINKS" == "true" ]] && echo "  ✓ Dotfile symlinks (.bashrc, .zshrc, .gitconfig, etc.)"
     [[ "$REMOVE_CONFIGS" == "true" ]] && echo "  ✓ Config directories (~/.config/mise, ~/.config/ghostty)"
+    [[ "$REMOVE_LOCAL_FILES" == "true" ]] && echo "  ✓ Local files (~/.env.local, ~/.gitconfig.local)"
+    [[ "$REMOVE_LOGS" == "true" ]] && echo "  ✓ Installation logs (~/.dotfiles-install-logs)"
+    [[ "$REMOVE_GIT_HOOKS" == "true" ]] && echo "  ✓ Git hooks (lefthook)"
     [[ "$REMOVE_MISE_TOOLS" == "true" ]] && echo "  ✓ Mise-managed tools (50+ packages)"
-    [[ "$REMOVE_MISE" == "true" ]] && echo "  ✓ Mise binary and data"
+    [[ "$REMOVE_MISE" == "true" ]] && echo "  ✓ Mise binary and data directories"
+    [[ "$REMOVE_HOMEBREW" == "true" ]] && echo "  ✓ Homebrew (DANGEROUS - will remove ALL brew packages!)"
     echo ""
 
     if [[ "$REMOVE_SYMLINKS" == "false" && "$REMOVE_CONFIGS" == "false" && \
-          "$REMOVE_MISE_TOOLS" == "false" && "$REMOVE_MISE" == "false" ]]; then
+          "$REMOVE_MISE_TOOLS" == "false" && "$REMOVE_MISE" == "false" && \
+          "$REMOVE_LOCAL_FILES" == "false" && "$REMOVE_LOGS" == "false" && \
+          "$REMOVE_GIT_HOOKS" == "false" && "$REMOVE_HOMEBREW" == "false" ]]; then
         log_warning "Nothing selected to remove"
         echo ""
         print_usage
@@ -343,11 +524,16 @@ main() {
         echo ""
     fi
 
-    # Execute uninstall steps in order
+    # Execute uninstall steps in order (safest to most destructive)
+    [[ "$REMOVE_GIT_HOOKS" == "true" ]] && remove_git_hooks
+    [[ "$REMOVE_LOGS" == "true" ]] && remove_install_logs
     [[ "$REMOVE_SYMLINKS" == "true" ]] && remove_symlinks
+    [[ "$REMOVE_SYMLINKS" == "true" ]] && reset_iterm2_preferences
     [[ "$REMOVE_CONFIGS" == "true" ]] && remove_config_directories
+    [[ "$REMOVE_LOCAL_FILES" == "true" ]] && remove_local_files
     [[ "$REMOVE_MISE_TOOLS" == "true" ]] && remove_mise_tools
     [[ "$REMOVE_MISE" == "true" ]] && remove_mise_binary
+    [[ "$REMOVE_HOMEBREW" == "true" ]] && remove_homebrew
 
     cleanup_shell_integration
 
@@ -377,7 +563,24 @@ main() {
         echo ""
     fi
 
+    if [[ "$REMOVE_HOMEBREW" == "true" ]] && ! is_dry_run; then
+        log_info "Homebrew has been removed"
+        log_info "To reinstall: /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+        echo ""
+    fi
+
+    if [[ "$REMOVE_LOCAL_FILES" == "true" ]]; then
+        log_info "Local configuration files removed"
+        log_info "Remember to reconfigure secrets if you reinstall"
+        echo ""
+    fi
+
     log_success "Uninstall complete!"
+
+    if is_dry_run; then
+        echo ""
+        log_info "This was a dry run. To actually uninstall, run without --dry-run"
+    fi
 }
 
 # Run main function
