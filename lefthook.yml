@@ -20,6 +20,7 @@ pre-commit:
     # Lint shell scripts without .sh extension
     shellcheck-no-ext:
       glob: "{bin/*,shell/functions,shell/env}"
+      exclude: "*.md"
       run: shellcheck {staged_files}
       skip:
         - merge

@@ -300,3 +300,152 @@ ppa_install_package() {
         return $?
     fi
 }
+
+# Install multiple PPA packages in bulk (FIXES N+1 apt-get update!)
+# Usage: ppa_install_bulk <manifest_file> <package_list> [dry_run]
+# Parameters:
+#   - manifest_file: Path to the package manifest
+#   - package_list: Space-separated list of package names
+#   - dry_run: Set to "true" to simulate installation (optional, default: false)
+# Returns: 0 on success, non-zero on error
+ppa_install_bulk() {
+    local manifest_file="$1"
+    local package_list="$2"
+    local dry_run="${3:-false}"
+
+    # Handle empty package list
+    if [[ -z "$package_list" ]]; then
+        echo "No PPA packages to install"
+        return 0
+    fi
+
+    # Convert space-separated list to array
+    local packages_array
+    # shellcheck disable=SC2206
+    packages_array=($package_list)
+
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "📦 Bulk PPA Installation (${#packages_array[@]} packages)"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+
+    # Phase 1: Add all PPA repositories (without updating each time)
+    echo "Phase 1: Adding PPA repositories..."
+    local added_repos=()
+
+    for package_name in "${packages_array[@]}"; do
+        [[ -z "$package_name" ]] && continue
+
+        # Get PPA repository
+        local repository
+        if ! repository=$(ppa_get_repository "$manifest_file" "$package_name" 2>&1); then
+            echo "⚠️  Skipping '$package_name' (no PPA repository)"
+            continue
+        fi
+
+        # Check if already added
+        if ppa_check_added "$repository"; then
+            echo "  ✓ Already added: $repository"
+            continue
+        fi
+
+        # Get GPG key if present
+        local gpg_key
+        gpg_key=$(ppa_get_gpg_key "$manifest_file" "$package_name")
+
+        if [[ "$dry_run" = "true" ]]; then
+            echo "[DRY RUN] Would add PPA: $repository"
+            if [[ -n "$gpg_key" ]]; then
+                echo "[DRY RUN] Would add GPG key: $gpg_key"
+            fi
+        else
+            echo "  → Adding: $repository"
+
+            # Add GPG key first if present
+            if [[ -n "$gpg_key" ]]; then
+                echo "    Adding GPG key: $gpg_key"
+                wget -qO - "$gpg_key" | sudo apt-key add -
+            fi
+
+            # Add the PPA (without running apt-get update yet)
+            if sudo add-apt-repository -y "$repository"; then
+                added_repos+=("$repository")
+            else
+                echo "    ❌ Failed to add: $repository"
+            fi
+        fi
+    done
+
+    echo ""
+
+    # Phase 2: Update APT cache ONCE (instead of N times!)
+    if [[ ${#added_repos[@]} -gt 0 ]] || [[ "$dry_run" = "true" ]]; then
+        echo "Phase 2: Updating APT cache (ONCE for all PPAs)..."
+
+        if [[ "$dry_run" = "true" ]]; then
+            echo "[DRY RUN] Would run: sudo apt-get update"
+        else
+            if ! sudo apt-get update; then
+                echo "⚠️  Warning: apt-get update failed, continuing anyway..."
+            fi
+        fi
+
+        echo ""
+    fi
+
+    # Phase 3: Install all packages
+    echo "Phase 3: Installing packages..."
+
+    local all_apt_packages=()
+    local succeeded=0
+    local skipped=0
+    local failed=0
+
+    # Collect all APT packages from manifest
+    for package_name in "${packages_array[@]}"; do
+        [[ -z "$package_name" ]] && continue
+
+        # Get package name(s) from manifest
+        local ppa_packages
+        if ! ppa_packages=$(ppa_get_package_name "$manifest_file" "$package_name" 2>&1); then
+            echo "⚠️  Skipping '$package_name' (no package name)"
+            ((skipped++))
+            continue
+        fi
+
+        # Add to install list
+        while IFS= read -r pkg; do
+            [[ -n "$pkg" ]] && all_apt_packages+=("$pkg")
+        done <<< "$ppa_packages"
+    done
+
+    # Install all packages in one apt-get call
+    if [[ ${#all_apt_packages[@]} -gt 0 ]]; then
+        if [[ "$dry_run" = "true" ]]; then
+            echo "[DRY RUN] Would install: ${all_apt_packages[*]}"
+            succeeded=${#all_apt_packages[@]}
+        else
+            echo "  Installing: ${all_apt_packages[*]}"
+            if sudo apt-get install -y "${all_apt_packages[@]}"; then
+                succeeded=${#all_apt_packages[@]}
+            else
+                failed=${#all_apt_packages[@]}
+            fi
+        fi
+    fi
+
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "📊 PPA Installation Summary:"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "  Repositories added: ${#added_repos[@]}"
+    echo "  Packages succeeded: $succeeded"
+    echo "  Packages skipped: $skipped"
+    echo "  Packages failed: $failed"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+
+    # Return success if no failures
+    [[ "$failed" -eq 0 ]]
+}

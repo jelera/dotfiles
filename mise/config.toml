@@ -24,7 +24,13 @@ fzf = "latest"
 ripgrep = "latest"
 bat = "latest"
 neovim = "latest"
-shellcheck = "latest"
+
+# ===== Shell Development Tools =====
+# Bash/Shell script development and testing
+shellcheck = "latest"                                     # Shell script linter
+shfmt = "latest"                                          # Shell script formatter
+bats = "latest"                                           # Bash Automated Testing System
+"npm:bash-language-server" = "latest"                    # Bash LSP for IDE integration
 
 # ===== Modern CLI Replacements =====
 # Better alternatives to standard Unix tools
