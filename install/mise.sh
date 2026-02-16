@@ -129,33 +129,24 @@ setup_mise_config() {
     local dotfiles_dir
     dotfiles_dir="$(get_dotfiles_dir)"
 
-    # Use the global config from dotfiles/mise/config.toml
-    local mise_config="${dotfiles_dir}/mise/config.toml"
+    # Note: mise config symlink is created by install/symlinks.sh
+    # Here we just trust the config and install tools
+
+    local mise_config_dir="${HOME}/.config/mise"
+    local mise_config="${mise_config_dir}/config.toml"
 
     if [[ -f "$mise_config" ]]; then
-        log_info "Using global mise config from dotfiles: $mise_config"
-
-        # Link global mise config
-        local mise_config_dir="${HOME}/.config/mise"
-        mkdir -p "$mise_config_dir"
-
-        # Backup existing config if it's not a symlink
-        if [[ -f "${mise_config_dir}/config.toml" ]] && [[ ! -L "${mise_config_dir}/config.toml" ]]; then
-            backup_file "${mise_config_dir}/config.toml"
-        fi
-
-        # Create symlink
-        ln -sf "$mise_config" "${mise_config_dir}/config.toml"
-        log_success "Linked global mise config to ~/.config/mise/config.toml"
+        log_info "Using global mise config: $mise_config"
 
         # Trust mise config files to avoid "not trusted" errors
-        mise trust "${mise_config_dir}/config.toml" 2>/dev/null || true
+        mise trust "${mise_config}" 2>/dev/null || true
         if [[ -f "${dotfiles_dir}/.mise.toml" ]]; then
             mise trust "${dotfiles_dir}/.mise.toml" 2>/dev/null || true
         fi
         log_success "Trusted mise config files"
     else
         log_warning "Global mise config not found at: $mise_config"
+        log_warning "Make sure symlinks are created first (install/symlinks.sh)"
         return 1
     fi
 

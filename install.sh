@@ -394,17 +394,29 @@ main() {
         log_info "Skipping package installation"
     fi
 
-    # Step 3: Install mise
+    # Step 3: Install mise binary
     if [[ "$INSTALL_MISE" == "true" ]]; then
         source "${SCRIPT_DIR}/install/mise.sh"
         install_mise || log_warning "mise installation had issues (continuing)"
         configure_mise_shell_integration || log_warning "mise shell integration had issues (continuing)"
-        setup_mise_config || true
     else
         log_info "Skipping mise installation"
     fi
 
-    # Step 4: Install language runtimes
+    # Step 4: Create symlinks (including mise config)
+    if [[ "$CREATE_SYMLINKS" == "true" ]]; then
+        source "${SCRIPT_DIR}/install/symlinks.sh"
+        create_all_symlinks || log_warning "Some symlinks failed to create"
+    else
+        log_info "Skipping symlink creation"
+    fi
+
+    # Step 5: Setup mise config and install tools
+    if [[ "$INSTALL_MISE" == "true" ]] && command_exists mise; then
+        setup_mise_config || true
+    fi
+
+    # Step 6: Install language runtimes
     if [[ "$INSTALL_LANGUAGES" == "true" ]]; then
         if command_exists mise; then
             if confirm "Install language runtimes? (This takes 10-30 minutes)" "y"; then
@@ -417,14 +429,6 @@ main() {
         fi
     else
         log_info "Skipping language runtime installation"
-    fi
-
-    # Step 5: Create symlinks
-    if [[ "$CREATE_SYMLINKS" == "true" ]]; then
-        source "${SCRIPT_DIR}/install/symlinks.sh"
-        create_all_symlinks || log_warning "Some symlinks failed to create"
-    else
-        log_info "Skipping symlink creation"
     fi
 
     # Step 6: Setup local environment file

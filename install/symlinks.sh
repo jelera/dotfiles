@@ -227,9 +227,10 @@ symlink_config_dirs() {
     # Ensure ~/.config exists
     mkdir -p "${HOME}/.config"
 
-    # Link mise config if exists
-    if [[ -d "${DOTFILES_DIR}/config/mise" ]]; then
-        create_dotfile_symlink "${DOTFILES_DIR}/config/mise" "${HOME}/.config/mise"
+    # Link mise config file
+    if [[ -f "${DOTFILES_DIR}/mise/config.toml" ]]; then
+        mkdir -p "${HOME}/.config/mise"
+        create_dotfile_symlink "${DOTFILES_DIR}/mise/config.toml" "${HOME}/.config/mise/config.toml"
     fi
 
     # Link Ghostty config if exists
