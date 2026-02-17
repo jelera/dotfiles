@@ -182,8 +182,8 @@ install_mise_tools() {
     # Install all tools from global config
     # Tools defined in ~/.config/mise/config.toml are automatically available globally
     # No need for explicit `mise use -g` calls - the global config handles this
-    # Use --global flag to explicitly install from global config only
-    if mise install --global; then
+    # mise install reads from global config by default
+    if mise install; then
         log_success "All mise tools installed successfully"
         log_info "Tools are configured globally via ~/.config/mise/config.toml"
         log_info "They will be available after shell restart"

@@ -351,11 +351,14 @@ main() {
     if [[ "$INSTALL_HOMEBREW" == "true" ]]; then
         source "${SCRIPT_DIR}/install/homebrew.sh"
         install_homebrew || log_warning "Homebrew installation had issues (continuing)"
+
+        # Step 1.5: Install Bash 4+ on macOS (required for optimized performance)
+        install_bash_4_on_macos "$@" || log_warning "Bash 4+ installation had issues (continuing)"
     else
         log_info "Skipping Homebrew installation"
     fi
 
-    # Step 1.5: Bootstrap yq (required for manifest parsing)
+    # Step 1.6: Bootstrap yq (required for manifest parsing)
     if [[ "$INSTALL_PACKAGES" == "true" ]]; then
         bootstrap_yq || {
             log_error "Failed to bootstrap yq - cannot proceed with package installation"

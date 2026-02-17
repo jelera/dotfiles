@@ -1,0 +1,20 @@
+{
+  "hooks": {
+    "PostToolUse": {
+      "Edit": [
+        {
+          "match": "\\.sh$",
+          "command": "shellcheck --severity=warning ${file_path}",
+          "description": "Run shellcheck after editing shell scripts"
+        }
+      ],
+      "Write": [
+        {
+          "match": "\\.sh$",
+          "command": "shellcheck --severity=warning ${file_path}",
+          "description": "Run shellcheck after writing shell scripts"
+        }
+      ]
+    }
+  }
+}

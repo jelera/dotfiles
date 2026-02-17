@@ -1085,6 +1085,36 @@ echo "test" | gpg --clearsign
 - Keep sensitive data in `~/.env.local`
 - Comment complex configurations
 
+### Bash Version Requirements
+
+**Minimum Required**: Bash 4.0+
+
+**Why Bash 4+?**
+- Associative arrays for O(1) caching (20-30x performance improvement)
+- Modern string operations and array handling
+- Standard on all Linux distributions (Ubuntu 22.04+ has 5.1+)
+- Automatically installed on macOS via Homebrew during setup
+
+**How to check version:**
+```bash
+bash --version                    # Current bash
+/opt/homebrew/bin/bash --version # Homebrew bash (macOS ARM)
+/usr/local/bin/bash --version    # Homebrew bash (macOS Intel)
+```
+
+**Scripts requiring Bash 4+:**
+- `install/lib/cache.sh` (associative arrays for caching)
+- `install/lib/interaction.sh` (associative arrays)
+- `install/packages-manifest.sh` (orchestration)
+- `test.mk` (test framework)
+
+**Enforcement:**
+All scripts using Bash 4+ features must include:
+```bash
+source install/lib/bash-version-check.sh
+require_bash4 "$0"
+```
+
 ## Testing
 
 ### Git Hooks (Lefthook)
@@ -1155,7 +1185,7 @@ bash -n install/*.sh
 ```
 
 **ShellCheck configuration** (`.shellcheckrc`):
-- Target shell: bash (compatible with bash 3.2 on macOS)
+- Target shell: bash (requires bash 4.0+)
 - Severity: warnings and above
 - Disabled: SC1091 (following sourced files)
 - Enabled optional checks: default-case, nullary-conditions, unassigned-uppercase, etc.

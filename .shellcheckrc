@@ -6,7 +6,7 @@
 # - Lefthook git hooks: pre-commit hooks use shellcheck
 # - GitHub Actions: .github/workflows/lint.yml CI pipeline
 
-# Target bash shell (compatible with bash 3.2 on macOS)
+# Target bash shell (requires bash 4.0+)
 shell=bash
 
 # Treat warnings as errors (fail on any issues)
@@ -25,8 +25,17 @@ enable=deprecate-which
 enable=quote-safe-variables
 enable=require-double-brackets
 
-# macOS bash 3.2 compatibility notes:
-# - Avoid readarray/mapfile (bash 4+)
-# - Avoid associative arrays (bash 4+)
-# - Avoid &>> redirection (bash 4+)
-# - Current scripts use newline-separated strings instead of arrays where needed
+# Bash 4+ features now ALLOWED and ENCOURAGED:
+# ✅ readarray/mapfile - Load file lines into array
+# ✅ Associative arrays (declare -A/-gA) - O(1) hash lookups for caching
+# ✅ &>> redirection - Append stdout and stderr
+# ✅ [[ ]] conditional expressions - Modern test syntax
+# ✅ String operations - ${var^^}, ${var,,}, ${var@Q}
+#
+# REQUIREMENT: All scripts using Bash 4+ features MUST check version using:
+#   source install/lib/bash-version-check.sh
+#   require_bash4 "$0"
+#
+# Bash 4+ is automatically installed during setup:
+#   - macOS: via Homebrew (/opt/homebrew/bin/bash or /usr/local/bin/bash)
+#   - Linux: Pre-installed (bash 5.1+ on Ubuntu 22.04/24.04)

@@ -21,6 +21,145 @@ if [ -f "${INSTALL_DIR}/common.sh" ]; then
     export QUIET_MODE=true
 fi
 
+# ==============================================================================
+# Mock Functions for Expensive System Calls
+# ==============================================================================
+# Enable with: MOCK_SYSTEM_CALLS=1 make -f test.mk test
+# These mocks reduce test time by avoiding real package manager queries
+
+mock_dpkg_query() {
+    # Mock dpkg-query -W (list installed packages)
+    if [[ "$1" == "-W" ]] && [[ "$2" == "-f" ]]; then
+        cat << 'EOF'
+bash
+curl
+git
+build-essential
+tmux
+wget
+python3
+neovim
+EOF
+        return 0
+    fi
+    return 1
+}
+
+mock_apt_cache() {
+    # Mock apt-cache pkgnames
+    if [[ "$1" == "pkgnames" ]]; then
+        cat << 'EOF'
+bash
+curl
+git
+wget
+build-essential
+python3
+python3-dev
+python3-pip
+tmux
+neovim
+zsh
+EOF
+        return 0
+    fi
+
+    # Mock apt-cache search
+    if [[ "$1" == "search" ]]; then
+        local pattern="$2"
+        case "$pattern" in
+            python*)
+                echo "python3 - Python 3 interpreter"
+                echo "python3-dev - Python 3 development files"
+                echo "python3-pip - Python package installer"
+                ;;
+            build*)
+                echo "build-essential - Essential build tools"
+                ;;
+            *)
+                echo "Package search results for: $pattern"
+                ;;
+        esac
+        return 0
+    fi
+    return 1
+}
+
+mock_brew_list() {
+    # Mock brew list --formula
+    if [[ "$1" == "--formula" ]]; then
+        cat << 'EOF'
+git
+curl
+wget
+bash
+neovim
+zsh
+EOF
+        return 0
+    fi
+
+    # Mock brew list --cask
+    if [[ "$1" == "--cask" ]]; then
+        cat << 'EOF'
+ghostty
+iterm2
+EOF
+        return 0
+    fi
+
+    return 1
+}
+
+mock_mise_ls_remote() {
+    # Mock mise ls-remote <tool>
+    local tool="$1"
+    case "$tool" in
+        ruby)
+            echo "3.2.0"
+            echo "3.1.0"
+            echo "3.0.0"
+            ;;
+        python)
+            echo "3.11.0"
+            echo "3.10.0"
+            echo "3.9.0"
+            ;;
+        node)
+            echo "20.0.0"
+            echo "18.0.0"
+            echo "16.0.0"
+            ;;
+        go)
+            echo "1.21.0"
+            echo "1.20.0"
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+    return 0
+}
+
+# Apply mocks if MOCK_SYSTEM_CALLS=1
+if [[ "${MOCK_SYSTEM_CALLS:-0}" == "1" ]]; then
+    dpkg-query() { mock_dpkg_query "$@"; }
+    apt-cache() { mock_apt_cache "$@"; }
+    brew() {
+        case "$1" in
+            list) mock_brew_list "${@:2}" ;;
+            *) command brew "$@" 2>/dev/null || return 1 ;;
+        esac
+    }
+    mise() {
+        case "$1" in
+            ls-remote) mock_mise_ls_remote "$2" ;;
+            *) command mise "$@" 2>/dev/null || return 1 ;;
+        esac
+    }
+    export -f dpkg-query apt-cache brew mise 2>/dev/null || true
+fi
+
 # Helper function: Create a minimal test manifest
 create_test_manifest() {
     local manifest_file="$1"

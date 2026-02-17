@@ -1,10 +1,16 @@
 #!/usr/bin/env bats
 # Tests for cache module
 
+# Load test helper
+load test-helper
+
 # Setup test environment
 setup() {
-    # Load cache module
-    load ../lib/cache.sh || return 1
+    # Load cache module using proper LIB_DIR from test-helper
+    if [[ -f "${LIB_DIR}/cache.sh" ]]; then
+        # shellcheck source=../lib/cache.sh
+        source "${LIB_DIR}/cache.sh"
+    fi
 }
 
 # Teardown
@@ -12,19 +18,14 @@ teardown() {
     cache_clear_all
 }
 
-@test "cache: Bash version detection" {
-    # Should detect Bash version
-    [[ -n "$BASH_VERSION_MAJOR" ]]
-    [[ "$BASH_VERSION_MAJOR" =~ ^[0-9]+$ ]]
+@test "cache: Bash version check function exists" {
+    # Should have require_bash4 function available
+    command -v require_bash4 >/dev/null
 }
 
-@test "cache: Fallback mode detection" {
-    # Should set fallback mode for Bash 3.x
-    if [[ "$BASH_VERSION_MAJOR" -lt 4 ]]; then
-        [[ "$CACHE_USE_FALLBACK" == "true" ]]
-    else
-        [[ "$CACHE_USE_FALLBACK" == "false" ]]
-    fi
+@test "cache: Bash version is 4+" {
+    # Cache requires Bash 4+ for associative arrays
+    [[ "${BASH_VERSINFO[0]}" -ge 4 ]]
 }
 
 @test "apt_cache_init: initializes cache" {
@@ -149,9 +150,8 @@ teardown() {
         skip "Homebrew not available"
     fi
 
-    run brew_cache_init
-    assert_success
-
+    # Call directly (not via run) to preserve variable state
+    brew_cache_init
     [[ "$BREW_CACHE_INITIALIZED" == "true" ]]
 }
 
@@ -209,9 +209,8 @@ teardown() {
         skip "mise not available"
     fi
 
-    run mise_cache_init
-    assert_success
-
+    # Call directly (not via run) to preserve variable state
+    mise_cache_init
     [[ "$MISE_CACHE_INITIALIZED" == "true" ]]
 }
 

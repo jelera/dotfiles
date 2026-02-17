@@ -11,6 +11,16 @@ fi
 # Get the directory where this script is located
 INTERACTION_SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Source bash version check helper
+if [[ -f "${INTERACTION_SCRIPT_DIR}/bash-version-check.sh" ]]; then
+    # shellcheck source=./bash-version-check.sh
+    source "${INTERACTION_SCRIPT_DIR}/bash-version-check.sh"
+    require_bash4 "interaction.sh" || return 1
+else
+    echo "Error: bash-version-check.sh not found" >&2
+    return 1
+fi
+
 # Source verification module if not already loaded
 if ! command -v has_verification_issues >/dev/null 2>&1; then
     if [[ -f "${INTERACTION_SCRIPT_DIR}/verification.sh" ]]; then
@@ -22,19 +32,8 @@ if ! command -v has_verification_issues >/dev/null 2>&1; then
     fi
 fi
 
-# Check Bash version for associative array support
-BASH_VERSION_MAJOR="${BASH_VERSINFO[0]:-3}"
-
-# Global user choices storage
-if [[ "$BASH_VERSION_MAJOR" -lt 4 ]]; then
-    # Bash 3.x fallback - will use format "pkg=choice" in flat array
-    # Note: -g not supported in Bash 3.x, but top-level arrays are global when sourced
-    declare -a USER_PACKAGE_CHOICES_ARRAY
-    USER_PACKAGE_CHOICES_ARRAY=()
-else
-    # Bash 4+ - associative array
-    declare -gA USER_PACKAGE_CHOICES
-fi
+# User package choices storage (Bash 4+ associative array)
+declare -gA USER_PACKAGE_CHOICES
 
 # Interactive mode flag
 INTERACTIVE_MODE="${INTERACTIVE_MODE:-true}"
@@ -55,48 +54,26 @@ is_interactive() {
 store_user_choice() {
     local pkg="$1"
     local choice="$2"
+    [[ -z "$pkg" ]] && return 1
 
-    if [[ "$BASH_VERSION_MAJOR" -lt 4 ]]; then
-        # Bash 3.x: store as "pkg=choice" in array
-        USER_PACKAGE_CHOICES_ARRAY+=("${pkg}=${choice}")
-    else
-        # Bash 4+: use associative array
-        USER_PACKAGE_CHOICES["$pkg"]="$choice"
-    fi
+    USER_PACKAGE_CHOICES["$pkg"]="$choice"
 }
 
 # Get user choice for a package
 get_user_choice() {
     local pkg="$1"
+    [[ -z "$pkg" ]] && return 1
 
-    if [[ "$BASH_VERSION_MAJOR" -lt 4 ]]; then
-        # Bash 3.x: linear search
-        local entry
-        for entry in "${USER_PACKAGE_CHOICES_ARRAY[@]}"; do
-            if [[ "$entry" == "${pkg}="* ]]; then
-                echo "${entry#*=}"
-                return 0
-            fi
-        done
-        return 1
-    else
-        # Bash 4+: hash lookup
-        if [[ -n "${USER_PACKAGE_CHOICES[$pkg]}" ]]; then
-            echo "${USER_PACKAGE_CHOICES[$pkg]}"
-            return 0
-        fi
-        return 1
-    fi
+    local choice="${USER_PACKAGE_CHOICES[$pkg]}"
+    [[ -n "$choice" ]] && echo "$choice" && return 0
+
+    return 1
 }
 
 # Clear all user choices
 clear_user_choices() {
-    if [[ "$BASH_VERSION_MAJOR" -lt 4 ]]; then
-        USER_PACKAGE_CHOICES_ARRAY=()
-    else
-        unset USER_PACKAGE_CHOICES
-        declare -gA USER_PACKAGE_CHOICES
-    fi
+    unset USER_PACKAGE_CHOICES
+    declare -gA USER_PACKAGE_CHOICES
 }
 
 # Prompt user for a single package issue
@@ -334,34 +311,17 @@ print_user_choices_summary() {
     echo "📊 User Choices Summary:"
     echo ""
 
-    if [[ "$BASH_VERSION_MAJOR" -lt 4 ]]; then
-        # Bash 3.x
-        for entry in "${USER_PACKAGE_CHOICES_ARRAY[@]}"; do
-            local pkg="${entry%%=*}"
-            local choice="${entry#*=}"
+    for pkg in "${!USER_PACKAGE_CHOICES[@]}"; do
+        local choice="${USER_PACKAGE_CHOICES[$pkg]}"
 
-            if [[ "$choice" == "SKIP" ]]; then
-                echo "  ⏭  Skipped: ${pkg}"
-                ((skipped++))
-            else
-                echo "  🔄 Replaced: ${pkg} → ${choice}"
-                ((replaced++))
-            fi
-        done
-    else
-        # Bash 4+
-        for pkg in "${!USER_PACKAGE_CHOICES[@]}"; do
-            local choice="${USER_PACKAGE_CHOICES[$pkg]}"
-
-            if [[ "$choice" == "SKIP" ]]; then
-                echo "  ⏭  Skipped: ${pkg}"
-                ((skipped++))
-            else
-                echo "  🔄 Replaced: ${pkg} → ${choice}"
-                ((replaced++))
-            fi
-        done
-    fi
+        if [[ "$choice" == "SKIP" ]]; then
+            echo "  ⏭  Skipped: ${pkg}"
+            ((skipped++))
+        else
+            echo "  🔄 Replaced: ${pkg} → ${choice}"
+            ((replaced++))
+        fi
+    done
 
     echo ""
     echo "  Total skipped: ${skipped}"

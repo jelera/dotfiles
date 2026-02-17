@@ -1,21 +1,22 @@
 #!/usr/bin/env bats
 # Tests for verification module
 
+# Load test helper
+load test-helper
+
 # Setup test environment
 setup() {
-    # Load required modules
-    SCRIPT_DIR="../lib"
-
+    # Load required modules using proper LIB_DIR from test-helper
     # Load cache module first
-    if [[ -f "$SCRIPT_DIR/cache.sh" ]]; then
+    if [[ -f "${LIB_DIR}/cache.sh" ]]; then
         # shellcheck source=../lib/cache.sh
-        source "$SCRIPT_DIR/cache.sh"
+        source "${LIB_DIR}/cache.sh"
     fi
 
     # Load verification module
-    if [[ -f "$SCRIPT_DIR/verification.sh" ]]; then
+    if [[ -f "${LIB_DIR}/verification.sh" ]]; then
         # shellcheck source=../lib/verification.sh
-        source "$SCRIPT_DIR/verification.sh"
+        source "${LIB_DIR}/verification.sh"
     fi
 
     # Clear any previous issues

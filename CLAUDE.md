@@ -26,3 +26,4 @@ Keep this file minimal. All updates should go to `AGENTS.md`.
 - Package priority: **mise** → Homebrew → PPA → Apt → Flathub → Source (NO snap)
 - Secrets: `~/.env.local` (see `shell/.env.local.example`)
 - Add tools: Check `mise ls-remote <tool>` first, add to `mise/config.toml`
+- Bash requirement: **4.0+** (auto-installed on macOS via Homebrew)

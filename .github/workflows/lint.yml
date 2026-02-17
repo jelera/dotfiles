@@ -1,4 +1,4 @@
-name: Lint
+name: CI
 
 on:
   pull_request:
@@ -36,3 +36,40 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bash parallel yq
+
+          # Verify Bash 4+ is available
+          bash --version
+
+      - name: Install BATS
+        run: |
+          # Install BATS 1.13.0 (matches local version)
+          git clone --depth 1 --branch v1.13.0 https://github.com/bats-core/bats-core.git /tmp/bats-core
+          cd /tmp/bats-core
+          sudo ./install.sh /usr/local
+
+      - name: Verify BATS installation
+        run: |
+          bats --version
+          parallel --version
+
+      - name: Run test suite (parallel, no mocks)
+        run: |
+          # Use parallel execution but NO mocks in CI (real validation)
+          BATS=/usr/local/bin/bats make -f test.mk test
+
+      - name: Test results summary
+        if: always()
+        run: |
+          echo "✅ Test suite completed"
+          echo "Configuration: Parallel (4 jobs), Real system calls (no mocks)"

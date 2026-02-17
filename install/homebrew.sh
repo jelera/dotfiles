@@ -14,6 +14,7 @@ source "${_INSTALL_SCRIPT_DIR}/common.sh"
 # shellcheck source=install/detect-os.sh
 source "${_INSTALL_SCRIPT_DIR}/detect-os.sh"
 
+# shellcheck disable=SC2154
 install_homebrew() {
     log_step "Installing Homebrew..."
 
@@ -56,6 +57,106 @@ install_homebrew() {
     return 0
 }
 
+# Install Bash 4+ on macOS (required for optimized installation)
+# Linux already has Bash 4+, so this only runs on macOS
+# shellcheck disable=SC2154
+install_bash_4_on_macos() {
+    # Skip if not macOS
+    if [[ "$OS" != "macos" ]]; then
+        return 0
+    fi
+
+    log_step "Checking Bash version..."
+
+    local current_version="${BASH_VERSINFO[0]:-3}"
+
+    # Check if already running Bash 4+
+    if [[ "$current_version" -ge 4 ]]; then
+        log_info "Already running Bash ${current_version}.${BASH_VERSINFO[1]}"
+        return 0
+    fi
+
+    log_warning "Detected Bash 3.x (${BASH_VERSION})"
+    log_info "Installing Bash 4+ for optimized performance (20-30x faster)..."
+
+    # Determine target bash path
+    local new_bash_path
+    if [[ "$ARCH" == "arm64" ]]; then
+        new_bash_path="/opt/homebrew/bin/bash"
+    else
+        new_bash_path="/usr/local/bin/bash"
+    fi
+
+    # In dry-run mode, check if bash 4+ is already available
+    # If so, exec to it so dry-run can continue properly
+    if is_dry_run; then
+        if [[ -x "$new_bash_path" ]]; then
+            local existing_version
+            # shellcheck disable=SC2016
+            existing_version=$("$new_bash_path" -c 'echo ${BASH_VERSINFO[0]}' 2>/dev/null)
+            if [[ "$existing_version" -ge 4 ]]; then
+                log_info "Bash 4+ already available at $new_bash_path"
+                log_info "Re-executing with Bash 4+ for accurate dry-run..."
+                echo ""
+                exec "$new_bash_path" "$0" "$@"
+            fi
+        fi
+
+        log_dry_run "Would install bash via Homebrew"
+        log_dry_run "Would add bash to /etc/shells"
+        log_dry_run "Would re-execute installer with Bash 4+"
+        log_warning "Continuing with Bash 3.x - some features may not work in dry-run"
+        return 0
+    fi
+
+    # Install bash via Homebrew
+    if ! command_exists brew; then
+        log_error "Homebrew not available - cannot install bash"
+        return 1
+    fi
+
+    log_info "Installing bash via Homebrew..."
+    if brew install bash; then
+        log_success "Bash 4+ installed"
+    else
+        log_error "Failed to install bash via Homebrew"
+        return 1
+    fi
+
+    # Determine new bash path
+    local new_bash_path
+    if [[ "$ARCH" == "arm64" ]]; then
+        new_bash_path="/opt/homebrew/bin/bash"
+    else
+        new_bash_path="/usr/local/bin/bash"
+    fi
+
+    # Verify installation
+    if [[ ! -x "$new_bash_path" ]]; then
+        log_error "Bash not found at expected location: $new_bash_path"
+        return 1
+    fi
+
+    local new_version
+    new_version=$("$new_bash_path" --version | head -n1)
+    log_success "Installed: $new_version"
+
+    # Add to /etc/shells if not present
+    if ! grep -qF "$new_bash_path" /etc/shells 2>/dev/null; then
+        log_info "Adding $new_bash_path to /etc/shells..."
+        echo "$new_bash_path" | sudo tee -a /etc/shells >/dev/null
+    fi
+
+    # Re-execute installer with new bash
+    log_info "Re-executing installer with Bash 4+..."
+    echo ""
+    exec "$new_bash_path" "$0" "$@"
+
+    # This line will never be reached if exec succeeds
+    return 0
+}
+
+# shellcheck disable=SC2154
 configure_homebrew_path() {
     log_step "Configuring Homebrew PATH..."
 
@@ -141,6 +242,7 @@ add_brew_to_shell_configs() {
     fi
 }
 
+# shellcheck disable=SC2154
 install_homebrew_packages() {
     log_step "Installing essential packages via Homebrew..."
 

@@ -9,19 +9,19 @@
 pre-commit:
   parallel: true
   commands:
-    # Lint shell scripts
+    # Lint shell scripts (uses .shellcheckrc: bash 4.0+, severity=warning)
     shellcheck:
       glob: "*.sh"
-      run: shellcheck {staged_files}
+      run: shellcheck --severity=warning {staged_files}
       skip:
         - merge
         - rebase
 
-    # Lint shell scripts without .sh extension
+    # Lint shell scripts without .sh extension (uses .shellcheckrc: bash 4.0+, severity=warning)
     shellcheck-no-ext:
       glob: "{bin/*,shell/functions,shell/env}"
       exclude: "*.md"
-      run: shellcheck {staged_files}
+      run: shellcheck --severity=warning {staged_files}
       skip:
         - merge
         - rebase

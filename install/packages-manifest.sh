@@ -449,15 +449,6 @@ install_from_manifest() {
         return 0
     fi
 
-    # Check Bash version for associative array support
-    local BASH_VERSION_MAJOR="${BASH_VERSINFO[0]:-3}"
-    # local use_batch=true
-
-    if [[ "$BASH_VERSION_MAJOR" -lt 4 ]]; then
-        echo "⚠️  Bash 3.x detected - using compatibility mode"
-        # We can still use batch mode with the fallback arrays in cache.sh
-    fi
-
     # Phase 1: Group packages by backend
     echo "Phase 1: Analyzing packages..."
     echo ""
