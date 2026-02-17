@@ -148,6 +148,19 @@ ppa_get_gpg_key() {
     return 0
 }
 
+# Add a GPG key using modern per-repo keyring (replaces deprecated apt-key add -)
+# Usage: _ppa_add_gpg_key <gpg_key_url> <package_name>
+# Stores key in /etc/apt/keyrings/<package_name>.gpg
+# Returns: 0 on success, non-zero on error
+_ppa_add_gpg_key() {
+    local gpg_key_url="$1"
+    local package_name="$2"
+    local keyring_path="/etc/apt/keyrings/${package_name}.gpg"
+
+    sudo mkdir -p /etc/apt/keyrings
+    wget -qO - "$gpg_key_url" | gpg --dearmor | sudo tee "$keyring_path" > /dev/null
+}
+
 # Check if a PPA repository is already added
 # Usage: ppa_check_added <repository>
 # Returns: 0 if added, 1 if not added
@@ -215,7 +228,7 @@ ppa_add_repository() {
         echo "[DRY RUN] Command: sudo add-apt-repository -y $repository"
         if [[ -n "$gpg_key" ]]; then
             echo "[DRY RUN] Would add GPG key: $gpg_key"
-            echo "[DRY RUN] Command: wget -qO - $gpg_key | sudo apt-key add -"
+            echo "[DRY RUN] Command: wget -qO - $gpg_key | gpg --dearmor | sudo tee /etc/apt/keyrings/${package_name}.gpg > /dev/null"
         fi
         return 0
     else
@@ -224,7 +237,7 @@ ppa_add_repository() {
         # Add GPG key first if present
         if [[ -n "$gpg_key" ]]; then
             echo "Adding GPG key: $gpg_key"
-            wget -qO - "$gpg_key" | sudo apt-key add -
+            _ppa_add_gpg_key "$gpg_key" "$package_name"
         fi
 
         # Add the PPA
@@ -357,7 +370,7 @@ ppa_install_bulk() {
         if [[ "$dry_run" = "true" ]]; then
             echo "[DRY RUN] Would add PPA: $repository"
             if [[ -n "$gpg_key" ]]; then
-                echo "[DRY RUN] Would add GPG key: $gpg_key"
+                echo "[DRY RUN] Would add GPG key: $gpg_key -> /etc/apt/keyrings/${package_name}.gpg"
             fi
         else
             echo "  → Adding: $repository"
@@ -365,7 +378,7 @@ ppa_install_bulk() {
             # Add GPG key first if present
             if [[ -n "$gpg_key" ]]; then
                 echo "    Adding GPG key: $gpg_key"
-                wget -qO - "$gpg_key" | sudo apt-key add -
+                _ppa_add_gpg_key "$gpg_key" "$package_name"
             fi
 
             # Add the PPA (without running apt-get update yet)

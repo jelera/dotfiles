@@ -37,8 +37,9 @@ install_mise() {
 
     # Install mise using official installer
     log_info "Downloading and installing mise..."
-
-    if ! curl https://mise.run | sh; then
+    # Flags: -f (fail on HTTP errors), -s (silent), -S (show errors), -L (follow redirects)
+    # Critical: -f prevents false positives if curl fails or gets HTTP error page
+    if ! curl -fsSL https://mise.run | sh; then
         log_error "mise installation failed"
         log_info "Trying alternative installation method..."
 

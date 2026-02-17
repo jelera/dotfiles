@@ -1,20 +1,17 @@
 {
   "hooks": {
-    "PostToolUse": {
-      "Edit": [
-        {
-          "match": "\\.sh$",
-          "command": "shellcheck --severity=warning ${file_path}",
-          "description": "Run shellcheck after editing shell scripts"
-        }
-      ],
-      "Write": [
-        {
-          "match": "\\.sh$",
-          "command": "shellcheck --severity=warning ${file_path}",
-          "description": "Run shellcheck after writing shell scripts"
-        }
-      ]
-    }
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "match": "\\.sh$",
+            "command": "FILE=$(jq -r '.tool_input.file_path'); [[ \"$FILE\" == *.sh ]] || exit 0; shellcheck --severity=warning \"$FILE\"",
+            "description": "Run shellcheck after editing/writing shell scripts"
+          }
+        ]
+      }
+    ]
   }
 }

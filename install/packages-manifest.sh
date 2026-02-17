@@ -461,6 +461,7 @@ install_from_manifest() {
 
     local total=0
     local backend_resolved=0
+    local skipped=0
 
     while IFS= read -r package_name; do
         [[ -z "$package_name" ]] && continue
@@ -474,6 +475,7 @@ install_from_manifest() {
 
         if [[ $resolve_status -ne 0 ]]; then
             echo "  ⚠️  No backend available for: $package_name"
+            ((skipped++))
             continue
         fi
 
@@ -535,6 +537,7 @@ install_from_manifest() {
                     for pkg in $apt_packages; do
                         if should_skip_package "$pkg"; then
                             echo "  ⏭  Skipping: $pkg"
+                            ((skipped++))
                         elif alt_pkg=$(get_alternative_package "$pkg" 2>/dev/null); then
                             echo "  🔄 Using alternative: $pkg → $alt_pkg"
                             updated_apt+="$alt_pkg "
@@ -549,6 +552,7 @@ install_from_manifest() {
                     for pkg in $homebrew_packages; do
                         if should_skip_package "$pkg"; then
                             echo "  ⏭  Skipping: $pkg"
+                            ((skipped++))
                         elif alt_pkg=$(get_alternative_package "$pkg" 2>/dev/null); then
                             echo "  🔄 Using alternative: $pkg → $alt_pkg"
                             updated_brew+="$alt_pkg "
@@ -563,6 +567,7 @@ install_from_manifest() {
                     for pkg in $mise_packages; do
                         if should_skip_package "$pkg"; then
                             echo "  ⏭  Skipping: $pkg"
+                            ((skipped++))
                         elif alt_pkg=$(get_alternative_package "$pkg" 2>/dev/null); then
                             echo "  🔄 Using alternative: $pkg → $alt_pkg"
                             updated_mise+="$alt_pkg "
@@ -577,6 +582,7 @@ install_from_manifest() {
                     for pkg in $ppa_packages; do
                         if should_skip_package "$pkg"; then
                             echo "  ⏭  Skipping: $pkg"
+                            ((skipped++))
                         elif alt_pkg=$(get_alternative_package "$pkg" 2>/dev/null); then
                             echo "  🔄 Using alternative: $pkg → $alt_pkg"
                             updated_ppa+="$alt_pkg "
@@ -604,7 +610,6 @@ install_from_manifest() {
 
     local succeeded=0
     local failed=0
-    local skipped=0
 
     # Install APT packages
     if [[ -n "$apt_packages" ]]; then

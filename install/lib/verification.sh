@@ -22,12 +22,18 @@ if ! command -v apt_cache_init >/dev/null 2>&1; then
     fi
 fi
 
+# Delimiter for issue serialization (ASCII Unit Separator)
+# Using \x1F instead of : to avoid collision with package identifiers
+# Package names can contain : (e.g., libc6:amd64, ppa:user/repo)
+readonly US=$'\x1F'
+
 # Global array to store verification issues
 # Note: Bash 3.x doesn't support -g flag, but top-level arrays are global when sourced
 declare -a VERIFICATION_ISSUES
 VERIFICATION_ISSUES=()
 
-# Issue format: "backend:pkg_name:actual_pkg:status:alternatives"
+# Issue format: "backend<US>pkg_name<US>actual_pkg<US>status<US>alternatives"
+# where <US> is the Unit Separator character (\x1F)
 # status: MISSING (not found), FUZZY (alternatives available), OK (verified)
 
 # Verify a single APT package
@@ -57,10 +63,10 @@ verify_apt_package() {
         # Found alternatives
         local alts_joined
         alts_joined=$(echo "$alternatives" | tr '\n' '|' | sed 's/|$//')
-        VERIFICATION_ISSUES+=("apt:${package_name}:${apt_pkg}:FUZZY:${alts_joined}")
+        VERIFICATION_ISSUES+=("apt${US}${package_name}${US}${apt_pkg}${US}FUZZY${US}${alts_joined}")
     else
         # No alternatives found
-        VERIFICATION_ISSUES+=("apt:${package_name}:${apt_pkg}:MISSING:")
+        VERIFICATION_ISSUES+=("apt${US}${package_name}${US}${apt_pkg}${US}MISSING${US}")
     fi
 
     return 1
@@ -109,9 +115,9 @@ verify_mise_tool() {
         if [[ -n "$alternatives" ]]; then
             local alts_joined
             alts_joined=$(echo "$alternatives" | tr '\n' '|' | sed 's/|$//')
-            VERIFICATION_ISSUES+=("mise:${package_name}:${package_name}:FUZZY:${alts_joined}")
+            VERIFICATION_ISSUES+=("mise${US}${package_name}${US}${package_name}${US}FUZZY${US}${alts_joined}")
         else
-            VERIFICATION_ISSUES+=("mise:${package_name}:${package_name}:MISSING:")
+            VERIFICATION_ISSUES+=("mise${US}${package_name}${US}${package_name}${US}MISSING${US}")
         fi
         return 1
     fi
@@ -134,13 +140,13 @@ verify_ppa_package() {
     # Get package names
     local ppa_packages
     if ! ppa_packages=$(ppa_get_package_name "$manifest_file" "$package_name" 2>/dev/null); then
-        VERIFICATION_ISSUES+=("ppa:${package_name}:${ppa_repo}:MISSING:")
+        VERIFICATION_ISSUES+=("ppa${US}${package_name}${US}${ppa_repo}${US}MISSING${US}")
         return 1
     fi
 
     # Verify the repo format is correct
     if [[ ! "$ppa_repo" =~ ^ppa: ]]; then
-        VERIFICATION_ISSUES+=("ppa:${package_name}:${ppa_repo}:MISSING:Invalid PPA format")
+        VERIFICATION_ISSUES+=("ppa${US}${package_name}${US}${ppa_repo}${US}MISSING${US}Invalid PPA format")
         return 1
     fi
 
@@ -161,9 +167,9 @@ verify_ppa_package() {
                     if [[ -n "$alternatives" ]]; then
                         local alts_joined
                         alts_joined=$(echo "$alternatives" | tr '\n' '|' | sed 's/|$//')
-                        VERIFICATION_ISSUES+=("ppa:${package_name}:${apt_pkg}:FUZZY:${alts_joined}")
+                        VERIFICATION_ISSUES+=("ppa${US}${package_name}${US}${apt_pkg}${US}FUZZY${US}${alts_joined}")
                     else
-                        VERIFICATION_ISSUES+=("ppa:${package_name}:${apt_pkg}:MISSING:")
+                        VERIFICATION_ISSUES+=("ppa${US}${package_name}${US}${apt_pkg}${US}MISSING${US}")
                     fi
                     return 1
                 fi
@@ -277,8 +283,10 @@ has_verification_issues() {
 parse_verification_issue() {
     local issue="$1"
 
-    # Parse format: "backend:pkg_name:actual_pkg:status:alternatives"
-    IFS=: read -r ISSUE_BACKEND ISSUE_PKG ISSUE_ACTUAL ISSUE_STATUS ISSUE_ALTS <<< "$issue"
+    # Parse format: "backend<US>pkg_name<US>actual_pkg<US>status<US>alternatives"
+    # Using Unit Separator (\x1F) instead of colon to handle packages with colons
+    # Examples: libc6:amd64 (architecture), ppa:user/repo (PPA format)
+    IFS=$'\x1F' read -r ISSUE_BACKEND ISSUE_PKG ISSUE_ACTUAL ISSUE_STATUS ISSUE_ALTS <<< "$issue"
 
     export ISSUE_BACKEND ISSUE_PKG ISSUE_ACTUAL ISSUE_STATUS ISSUE_ALTS
 }

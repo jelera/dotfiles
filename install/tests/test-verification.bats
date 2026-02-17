@@ -65,7 +65,8 @@ teardown() {
 }
 
 @test "parse_verification_issue: parses issue string correctly" {
-    local issue="apt:python-dev:python-dev:MISSING:"
+    # Use Unit Separator (US is already defined by verification.sh)
+    local issue="apt${US}python-dev${US}python-dev${US}MISSING${US}"
 
     parse_verification_issue "$issue"
 
@@ -77,7 +78,8 @@ teardown() {
 }
 
 @test "parse_verification_issue: parses issue with alternatives" {
-    local issue="apt:python-dev:python-dev:FUZZY:python3-dev|python3.9-dev"
+    # Use Unit Separator (US is already defined by verification.sh)
+    local issue="apt${US}python-dev${US}python-dev${US}FUZZY${US}python3-dev|python3.9-dev"
 
     parse_verification_issue "$issue"
 
@@ -96,9 +98,10 @@ teardown() {
 }
 
 @test "format_verification_issues: displays issues correctly" {
+    # Use Unit Separator (US is already defined by verification.sh)
     VERIFICATION_ISSUES=(
-        "apt:test-pkg:test-pkg:MISSING:"
-        "homebrew:another:another:FUZZY:alt1|alt2"
+        "apt${US}test-pkg${US}test-pkg${US}MISSING${US}"
+        "homebrew${US}another${US}another${US}FUZZY${US}alt1|alt2"
     )
 
     output=$(format_verification_issues)
