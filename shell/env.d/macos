@@ -3,7 +3,7 @@
 # GPG configuration for macOS
 # Set GPG_TTY for signing commits
 # This is required for GPG to prompt for passphrases in the terminal
-export GPG_TTY=$(tty)
+export GPG_TTY=$TTY
 
 # macOS: Ensure gpg-agent uses correct pinentry
 if command -v gpgconf &>/dev/null; then
@@ -13,14 +13,20 @@ if command -v gpgconf &>/dev/null; then
     fi
 fi
 
-# Homebrew paths for macOS
+# Homebrew paths for macOS (cached to avoid slow subprocess on every shell start)
+_brew_cache="${XDG_CACHE_HOME:-$HOME/.cache}/brew_shellenv.sh"
 if [[ -d "/opt/homebrew" ]]; then
-    # Apple Silicon
-    eval "$(/opt/homebrew/bin/brew shellenv)"
+    _brew_bin="/opt/homebrew/bin/brew"
 elif [[ -d "/usr/local/Homebrew" ]]; then
-    # Intel Mac
-    eval "$(/usr/local/bin/brew shellenv)"
+    _brew_bin="/usr/local/bin/brew"
 fi
+if [[ -n "$_brew_bin" ]]; then
+    if [[ ! -f "$_brew_cache" ]] || [[ "$_brew_bin" -nt "$_brew_cache" ]]; then
+        "$_brew_bin" shellenv > "$_brew_cache"
+    fi
+    source "$_brew_cache"
+fi
+unset _brew_bin _brew_cache
 
 # PostgreSQL (if installed via Homebrew)
 if [[ -d "/opt/homebrew/opt/postgresql@16" ]]; then

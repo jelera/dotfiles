@@ -59,6 +59,7 @@ if command -v eza &> /dev/null; then
     alias lt='eza --tree --icons --level=2'
     alias lta='eza --tree --icons'
 else
+    alias ls='ls -G'   # BSD ls color (DISABLE_LS_COLORS=true skips OMZ's detection)
     alias la='ls -lah'
     alias ll='ls -lh'
 fi

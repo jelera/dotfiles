@@ -47,9 +47,20 @@ export HISTSIZE=10000
 export HISTFILESIZE=20000
 export HISTCONTROL=ignoredups:erasedups
 
-# Less configuration
+# Pager
+export PAGER="less"
 export LESS='-R -F -X'
 export LESSOPEN='|bat --style=numbers --color=always %s 2>/dev/null'
+
+# Bat configuration
+export BAT_THEME="TwoDark"
+export BAT_STYLE="numbers,changes,header"
+
+# Ripgrep (config file enables: smart-case, hidden files, .gitignore awareness)
+export RIPGREP_CONFIG_PATH="${HOME}/.ripgreprc"
+
+# Projects root
+export PROJECTS="${HOME}/projects"
 
 # Locale
 export LC_ALL=en_US.UTF-8
@@ -57,9 +68,6 @@ export LANG=en_US.UTF-8
 
 # Disable Homebrew analytics
 export HOMEBREW_NO_ANALYTICS=1
-
-# Better history across multiple terminal sessions
-export PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
 
 # Load secure environment variables (NOT committed to git)
 [[ -f ~/.env.local ]] && source ~/.env.local

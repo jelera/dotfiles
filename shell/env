@@ -3,17 +3,12 @@
 # This file detects the platform and loads the appropriate environment files
 # Loaded by both bash and zsh
 
-# Get the directory where this script is located
-# Works in both bash (BASH_SOURCE) and zsh (${(%):-%x})
-if [[ -n "${BASH_SOURCE[0]}" ]]; then
-    # Bash
+# Locate shell directory — no subprocesses in zsh (caller sets DOTFILES_DIR)
+if [[ -n "${ZSH_VERSION}" ]]; then
+    DOTFILES_SHELL_DIR="${DOTFILES_DIR:-$HOME/.config/dotfiles}/shell"
+elif [[ -n "${BASH_SOURCE[0]}" ]]; then
     DOTFILES_SHELL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-elif [[ -n "${ZSH_VERSION}" ]]; then
-    # Zsh - uses zsh-specific syntax for getting script path
-    # shellcheck disable=SC2296
-    DOTFILES_SHELL_DIR="$(cd "$(dirname "${(%):-%x}")" && pwd)"
 else
-    # Fallback: assume standard location
     DOTFILES_SHELL_DIR="${HOME}/.config/dotfiles/shell"
 fi
 DOTFILES_ENV_DIR="${DOTFILES_SHELL_DIR}/env.d"

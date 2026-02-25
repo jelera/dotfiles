@@ -2,8 +2,12 @@
 # Shell Functions Loader
 # Loads all function files from functions.d/
 
-# Get the directory where this script is located
-FUNCTIONS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/functions.d"
+# Locate functions directory — avoid subprocesses when DOTFILES_DIR is set
+if [[ -n "${DOTFILES_DIR}" ]]; then
+    FUNCTIONS_DIR="${DOTFILES_DIR}/shell/functions.d"
+else
+    FUNCTIONS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/functions.d"
+fi
 
 # Load all function files
 if [[ -d "$FUNCTIONS_DIR" ]]; then
