@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+# csv_column_to_list — extract a CSV column and emit it as a formatted list.
+#
+# Usage:
+#   csv_column_to_list [--format=sql|csv|lines] [--col=COLUMN_NAME] [--no-clipboard] <file.csv>
+#
+# Options:
+#   --format=FORMAT   Output format. One of:
+#                       sql   — SQL IN-clause: (1,2,3)  [default]
+#                       csv   — comma-separated values: 1,2,3
+#                       lines — one value per line
+#   --col=NAME        Header name of the column to extract  [default: @policy_id]
+#   --no-clipboard    Skip copying the output to the clipboard
+#   --no-unique       Keep duplicate values (unique is on by default)
+#   --limit=N         Keep first N values; negative N keeps last N  [default: all]
+#   --help            Show this help and exit
+#
+# Examples:
+#   csv_column_to_list export.csv
+#   csv_column_to_list --col=account_id export.csv
+#   csv_column_to_list --format=lines --col=@policy_id export.csv
+#   csv_column_to_list --no-clipboard export.csv
+#
+# Output values are deduplicated and sorted numerically.
+
+set -euo pipefail
+
+SCRIPT_NAME=$(basename "$0")
+
+# ── defaults ──────────────────────────────────────────────────────────────────
+FORMAT="sql"
+COL_NAME="@policy_id"
+FILE=""
+CLIPBOARD=1
+UNIQUE=1
+LIMIT=0
+
+# ── argument parsing ──────────────────────────────────────────────────────────
+for arg in "$@"; do
+  case "$arg" in
+    --format=*)    FORMAT="${arg#--format=}" ;;
+    --col=*)       COL_NAME="${arg#--col=}" ;;
+    --no-clipboard) CLIPBOARD=0 ;;
+    --no-unique)   UNIQUE=0 ;;
+    --limit=*)     LIMIT="${arg#--limit=}" ;;
+    # awk: skip the shebang line, print comment body until the first non-comment line
+    --help)        awk 'NR>1 && /^[^#]/{exit} NR>1{sub(/^# ?/,""); print}' "$0"; exit 0 ;;
+    -*)            echo "Unknown option: $arg" >&2; exit 1 ;;
+    *)             FILE="$arg" ;;
+  esac
+done
+
+if [[ -z "$FILE" ]]; then
+  echo "Usage: $SCRIPT_NAME [--format=sql|csv|lines] [--col=COLUMN_NAME] [--no-clipboard] <file.csv>" >&2
+  echo "       $SCRIPT_NAME --help for full usage" >&2
+  exit 1
+fi
+
+# ── locate the target column by matching its header (case-insensitive) ────────
+HEADER=$(head -n 1 "$FILE")
+# grep exits 1 on no match; || true prevents set -e from aborting before we can report the error
+COL_IDX=$(echo "$HEADER" | tr ',' '\n' | grep -in "^${COL_NAME}$" | cut -d: -f1 || true)
+
+if [[ -z "$COL_IDX" ]]; then
+  echo "Error: column '${COL_NAME}' not found." >&2
+  echo "Available headers: $HEADER" >&2
+  exit 1
+fi
+
+# ── extract column values: skip header, strip quotes, dedup, sort numerically ─
+SORT_FLAGS=(-n)
+[[ "$UNIQUE" -eq 1 ]] && SORT_FLAGS+=(-u)
+
+IDS=$(tail -n +2 "$FILE" \
+  | awk -F',' -v col="$COL_IDX" '$col != "" { print $col }' \
+  | tr -d '"' \
+  | sort "${SORT_FLAGS[@]}")
+
+if [[ "$LIMIT" -gt 0 ]]; then
+  IDS=$(echo "$IDS" | head -n "$LIMIT")
+elif [[ "$LIMIT" -lt 0 ]]; then
+  IDS=$(echo "$IDS" | tail -n "${LIMIT#-}")
+fi
+
+# join_csv: portable line-joining via tr + sed (avoids BSD vs GNU paste differences)
+join_csv() {
+  tr '\n' ',' | sed 's/,$//'
+}
+
+# ── emit in the requested format ──────────────────────────────────────────────
+case "$FORMAT" in
+  sql)   OUTPUT="($(echo "$IDS" | join_csv))" ;;
+  csv)   OUTPUT="$(echo "$IDS" | join_csv)" ;;
+  lines) OUTPUT="$IDS" ;;
+  *)
+    echo "Unknown format '${FORMAT}'. Choose: sql, csv, lines" >&2
+    exit 1
+    ;;
+esac
+
+echo "$OUTPUT"
+
+# ── copy to clipboard ─────────────────────────────────────────────────────────
+if [[ "$CLIPBOARD" -eq 1 ]]; then
+  if command -v pbcopy &>/dev/null; then
+    printf '%s' "$OUTPUT" | pbcopy
+    echo "  (copied to clipboard)" >&2
+  elif command -v xclip &>/dev/null; then
+    printf '%s' "$OUTPUT" | xclip -selection clipboard
+    echo "  (copied to clipboard)" >&2
+  elif command -v xsel &>/dev/null; then
+    printf '%s' "$OUTPUT" | xsel --clipboard --input
+    echo "  (copied to clipboard)" >&2
+  else
+    echo "  (no clipboard tool found: install pbcopy/xclip/xsel)" >&2
+  fi
+fi
