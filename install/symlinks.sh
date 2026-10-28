@@ -211,6 +211,27 @@ symlink_iterm2_config() {
     return 0
 }
 
+symlink_vscode_config() {
+    log_step "Configuring VS Code..."
+
+    local user_dir
+    case "$OSTYPE" in
+        darwin*) user_dir="${HOME}/Library/Application Support/Code/User" ;;
+        linux*) user_dir="${HOME}/.config/Code/User" ;;
+        *)
+            log_info "Skipping VS Code config (unsupported OS)"
+            return 0
+            ;;
+    esac
+
+    local file
+    for file in settings.json keybindings.json; do
+        create_dotfile_symlink "${DOTFILES_DIR}/vscode/${file}" "${user_dir}/${file}"
+    done
+
+    return 0
+}
+
 symlink_ripgrep_config() {
     log_step "Linking ripgrep configuration..."
 
@@ -320,6 +341,7 @@ create_all_symlinks() {
     symlink_bin_scripts
     symlink_config_dirs
     symlink_iterm2_config
+    symlink_vscode_config
     symlink_keyd_config
 
     log_success "All symlinks created"
@@ -353,6 +375,10 @@ remove_symlinks() {
         "${HOME}/.bin"
         "${HOME}/.config/mise"
         "${HOME}/.config/ghostty"
+        "${HOME}/Library/Application Support/Code/User/settings.json"
+        "${HOME}/Library/Application Support/Code/User/keybindings.json"
+        "${HOME}/.config/Code/User/settings.json"
+        "${HOME}/.config/Code/User/keybindings.json"
     )
 
     # Also remove keyd config if it exists and points to our dotfiles

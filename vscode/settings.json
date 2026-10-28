@@ -1,0 +1,155 @@
+{
+  "workbench.iconTheme": "vscode-icons",
+  "editor.fontFamily": " 'CaskaydiaCove Nerd Font', Menlo, Monaco, 'Courier New', monospace",
+  "editor.fontSize": 13,
+  "explorer.confirmDragAndDrop": false,
+  "explorer.confirmDelete": false,
+  "[ruby]": {
+    "editor.tabSize": 2,
+    // "editor.defaultFormatter": "Shopify.ruby-lsp",
+    "editor.defaultFormatter": "testdouble.vscode-standard-ruby",
+    "editor.formatOnType": true,
+    "editor.insertSpaces": true,
+    "editor.semanticHighlighting.enabled": true,
+    "editor.formatOnSave": true
+  },
+  "standardRuby.mode": "enableViaGemfile",
+  "standardRuby.autofix": true,
+  "files.eol": "\n",
+  "[typescript]": {
+    "editor.defaultFormatter": "vscode.typescript-language-features"
+  },
+  "workbench.colorTheme": "Gruvbox Dark Hard",
+  "vsicons.dontShowNewVersionMessage": true,
+  "editor.cursorStyle": "line",
+  "editor.lineNumbers": "on",
+  "editor.wordSeparators": "/\\()\"':,.;<>~!@#$%^&*|+=[]{}`?-",
+  "editor.wordWrap": "off",
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "redhat.telemetry.enabled": false,
+  "editor.suggestSelection": "first",
+  "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
+  "editor.accessibilitySupport": "off",
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "files.exclude": {
+    "**/.trunk/*out/": true,
+    "**/.trunk/*actions/": true,
+    "**/.trunk/*logs/": true,
+    "**/.trunk/*plugins/": true
+  },
+  "files.watcherExclude": {
+    "**/.trunk/*out/": true,
+    "**/.trunk/*actions/": true,
+    "**/.trunk/*logs/": true,
+    "**/.trunk/*plugins/": true
+},
+  "rubyLsp.enabledFeatures": {
+    "codeActions": true,
+    "diagnostics": true,
+    "documentHighlights": true,
+    "documentLink": true,
+    "documentSymbols": true,
+    "foldingRanges": true,
+    "formatting": true,
+    "hover": true,
+    "inlayHint": true,
+    "onTypeFormatting": true,
+    "selectionRanges": true,
+    "semanticHighlighting": true,
+    "completion": true,
+    "codeLens": true
+  },
+  "rubyLsp.rubyVersionManager": {
+    "identifier": "mise"
+  },
+  "rubyTestExplorer.testFramework": "rspec",
+  "vim.cursorStylePerMode.normal": "block",
+  "vim.cursorStylePerMode.visual": "block",
+  "vim.cursorStylePerMode.visualblock": "block",
+  "vim.cursorStylePerMode.visualline": "block",
+  "vim.history": 10000,
+  "vim.hlsearch": true,
+  "vim.leader": ",",
+  "rubyLsp.formatter": "auto",
+  "editor.formatOnSaveMode": "modificationsIfAvailable",
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "editor.rulers": [
+    120
+  ],
+  "rubyLsp.enableExperimentalFeatures": false,
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "github.copilot.editor.enableAutoCompletions": true,
+  "[liquid]": {
+    "editor.formatOnType": true
+  },
+  "github.copilot.nextEditSuggestions.enabled": true,
+  "editor.tabSize": 2,
+  "vim.enableNeovim": true,
+  "vim.statusBarColorControl": true,
+  "workbench.colorCustomizations": {
+    "statusBar.background": "#005f5f",
+    "statusBar.noFolderBackground": "#005f5f",
+    "statusBar.debuggingBackground": "#005f5f",
+    "statusBar.foreground": "#ffffff",
+    "statusBar.debuggingForeground": "#ffffff"
+  },
+  "debug.javascript.autoAttachFilter": "smart",
+  "[handlebars]": {
+    "editor.defaultFormatter": "vscode.html-language-features"
+  },
+  "svelte.enable-ts-plugin": true,
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "docker.extension.enableComposeLanguageServer": false,
+  "pgsql.serverGroups": [
+    {
+      "name": "Servers",
+      "id": "081C63D1-8727-4627-B9DC-70E3042339F3",
+      "isDefault": true
+    }
+  ],
+  "git.openRepositoryInParentFolders": "always",
+  "terminal.integrated.enableMultiLinePasteWarning": "never",
+  "[dockercompose]": {
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2,
+    "editor.autoIndent": "advanced",
+    "editor.quickSuggestions": {
+      "other": true,
+      "comments": false,
+      "strings": true
+    },
+    "editor.defaultFormatter": "redhat.vscode-yaml"
+  },
+  "[github-actions-workflow]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml"
+  },
+  "chat.tools.terminal.autoApprove": {
+    "npm run test": true,
+    "npm run lint": true,
+    "npm run type-check": true,
+    "markdownlint": true
+  },
+  "claudeCode.preferredLocation": "panel",
+  "chat.viewSessions.orientation": "stacked",
+  "security.workspace.trust.untrustedFiles": "open",
+  "workbench.secondarySideBar.defaultVisibility": "hidden",
+  "makefile.configureOnOpen": true,
+  "yaml.disableSchemaDetection": [
+    "**/.github/workflows/*.yml",
+    "**/.github/workflows/*.yaml",
+    "**/.gitea/workflows/*.yml",
+    "**/.gitea/workflows/*.yaml",
+    "**/.forgejo/workflows/*.yml",
+    "**/.forgejo/workflows/*.yaml"
+  ]
+}
