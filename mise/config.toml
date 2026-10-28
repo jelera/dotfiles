@@ -9,7 +9,7 @@
 [tools]
 # ===== Language Runtimes =====
 ruby = "latest"
-node = "lts"
+node = "22"
 python = "latest"
 go = "latest"
 erlang = "latest"
