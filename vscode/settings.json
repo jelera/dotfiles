@@ -117,7 +117,7 @@
       "isDefault": true
     }
   ],
-  "git.openRepositoryInParentFolders": "always",
+  "git.openRepositoryInParentFolders": "prompt",
   "terminal.integrated.enableMultiLinePasteWarning": "never",
   "[dockercompose]": {
     "editor.insertSpaces": true,
@@ -141,9 +141,9 @@
   },
   "claudeCode.preferredLocation": "panel",
   "chat.viewSessions.orientation": "stacked",
-  "security.workspace.trust.untrustedFiles": "open",
+  "security.workspace.trust.untrustedFiles": "prompt",
   "workbench.secondarySideBar.defaultVisibility": "hidden",
-  "makefile.configureOnOpen": true,
+  "makefile.configureOnOpen": false,
   "yaml.disableSchemaDetection": [
     "**/.github/workflows/*.yml",
     "**/.github/workflows/*.yaml",
