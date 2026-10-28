@@ -183,6 +183,8 @@ always_keep_download = false
 # Use all CPU cores for compilation
 jobs = 4
 legacy_version_file = true
+# Honor .ruby-version (and .node-version etc.) for these tools
+idiomatic_version_file_enable_tools = ["ruby"]
 # Shorten version output
 yes = false
 
