@@ -33,6 +33,19 @@ pre-commit:
         - merge
         - rebase
 
+    # Identity lives in ~/.gitconfig.local; `git config --global user.*` writes into the
+    # tracked git/gitconfig (via the ~/.gitconfig symlink), so block it at commit time
+    no-identity-in-gitconfig:
+      glob: "git/gitconfig"
+      run: |
+        if git show :git/gitconfig | git config --file /dev/stdin --get-regexp '^user\.(name|email|signingkey)$' >/dev/null; then
+          echo "❌ Error: user identity found in git/gitconfig. Keep it in ~/.gitconfig.local"
+          exit 1
+        fi
+      skip:
+        - merge
+        - rebase
+
     # Check for trailing whitespace
     trailing-whitespace:
       glob: "*.{sh,md,yml,yaml,toml,zsh}"
