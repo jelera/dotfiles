@@ -271,3 +271,5 @@ Cargo.lock
 .envrc
 .tool-versions
 *.orig
+
+**/.claude/settings.local.json
