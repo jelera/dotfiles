@@ -49,8 +49,10 @@ plugins=(
 
 # --- Performance knobs (must be set before source oh-my-zsh.sh) ---
 
-# Fixed dump path: avoids OMZ computing a hostname-versioned path via scutil
-ZSH_COMPDUMP="${ZDOTDIR:-$HOME}/.zcompdump"
+# Fixed dump path: avoids OMZ computing a hostname-versioned path via scutil.
+# Keyed on $ZSH_VERSION so Homebrew zsh and /bin/zsh (or a brew upgrade) never
+# share a .zwc — zsh rejects one compiled by a different version.
+ZSH_COMPDUMP="${ZDOTDIR:-$HOME}/.zcompdump-${ZSH_VERSION}"
 
 # Skip compaudit: avoids the grep subprocess that scans completion dirs for
 # insecure permissions on every startup
