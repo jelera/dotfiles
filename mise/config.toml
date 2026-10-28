@@ -144,6 +144,10 @@ yq = "latest"
 "cargo:stylua" = "latest"                                             # Lua formatter
 "cargo:cargo-watch" = "latest"                                        # Watch Rust files and run commands
 # "cargo:cargo-edit" = "latest"                                       # Cargo commands for editing Cargo.toml
+# Note: PostgreSQL + PostGIS are installed via Homebrew (postgresql@18 + postgis), not mise.
+# The asdf-postgis mise plugin assumes asdf-postgres layout and breaks with mise's postgres
+# install path (macOS -bundle_loader cannot find the postgres binary). Brew's postgis formula
+# is built/linked against brew's postgres and works without patching.
 
 [env]
 # Global environment variables for development

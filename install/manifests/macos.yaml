@@ -45,3 +45,19 @@ packages:
     homebrew:
       cask: true
       package: ghostty
+
+  # === Databases ===
+
+  postgresql:
+    category: databases
+    description: "PostgreSQL 18 — relational database server"
+    platforms: ["macos"]
+    homebrew:
+      package: postgresql@18
+
+  postgis:
+    category: databases
+    description: "PostGIS — spatial extensions for PostgreSQL (built against postgresql@18)"
+    platforms: ["macos"]
+    homebrew:
+      package: postgis

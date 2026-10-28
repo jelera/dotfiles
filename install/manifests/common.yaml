@@ -8,11 +8,11 @@ metadata:
 profiles:
   full:
     description: "Complete development environment with all tools"
-    includes: [core_utils, shell_tools, dev_tools, git_tools, file_tools, monitoring_tools, language_runtimes, system_libraries, gui_applications]
+    includes: [core_utils, shell_tools, dev_tools, git_tools, file_tools, monitoring_tools, language_runtimes, system_libraries, databases, gui_applications]
 
   dev:
     description: "Developer tools without GUI applications"
-    includes: [core_utils, shell_tools, dev_tools, git_tools, file_tools, monitoring_tools, language_runtimes, system_libraries]
+    includes: [core_utils, shell_tools, dev_tools, git_tools, file_tools, monitoring_tools, language_runtimes, system_libraries, databases]
     excludes: [gui_applications]
 
   minimal:
@@ -60,6 +60,10 @@ categories:
   gui_applications:
     description: "Desktop applications"
     priority: ["homebrew-cask", "flatpak"]
+
+  databases:
+    description: "Database servers and spatial extensions"
+    priority: ["homebrew", "apt"]
 
 # Cross-platform package definitions
 packages:
