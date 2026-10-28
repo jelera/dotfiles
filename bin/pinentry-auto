@@ -21,9 +21,12 @@ detect_best_pinentry() {
         "/opt/homebrew/bin/pinentry-tty" # macOS Homebrew (ARM)
     )
 
-    # Check if we're in a graphical environment
+    # Check if we're in a graphical environment.
+    # macOS is always graphical — Quartz sets no DISPLAY, so without this it would fall through to
+    # the terminal list and pick pinentry-tty, which cannot prompt from a non-TTY caller (an editor
+    # or agent shell) and fails the signature with "Timeout".
     # shellcheck disable=SC2154
-    if [[ -n "${DISPLAY:-}" ]] || [[ -n "${WAYLAND_DISPLAY:-}" ]] || [[ "${TERM_PROGRAM:-}" == "vscode" ]]; then
+    if [[ "$(uname -s)" == "Darwin" ]] || [[ -n "${DISPLAY:-}" ]] || [[ -n "${WAYLAND_DISPLAY:-}" ]] || [[ "${TERM_PROGRAM:-}" == "vscode" ]]; then
         # GUI environment - try GUI pinentry first
         for pinentry in "${gui_pinentry_options[@]}"; do
             if [[ -x "$pinentry" ]]; then
