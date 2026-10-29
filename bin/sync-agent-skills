@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+# Link skills into Codex (~/.agents/skills) and Copilot (~/.copilot/skills) from one manifest,
+# so each skill keeps a single source of truth instead of per-agent copies.
+#
+# Usage: sync-agent-skills [--check] [--manifest PATH]
+#   --check     report problems, write nothing
+#   --manifest  default: ../agents/skills.manifest next to this script
+#
+# Manifest lines (# comments allowed, leading ~ expands to $HOME):
+#   skill <link-name> <source-dir>
+#   file  <path>            # a file that must exist (e.g. a doc the skills point at)
+#
+# Prints "PROBLEM <kind> <path>" per problem and exits 1 if there were any.
+# Kinds: missing-link dangling-link wrong-target not-a-symlink missing-file no-skill-md
+set -euo pipefail
+
+check=0
+manifest="$(cd "$(dirname "$0")" && pwd)/../agents/skills.manifest"
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --check) check=1; shift ;;
+    --manifest) manifest="$2"; shift 2 ;;
+    *) echo "unknown argument: $1" >&2; exit 2 ;;
+  esac
+done
+
+roots=("$HOME/.agents/skills" "$HOME/.copilot/skills")
+problems=0
+
+report() {
+  echo "PROBLEM $1 $2"
+  problems=1
+}
+
+expand() {
+  # shellcheck disable=SC2088  # the patterns match a literal "~" written in the manifest
+  case "$1" in
+    "~") echo "$HOME" ;;
+    "~/"*) echo "$HOME/${1#\~/}" ;;
+    *) echo "$1" ;;
+  esac
+}
+
+check_link() {
+  local dest="$1" src="$2"
+  if [ -L "$dest" ]; then
+    [ "$(readlink "$dest")" = "$src" ] || report wrong-target "$dest"
+    [ -e "$dest" ] || report dangling-link "$dest"
+  elif [ -e "$dest" ]; then
+    report not-a-symlink "$dest"
+  else
+    report missing-link "$dest"
+  fi
+}
+
+sync_link() {
+  local dest="$1" src="$2"
+  if [ -e "$dest" ] && [ ! -L "$dest" ]; then
+    report not-a-symlink "$dest"
+    return
+  fi
+  mkdir -p "$(dirname "$dest")"
+  ln -sfn "$src" "$dest"
+}
+
+while read -r kind a b || [ -n "${kind:-}" ]; do
+  case "${kind:-}" in
+    "" | "#"*) continue ;;
+    file)
+      [ -e "$(expand "$a")" ] || report missing-file "$(expand "$a")"
+      ;;
+    skill)
+      src="$(expand "$b")"
+      if [ ! -d "$src" ]; then
+        report dangling-link "$src"
+      elif [ ! -f "$src/SKILL.md" ]; then
+        report no-skill-md "$src"
+      fi
+      for root in "${roots[@]}"; do
+        if [ "$check" -eq 1 ]; then
+          check_link "$root/$a" "$src"
+        elif [ -d "$src" ]; then
+          sync_link "$root/$a" "$src"
+        fi
+      done
+      ;;
+    *) echo "unknown manifest entry: $kind" >&2; exit 2 ;;
+  esac
+done < "$manifest"
+
+exit "$problems"

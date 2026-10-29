@@ -1,0 +1,24 @@
+# Skills exposed to Codex (~/.agents/skills) and Copilot (~/.copilot/skills) by bin/sync-agent-skills.
+# Claude gets these from its plugins, so they are NOT linked into ~/.claude/skills.
+# Each line was checked for Claude-only tools (AskUserQuestion, Agent, MCP): none found, 2026-10-28.
+
+# COMMS-1232 (Home documents on Core)
+skill comms-1232                 ~/kin/jelera-work-claude-plugins/plugins/comms/skills/comms-1232
+skill create-a-field             ~/kin/kin-data-dictionary/.claude/skills/create-a-field
+skill document-presenter-builder ~/kin/dot-com/engines/core/.claude/skills/document-presenter-builder
+skill sheng-template-authoring   ~/kin/jelera-work-claude-plugins/plugins/sheng/skills/template-authoring
+skill sheng-template-testing     ~/kin/jelera-work-claude-plugins/plugins/sheng/skills/template-testing
+
+# Voice and planning
+skill writing-for-humans         ~/kin/jelera-personal-claude-plugins/plugins/writing/skills/writing-for-humans
+skill ticket-writing             ~/kin/jelera-personal-claude-plugins/plugins/planning/skills/ticket-writing
+skill execution-plan             ~/kin/jelera-personal-claude-plugins/plugins/planning/skills/execution-plan
+
+# Docs the skills and global instructions point at
+file ~/kin/docsworld/documents/comms-1232-primer.md
+file ~/kin/docsworld/documents/comms-1232-rules.md
+
+# Bodies the team loaders delegate to. A missing one means ~/kin/document_fields_scaffold
+# isn't on main (old branches predate document-presenter-builder and the gem split).
+file ~/kin/document_fields_scaffold/.claude/skills/create-a-field/SKILL.md
+file ~/kin/document_fields_scaffold/.claude/skills/document-presenter-builder/SKILL.md
